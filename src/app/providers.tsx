@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { OrganizationProvider } from './organization-context';
 import type { ReactNode } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -81,7 +82,9 @@ export function AppProviders({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthContext.Provider value={value}>
-        {children}
+        <OrganizationProvider>
+          {children}
+        </OrganizationProvider>
       </AuthContext.Provider>
     </QueryClientProvider>
   );

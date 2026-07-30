@@ -4,11 +4,11 @@
 - [x] Supabase client connected
 - [x] Database types generated
 - [x] Auth session restored
-- [ ] Current profile loaded
-- [ ] Current organization loaded
-- [ ] Roles loaded
-- [ ] Scopes loaded
-- [ ] Permissions loaded
+- [x] Current profile loaded
+- [x] Current organization loaded
+- [x] Roles loaded
+- [x] Scopes loaded
+- [x] Permissions loaded
 
 ## Security
 - [ ] RLS verified for own profile

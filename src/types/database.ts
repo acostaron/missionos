@@ -5999,6 +5999,11 @@ export type Database = {
         Args: { p_actor_profile_id: string; p_merge_request_id: string }
         Returns: string
       }
+      get_current_authorization_context: {
+        Args: { p_organization_id: string }
+        Returns: Json
+      }
+      get_current_profile_context: { Args: never; Returns: Json }
       issue_member_qr_token: {
         Args: {
           p_actor_profile_id?: string
