@@ -36,4 +36,6 @@ supabase/seeds/*_draft.sql
 # Local legacy import working files — may contain member PII
 supabase/seeds/
 
+.agents/
+
 
