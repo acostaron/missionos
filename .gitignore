@@ -27,3 +27,13 @@ dist-ssr
 *.sw?
 
 supabase/.temp/
+
+# Local legacy import source data — contains member PII
+supabase/seeds/*.csv
+supabase/seeds/*_values.txt
+supabase/seeds/*_draft.sql
+
+# Local legacy import working files — may contain member PII
+supabase/seeds/
+
+

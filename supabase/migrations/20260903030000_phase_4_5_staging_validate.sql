@@ -1,0 +1,38 @@
+-- =============================================================================
+-- Migration Version: 20260903030000
+-- Label:             phase_4_5_staging_validate
+-- Phase:             4.5 — Legacy Member Import Preparation (Migration D)
+-- =============================================================================
+--
+-- THIS FILE IS AN INTENTIONAL PLACEHOLDER.
+--
+-- This migration was a one-time, environment-specific legacy data import
+-- applied directly to the MFCNY production database on 2026-09-03.
+--
+-- The original SQL performed normalization and validation passes over the
+-- staging tables populated by Migration C (20260903020000). It updated
+-- norm_* fields (names, dates, emails, phones) and set validation_status
+-- on each staging row, flagging one address row as 'review_required' due to
+-- contradictory location fields.
+--
+-- SOURCE DATA EXCLUDED FROM SOURCE CONTROL
+-- -----------------------------------------
+-- Although Migration D contained no hardcoded member data of its own, it
+-- operated exclusively on staging rows that contain member PII. Publishing
+-- the SQL in its original form alongside the staging schema would make the
+-- data pipeline fully reconstructable for a specific named environment. The
+-- file is therefore sanitized for the same reason as Migration C.
+--
+-- The results of this migration are present in the live MFCNY production
+-- database (staging.legacy_members and related tables reflect the normalized
+-- and validated state). They are not recoverable from this repository.
+--
+-- MIGRATION HISTORY ALIGNMENT
+-- ----------------------------
+-- This version (20260903030000) is retained locally to keep
+-- supabase_migrations.schema_migrations aligned between the local project
+-- and the remote database.
+--
+-- DO NOT re-apply this file. It contains no executable SQL.
+-- DO NOT attempt to reconstruct the original data-bearing SQL from Git.
+-- =============================================================================

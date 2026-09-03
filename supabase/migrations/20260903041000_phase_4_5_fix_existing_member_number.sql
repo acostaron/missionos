@@ -1,0 +1,38 @@
+-- =============================================================================
+-- Migration Version: 20260903041000
+-- Label:             phase_4_5_fix_existing_member_number
+-- Phase:             4.5 — Legacy Member Import Preparation (Migration E corrective)
+-- =============================================================================
+--
+-- THIS FILE IS AN INTENTIONAL PLACEHOLDER.
+--
+-- This migration was a one-time corrective applied directly to the MFCNY
+-- production database on 2026-09-03, immediately after Migration E
+-- (20260903040000).
+--
+-- The original SQL inserted a single missing member_number identifier into
+-- public.member_identifiers for one member whose import followed the
+-- confirmed-existing match path in Migration E. That path correctly avoided
+-- creating a duplicate canonical member row but inadvertently skipped the
+-- member_number identifier insertion. This corrective resolved that
+-- discrepancy, bringing the total member_number identifier count to the
+-- expected value.
+--
+-- SOURCE DATA EXCLUDED FROM SOURCE CONTROL
+-- -----------------------------------------
+-- The original SQL contained a specific canonical member UUID and a specific
+-- member number value belonging to a real individual. Both are excluded from
+-- source control to protect member privacy.
+--
+-- The corrected identifier record is present in the live MFCNY production
+-- database. It is not recoverable from this repository.
+--
+-- MIGRATION HISTORY ALIGNMENT
+-- ----------------------------
+-- This version (20260903041000) is retained locally to keep
+-- supabase_migrations.schema_migrations aligned between the local project
+-- and the remote database.
+--
+-- DO NOT re-apply this file. It contains no executable SQL.
+-- DO NOT attempt to reconstruct the original data-bearing SQL from Git.
+-- =============================================================================

@@ -1,0 +1,36 @@
+-- =============================================================================
+-- Migration Version: 20260903040000
+-- Label:             phase_4_5_canonical_import
+-- Phase:             4.5 — Legacy Member Import Preparation (Migration E)
+-- =============================================================================
+--
+-- THIS FILE IS AN INTENTIONAL PLACEHOLDER.
+--
+-- This migration was a one-time, environment-specific legacy data import
+-- applied directly to the MFCNY production database on 2026-09-03.
+--
+-- The original SQL promoted validated staging rows into canonical public.*
+-- tables: public.members, public.member_names, and public.member_identifiers.
+-- It allocated new canonical UUIDs for unmatched members, reused the
+-- confirmed-existing canonical UUID for one matched member, and inserted
+-- legacy_member_id and member_number identifiers for all imported members.
+--
+-- SOURCE DATA EXCLUDED FROM SOURCE CONTROL
+-- -----------------------------------------
+-- The original SQL referenced organization-specific UUIDs and constants that,
+-- in combination with the staging tables it read from, would allow the full
+-- member dataset to be reconstructed. It is intentionally excluded from source
+-- control to protect the privacy of individual members.
+--
+-- The canonical member records are present in the live MFCNY production
+-- database. They are not recoverable from this repository.
+--
+-- MIGRATION HISTORY ALIGNMENT
+-- ----------------------------
+-- This version (20260903040000) is retained locally to keep
+-- supabase_migrations.schema_migrations aligned between the local project
+-- and the remote database.
+--
+-- DO NOT re-apply this file. It contains no executable SQL.
+-- DO NOT attempt to reconstruct the original data-bearing SQL from Git.
+-- =============================================================================

@@ -1,0 +1,40 @@
+-- =============================================================================
+-- Migration Version: 20260903020000
+-- Label:             phase_4_5_staging_load
+-- Phase:             4.5 — Legacy Member Import Preparation (Migration C)
+-- =============================================================================
+--
+-- THIS FILE IS AN INTENTIONAL PLACEHOLDER.
+--
+-- This migration was a one-time, environment-specific legacy data import
+-- applied directly to the MFCNY production database on 2026-09-03.
+--
+-- The original SQL loaded legacy CSV source data into staging tables
+-- (staging.legacy_members, staging.legacy_member_emails,
+-- staging.legacy_member_phones, staging.legacy_member_addresses,
+-- staging.legacy_member_relationships) and created the import batch record
+-- for batch_code = 'mfcny_legacy_2026_09'.
+--
+-- SOURCE DATA EXCLUDED FROM SOURCE CONTROL
+-- -----------------------------------------
+-- The original SQL contained inline VALUES clauses derived from legacy CSV
+-- exports. That source data included member names, contact details, dates,
+-- member codes, and internal legacy system identifiers belonging to real
+-- individuals. It has been intentionally removed from this file and must not
+-- be reconstructed from Git history.
+--
+-- The data is present in the live MFCNY production database. It is not
+-- recoverable from this repository, and that is by design.
+--
+-- MIGRATION HISTORY ALIGNMENT
+-- ----------------------------
+-- This version (20260903020000) is retained in the local migrations directory
+-- solely to keep the Supabase migration-history table (supabase_migrations.
+-- schema_migrations) aligned between the local project and the remote
+-- database. The remote record for this version was written when the migration
+-- was applied. Removing this file locally would cause 'supabase migration list'
+-- to report a remote-only entry, which is undesirable for CI and tooling.
+--
+-- DO NOT re-apply this file. It contains no executable SQL.
+-- DO NOT attempt to reconstruct the original data-bearing SQL from Git.
+-- =============================================================================

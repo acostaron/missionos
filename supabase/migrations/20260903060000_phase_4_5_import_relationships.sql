@@ -1,0 +1,45 @@
+-- =============================================================================
+-- Migration Version: 20260903060000
+-- Label:             phase_4_5_import_relationships
+-- Phase:             4.5 — Legacy Member Import Preparation (Migration G)
+-- =============================================================================
+--
+-- THIS FILE IS AN INTENTIONAL PLACEHOLDER.
+--
+-- This migration was a one-time, environment-specific legacy data import
+-- applied directly to the MFCNY production database on 2026-09-03.
+--
+-- The original SQL performed three operations:
+--
+-- 1. Created a canonical family record in public.families for a household
+--    represented in the legacy import data.
+--
+-- 2. Linked the members of that household via public.family_members, assigning
+--    family roles and dependency flags derived from the legacy source.
+--
+-- 3. Inserted the validated family relationships from staging into
+--    public.family_relationships, preserving exact source directionality
+--    (from_member_id / to_member_id) and satisfying the live trigger
+--    constraint that requires a non-NULL family_id for all relationship types
+--    used in this import (child_of, parent_of, spouse).
+--
+-- SOURCE DATA EXCLUDED FROM SOURCE CONTROL
+-- -----------------------------------------
+-- The original SQL referenced specific canonical member UUIDs, a family name
+-- tied to identifiable individuals, and family role assignments for real
+-- members. All such data is intentionally excluded from source control to
+-- protect member privacy.
+--
+-- The family record, family_members rows, and family_relationships rows are
+-- present in the live MFCNY production database. They are not recoverable
+-- from this repository.
+--
+-- MIGRATION HISTORY ALIGNMENT
+-- ----------------------------
+-- This version (20260903060000) is retained locally to keep
+-- supabase_migrations.schema_migrations aligned between the local project
+-- and the remote database.
+--
+-- DO NOT re-apply this file. It contains no executable SQL.
+-- DO NOT attempt to reconstruct the original data-bearing SQL from Git.
+-- =============================================================================
