@@ -1,0 +1,35 @@
+-- =============================================================================
+-- Phase 4.5C Migration K — Environment-Specific Legacy Address Correction
+-- Version: 20260904020000
+-- =============================================================================
+--
+-- This migration was successfully applied to the MFCNY production database.
+--
+-- It resolved one quarantined legacy address record that had been held in
+-- staging.legacy_member_addresses with validation_status = 'review_required'
+-- due to a country field that contradicted all other location data.
+--
+-- The corrected address was promoted into:
+--   public.addresses
+--   public.member_addresses
+--
+-- Staging provenance fields were updated to reflect the correction while
+-- preserving the original source_country_raw value for audit purposes.
+--
+-- SOURCE DATA INTENTIONALLY EXCLUDED FROM SOURCE CONTROL
+-- -------------------------------------------------------
+-- Member-specific data (name, address fields, country values, UUIDs,
+-- member numbers, and all other personally identifiable information) has
+-- been deliberately omitted from this file.
+--
+-- This migration was a one-time, environment-specific correction.
+-- The original data-bearing SQL must not be reconstructed from Git history.
+--
+-- MIGRATION HISTORY
+-- -----------------
+-- This version identifier (20260904020000) is retained in the repository
+-- solely to preserve alignment with the remote migration history recorded in
+-- supabase_migrations.schema_migrations.
+--
+-- Do not re-apply, re-run, or modify this file.
+-- =============================================================================
