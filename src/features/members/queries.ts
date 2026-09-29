@@ -197,6 +197,8 @@ export const memberKeys = {
   statuses: (orgId: string) => [...memberKeys.all, 'statuses', orgId] as const,
   statusHistory: (orgId: string, memberId: string) =>
     [...memberKeys.all, 'status-history', orgId, memberId] as const,
+  families: (orgId: string, memberId: string) =>
+    [...memberKeys.all, 'families', orgId, memberId] as const,
 };
 
 // ---------------------------------------------------------------------------

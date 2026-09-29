@@ -191,3 +191,18 @@ export interface ArchiveMemberRecordResponse {
   active_section_membership_count: number;
   active_leadership_assignment_count: number;
 }
+
+export interface MemberFamilySummary {
+  family_id: string;
+  family_name: string | null;
+  display_name: string | null;
+  family_type: string | null;
+  family_status: string;
+  family_member_id: string;
+  family_role: string | null;
+  is_primary_contact: boolean;
+  is_dependent: boolean;
+  effective_from: string | null;
+  effective_to: string | null;
+  active_member_count: number;
+}

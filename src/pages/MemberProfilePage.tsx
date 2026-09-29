@@ -15,6 +15,7 @@ import { ArchiveMemberRecordModal } from '../features/members/components/Archive
 import { RevertMemberDeceasedModal } from '../features/members/components/RevertMemberDeceasedModal';
 import { RestoreMemberRecordModal } from '../features/members/components/RestoreMemberRecordModal';
 import { MemberStatusTimeline } from '../features/members/components/MemberStatusTimeline';
+import { MemberFamilyCard } from '../features/members/components/MemberFamilyCard';
 import {
   RemoveContactConfirmModal,
   type RemoveTargetType,
@@ -740,6 +741,7 @@ export default function MemberProfilePage() {
   const canArchiveRecord = !isPermLoading && hasPermission(Permissions.MembersRecordsArchive);
   const canRevertDeceased = !isPermLoading && hasPermission(Permissions.MembersDeceasedRevert);
   const canRestoreRecord = !isPermLoading && hasPermission(Permissions.MembersRecordsRestore);
+  const canViewFamilies = !isPermLoading && hasPermission(Permissions.FamiliesRecordsView);
 
   const {
     data: profile,
@@ -1060,6 +1062,11 @@ export default function MemberProfilePage() {
             hasSecondaryContacts: false,
           })
         }
+      />
+      <MemberFamilyCard
+        organizationId={orgId}
+        memberId={profile.id}
+        canViewFamilies={canViewFamilies}
       />
       <PlacementsSection
         section={profile.section_placement}
