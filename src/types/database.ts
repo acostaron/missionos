@@ -5775,10 +5775,10 @@ export type Database = {
       }
       change_member_membership_status: {
         Args: {
-          p_effective_from?: string
+          p_effective_from?: string | null
           p_member_id: string
           p_organization_id: string
-          p_reason?: string
+          p_reason?: string | null
           p_target_status_id: string
         }
         Returns: Json

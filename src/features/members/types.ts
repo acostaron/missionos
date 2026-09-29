@@ -102,3 +102,31 @@ export interface ChangeMemberGovernanceAssignmentResponse {
   new_node_id: string | null;
   assignment_id: string | null;
 }
+
+export interface MemberStatusOption {
+  status_id: string;
+  code: string;
+  name: string;
+  description: string | null;
+  status_category: string;
+  is_active_membership: boolean;
+  display_order: number;
+}
+
+export interface ChangeMemberMembershipStatusInput {
+  organizationId: string;
+  memberId: string;
+  targetStatusId: string;
+  effectiveFrom: string; // YYYY-MM-DD
+  reason?: string | null;
+}
+
+export interface ChangeMemberMembershipStatusResponse {
+  status: 'success';
+  member_id: string;
+  previous_status_id: string;
+  previous_status_code: string;
+  new_status_id: string;
+  new_status_code: string;
+  effective_from: string;
+}

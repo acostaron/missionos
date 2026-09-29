@@ -9,6 +9,7 @@ import { EditEmailModal } from '../features/members/components/EditEmailModal';
 import { EditPhoneModal } from '../features/members/components/EditPhoneModal';
 import { EditAddressModal } from '../features/members/components/EditAddressModal';
 import { ChangeGovernancePlacementModal } from '../features/members/components/ChangeGovernancePlacementModal';
+import { ChangeMemberStatusModal } from '../features/members/components/ChangeMemberStatusModal';
 import {
   RemoveContactConfirmModal,
   type RemoveTargetType,
@@ -677,6 +678,9 @@ export default function MemberProfilePage() {
   // Placement modal state
   const [isChangePlacementModalOpen, setIsChangePlacementModalOpen] = useState(false);
 
+  // Status change modal state
+  const [isChangeStatusModalOpen, setIsChangeStatusModalOpen] = useState(false);
+
   // Remove confirmation modal state
   const [removeModalState, setRemoveModalState] = useState<{
     isOpen: boolean;
@@ -698,6 +702,7 @@ export default function MemberProfilePage() {
   const canManageContacts = !isPermLoading && hasPermission(Permissions.MembersContactsManage);
   const canManageAddresses = !isPermLoading && hasPermission(Permissions.MembersAddressesManage);
   const canManagePlacements = !isPermLoading && hasPermission(Permissions.MembersPlacementsManage);
+  const canManageStatus = !isPermLoading && hasPermission(Permissions.MembersStatusManage);
 
   const {
     data: profile,
@@ -825,10 +830,22 @@ export default function MemberProfilePage() {
             </h1>
             <div className="mt-1 flex items-center gap-3">
               {profile.membership_status && (
-                <StatusBadge
-                  name={profile.membership_status.name}
-                  isActive={profile.membership_status.is_active_membership}
-                />
+                <div className="flex items-center gap-2">
+                  <StatusBadge
+                    name={profile.membership_status.name}
+                    isActive={profile.membership_status.is_active_membership}
+                  />
+                  {canManageStatus && orgId && (
+                    <button
+                      type="button"
+                      id="change-status-button"
+                      onClick={() => setIsChangeStatusModalOpen(true)}
+                      className="rounded px-2 py-0.5 text-xs font-semibold text-indigo-400 hover:bg-indigo-950/40 hover:text-indigo-300 transition-colors border border-indigo-700/60"
+                    >
+                      Change Status
+                    </button>
+                  )}
+                </div>
               )}
               <span className="text-xs text-slate-500 capitalize">{profile.record_status}</span>
             </div>
@@ -836,8 +853,8 @@ export default function MemberProfilePage() {
         </div>
 
         {/* Action Controls */}
-        {canEditProfile && orgId && (
-          <div>
+        <div className="flex items-center gap-3">
+          {canEditProfile && orgId && (
             <button
               type="button"
               id="edit-profile-button"
@@ -849,8 +866,8 @@ export default function MemberProfilePage() {
               </svg>
               Edit Profile
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Sections */}
@@ -951,6 +968,18 @@ export default function MemberProfilePage() {
           organizationId={orgId}
           memberId={profile.id}
           currentPlacement={profile.governance_placement}
+          onSuccessToast={triggerToast}
+        />
+      )}
+
+      {/* Change Membership Status Modal */}
+      {canManageStatus && orgId && isChangeStatusModalOpen && (
+        <ChangeMemberStatusModal
+          isOpen={isChangeStatusModalOpen}
+          onClose={() => setIsChangeStatusModalOpen(false)}
+          organizationId={orgId}
+          memberId={profile.id}
+          currentStatus={profile.membership_status}
           onSuccessToast={triggerToast}
         />
       )}
