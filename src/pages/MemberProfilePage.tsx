@@ -11,6 +11,7 @@ import { EditAddressModal } from '../features/members/components/EditAddressModa
 import { ChangeGovernancePlacementModal } from '../features/members/components/ChangeGovernancePlacementModal';
 import { ChangeMemberStatusModal } from '../features/members/components/ChangeMemberStatusModal';
 import { RecordMemberDeceasedModal } from '../features/members/components/RecordMemberDeceasedModal';
+import { ArchiveMemberRecordModal } from '../features/members/components/ArchiveMemberRecordModal';
 import { MemberStatusTimeline } from '../features/members/components/MemberStatusTimeline';
 import {
   RemoveContactConfirmModal,
@@ -701,6 +702,9 @@ export default function MemberProfilePage() {
   // Record deceased modal state
   const [isRecordDeceasedModalOpen, setIsRecordDeceasedModalOpen] = useState(false);
 
+  // Archive record modal state
+  const [isArchiveModalOpen, setIsArchiveModalOpen] = useState(false);
+
   // Remove confirmation modal state
   const [removeModalState, setRemoveModalState] = useState<{
     isOpen: boolean;
@@ -725,6 +729,7 @@ export default function MemberProfilePage() {
   const canManageStatus = !isPermLoading && hasPermission(Permissions.MembersStatusManage);
   const canViewStatus = !isPermLoading && hasPermission(Permissions.MembersStatusView);
   const canManageDeceased = !isPermLoading && hasPermission(Permissions.MembersDeceasedManage);
+  const canArchiveRecord = !isPermLoading && hasPermission(Permissions.MembersRecordsArchive);
 
   const {
     data: profile,
@@ -840,6 +845,31 @@ export default function MemberProfilePage() {
         Member Directory
       </Link>
 
+      {/* Archived Record Banner */}
+      {profile.record_status === 'archived' && (
+        <div className="rounded-xl border border-slate-700 bg-slate-800/80 p-4 space-y-1.5 shadow-sm">
+          <div className="flex items-center gap-2 text-sm font-semibold text-slate-200">
+            <svg className="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+            </svg>
+            <span>Archived Member Record</span>
+          </div>
+          <p className="text-xs text-slate-400 leading-relaxed">
+            This record is archived and excluded from standard active directory searches.
+            {profile.archived_at && (
+              <span className="ml-1 text-slate-300">
+                Archived on {new Date(profile.archived_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' })}.
+              </span>
+            )}
+          </p>
+          {profile.archive_reason && (
+            <p className="text-xs text-slate-400 pt-1 border-t border-slate-700/60">
+              <span className="font-medium text-slate-300">Reason:</span> {profile.archive_reason}
+            </p>
+          )}
+        </div>
+      )}
+
       {/* Hero Header with Actions */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-5">
@@ -887,6 +917,20 @@ export default function MemberProfilePage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
               Record as Deceased
+            </button>
+          )}
+
+          {canArchiveRecord && orgId && profile.record_status === 'active' && (
+            <button
+              type="button"
+              id="archive-record-button"
+              onClick={() => setIsArchiveModalOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-rose-800/60 bg-rose-950/30 px-3.5 py-2 text-xs font-semibold text-rose-300 hover:bg-rose-950/60 hover:border-rose-700 transition-colors shadow-sm"
+            >
+              <svg className="h-4 w-4 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+              </svg>
+              Archive Record
             </button>
           )}
 
@@ -1047,6 +1091,19 @@ export default function MemberProfilePage() {
           organizationId={orgId}
           memberId={profile.id}
           displayName={profile.display_name}
+          onSuccessToast={triggerToast}
+        />
+      )}
+
+      {/* Archive Member Record Modal */}
+      {canArchiveRecord && orgId && isArchiveModalOpen && (
+        <ArchiveMemberRecordModal
+          isOpen={isArchiveModalOpen}
+          onClose={() => setIsArchiveModalOpen(false)}
+          organizationId={orgId}
+          memberId={profile.id}
+          displayName={profile.display_name}
+          governancePlacement={profile.governance_placement}
           onSuccessToast={triggerToast}
         />
       )}

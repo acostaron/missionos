@@ -5703,6 +5703,14 @@ export type Database = {
         Args: { p_actor_profile_id: string; p_assignment_id: string }
         Returns: undefined
       }
+      archive_member_record: {
+        Args: {
+          p_member_id: string
+          p_organization_id: string
+          p_reason: string
+        }
+        Returns: Json
+      }
       assign_member_to_household: {
         Args: {
           p_actor_profile_id?: string

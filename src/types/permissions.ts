@@ -5,6 +5,7 @@ export const Permissions = {
   MembersRecordsCreate: 'members.records.create',
   MembersRecordsView: 'members.records.view',
   MembersRecordsUpdate: 'members.records.update',
+  MembersRecordsArchive: 'members.records.archive',
 
   // Identifier visibility & management
   MembersIdentifiersView: 'members.identifiers.view',

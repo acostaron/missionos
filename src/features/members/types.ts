@@ -172,3 +172,22 @@ export interface RecordMemberDeceasedResponse {
   deceased_on_precision: string;
   effective_from: string;
 }
+
+export interface ArchiveMemberRecordInput {
+  organizationId: string;
+  memberId: string;
+  reason: string;
+}
+
+export interface ArchiveMemberRecordResponse {
+  status: 'success';
+  member_id: string;
+  previous_record_status: string;
+  new_record_status: string;
+  archived_at: string;
+  archive_reason: string;
+  active_governance_assignment_count: number;
+  active_household_membership_count: number;
+  active_section_membership_count: number;
+  active_leadership_assignment_count: number;
+}
