@@ -81,6 +81,11 @@ DECLARE
   v_archive_res           jsonb;
   v_profile_res           jsonb;
 
+  -- Lifecycle gating test fixtures
+  v_merged_fam_id         uuid;
+  v_ended_fam_id          uuid;
+  v_changed_fam_id        uuid;
+
   v_failed                boolean;
 BEGIN
   -- -------------------------------------------------------------------------
@@ -513,6 +518,107 @@ BEGIN
   ASSERT v_failed, 'TEST 27.L FAILED: expected 42501 for unauthorized archive';
 
   RAISE NOTICE 'SECTION 27 & 28 PASSED: Archive and active-member warning tests successful';
+
+  -- -------------------------------------------------------------------------
+  -- SECTION 29: LIFECYCLE GATING VERIFICATION (ACTIVE, CHANGED, ENDED, MERGED, ARCHIVED)
+  -- -------------------------------------------------------------------------
+  -- Setup synthetic families under postgres role
+  PERFORM set_config('role', 'postgres', true);
+
+  -- 1. Synthetic Merged Family
+  v_merged_fam_id := gen_random_uuid();
+  INSERT INTO public.families (
+    id, organization_id, family_name, display_name, family_type, family_status,
+    created_by_profile_id, updated_by_profile_id
+  ) VALUES (
+    v_merged_fam_id, v_org_id, 'MergedFamily', 'Merged Family Test', 'household_family', 'merged',
+    v_admin_id, v_admin_id
+  );
+
+  -- 2. Synthetic Ended Family
+  v_ended_fam_id := gen_random_uuid();
+  INSERT INTO public.families (
+    id, organization_id, family_name, display_name, family_type, family_status, ended_on,
+    created_by_profile_id, updated_by_profile_id
+  ) VALUES (
+    v_ended_fam_id, v_org_id, 'EndedFamily', 'Ended Family Test', 'household_family', 'ended', current_date,
+    v_admin_id, v_admin_id
+  );
+
+  -- 3. Synthetic Changed Family
+  v_changed_fam_id := gen_random_uuid();
+  INSERT INTO public.families (
+    id, organization_id, family_name, display_name, family_type, family_status,
+    created_by_profile_id, updated_by_profile_id
+  ) VALUES (
+    v_changed_fam_id, v_org_id, 'ChangedFamily', 'Changed Family Test', 'household_family', 'changed',
+    v_admin_id, v_admin_id
+  );
+
+  -- Switch to Authenticated Org Admin JWT context
+  PERFORM set_config('role', 'authenticated', true);
+  PERFORM set_config('request.jwt.claim.sub', v_admin_id::text, true);
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', v_admin_id)::text, true);
+
+  -- 29.1 Merged family CANNOT be updated (22023)
+  v_failed := false;
+  BEGIN
+    PERFORM public.update_family_identity(v_org_id, v_merged_fam_id, 'Updated Merged', 'MergedFamily');
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLSTATE = '22023' THEN v_failed := true; END IF;
+  END;
+  ASSERT v_failed, 'TEST 29.1 FAILED: expected 22023 when updating merged family';
+
+  -- 29.2 Merged family CANNOT be archived (22023)
+  v_failed := false;
+  BEGIN
+    PERFORM public.archive_family_record(v_org_id, v_merged_fam_id, 'Archiving merged');
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLSTATE = '22023' THEN v_failed := true; END IF;
+  END;
+  ASSERT v_failed, 'TEST 29.2 FAILED: expected 22023 when archiving merged family';
+
+  -- 29.3 Archived family CANNOT be updated (22023)
+  v_failed := false;
+  BEGIN
+    PERFORM public.update_family_identity(v_org_id, v_test_fam_id, 'Updated Archived', 'ArchivedFamily');
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLSTATE = '22023' THEN v_failed := true; END IF;
+  END;
+  ASSERT v_failed, 'TEST 29.3 FAILED: expected 22023 when updating archived family';
+
+  -- 29.4 Ended family CANNOT be updated (22023)
+  v_failed := false;
+  BEGIN
+    PERFORM public.update_family_identity(v_org_id, v_ended_fam_id, 'Updated Ended', 'EndedFamily');
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLSTATE = '22023' THEN v_failed := true; END IF;
+  END;
+  ASSERT v_failed, 'TEST 29.4 FAILED: expected 22023 when updating ended family';
+
+  -- 29.4b Ended family CANNOT be archived (22023)
+  v_failed := false;
+  BEGIN
+    PERFORM public.archive_family_record(v_org_id, v_ended_fam_id, 'Archiving ended');
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLSTATE = '22023' THEN v_failed := true; END IF;
+  END;
+  ASSERT v_failed, 'TEST 29.4b FAILED: expected 22023 when archiving ended family';
+
+  -- 29.5 Active family remains editable (succeeds)
+  v_update_res := public.update_family_identity(v_org_id, v_dup_fam_id, 'Updated Active Dup', 'Vanderbilt');
+  ASSERT (v_update_res->>'status') = 'success', 'TEST 29.5 FAILED: updating active family failed';
+
+  -- 29.6 Changed family remains editable according to current contract (succeeds)
+  v_update_res := public.update_family_identity(v_org_id, v_changed_fam_id, 'Updated Changed Family', 'ChangedFamily');
+  ASSERT (v_update_res->>'status') = 'success', 'TEST 29.6 FAILED: updating changed family failed';
+
+  -- 29.7 Active & Changed archive behavior remains operational (succeeds)
+  v_archive_res := public.archive_family_record(v_org_id, v_changed_fam_id, 'Archiving changed family');
+  ASSERT (v_archive_res->>'status') = 'success', 'TEST 29.7 FAILED: archiving changed family failed';
+  ASSERT (v_archive_res->>'family_status') = 'archived', 'TEST 29.7 FAILED: changed family status did not transition to archived';
+
+  RAISE NOTICE 'SECTION 29 PASSED: Complete lifecycle gating verified for active, changed, ended, merged, and archived';
 
   -- -------------------------------------------------------------------------
   -- PART 3: DIRECT TABLE WRITES DENIED UNDER AUTHENTICATED

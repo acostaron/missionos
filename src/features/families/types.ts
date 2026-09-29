@@ -59,3 +59,93 @@ export interface FamilyProfile {
   members: FamilyProfileMember[];
   relationships: FamilyProfileRelationship[] | null;
 }
+
+export const FAMILY_TYPES = [
+  { value: 'household_family', label: 'Household family' },
+  { value: 'married_couple', label: 'Married couple' },
+  { value: 'single_parent_family', label: 'Single-parent family' },
+  { value: 'guardian_family', label: 'Guardian family' },
+  { value: 'extended_family', label: 'Extended family' },
+  { value: 'other', label: 'Other' },
+] as const;
+
+export type FamilyTypeCode = (typeof FAMILY_TYPES)[number]['value'];
+
+export interface CreateFamilyInput {
+  organizationId: string;
+  displayName: string;
+  familyName: string;
+  familyType?: string;
+  formedOn?: string | null;
+  confirmDuplicate?: boolean;
+}
+
+export interface DuplicateFamilyMatch {
+  family_id: string;
+  family_name: string;
+  display_name: string;
+  family_status: string;
+  formed_on: string | null;
+}
+
+export interface CreateFamilySuccessResponse {
+  status: 'created';
+  family_id: string;
+  display_name: string;
+  family_name: string;
+  family_status: string;
+  warning_count: number;
+}
+
+export interface CreateFamilyWarningResponse {
+  status: 'warning';
+  warning_type: 'duplicate_family_detected';
+  warning_count: number;
+  warnings: DuplicateFamilyMatch[];
+}
+
+export type CreateFamilyResult = CreateFamilySuccessResponse | CreateFamilyWarningResponse;
+
+export interface UpdateFamilyIdentityInput {
+  organizationId: string;
+  familyId: string;
+  displayName: string;
+  familyName: string;
+  familyType?: string;
+  formedOn?: string | null;
+}
+
+export interface UpdateFamilyIdentityResponse {
+  status: 'success';
+  family_id: string;
+  display_name: string;
+  family_name: string;
+  family_type: string;
+  formed_on: string | null;
+}
+
+export interface ArchiveFamilyRecordInput {
+  organizationId: string;
+  familyId: string;
+  reason: string;
+  confirmWithActiveMembers?: boolean;
+}
+
+export interface ArchiveFamilySuccessResponse {
+  status: 'success';
+  family_id: string;
+  family_status: 'archived';
+  ended_on: string;
+  active_member_count: number;
+  active_relationship_count: number;
+}
+
+export interface ArchiveFamilyWarningResponse {
+  status: 'warning';
+  warning_type: 'active_members_present';
+  active_member_count: number;
+  active_relationship_count: number;
+  message: string;
+}
+
+export type ArchiveFamilyResult = ArchiveFamilySuccessResponse | ArchiveFamilyWarningResponse;

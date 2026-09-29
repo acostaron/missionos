@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { useOrganizationContext } from '../hooks/use-organization-context';
 import { usePermissions } from '../hooks/use-permissions';
@@ -5,6 +6,8 @@ import { Permissions } from '../types/permissions';
 import { useFamilyProfile } from '../features/families/api/get-family-profile';
 import { FamilyMemberRoster } from '../features/families/components/FamilyMemberRoster';
 import { FamilyRelationshipList } from '../features/families/components/FamilyRelationshipList';
+import { EditFamilyModal } from '../features/families/components/EditFamilyModal';
+import { ArchiveFamilyModal } from '../features/families/components/ArchiveFamilyModal';
 
 function formatFamilyType(type: string | null): string {
   if (!type) return 'Family';
@@ -18,10 +21,15 @@ export default function FamilyProfilePage() {
   const { activeOrganization, isLoading: isOrgLoading } = useOrganizationContext();
   const { hasPermission, isLoading: isPermLoading } = usePermissions();
 
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isArchiveOpen, setIsArchiveOpen] = useState(false);
+
   const orgId = activeOrganization?.id ?? null;
 
   const canViewFamilies = !isPermLoading && hasPermission(Permissions.FamiliesRecordsView);
   const canViewRelationships = !isPermLoading && hasPermission(Permissions.FamiliesRelationshipsView);
+  const canUpdateFamily = !isPermLoading && hasPermission(Permissions.FamiliesRecordsUpdate);
+  const canArchiveFamily = !isPermLoading && hasPermission(Permissions.FamiliesRecordsArchive);
 
   const {
     data: profile,
@@ -112,6 +120,13 @@ export default function FamilyProfilePage() {
     ? family.family_status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
     : 'Active';
 
+  // Lifecycle gating: only active and changed are operational/editable/archivable
+  const isEditable = family.family_status === 'active' || family.family_status === 'changed';
+  const isArchiveable = family.family_status === 'active' || family.family_status === 'changed';
+
+  const showEdit = canUpdateFamily && isEditable;
+  const showArchive = canArchiveFamily && isArchiveable;
+
   const initials = familyName
     .split(' ')
     .map((w: string) => w[0])
@@ -163,6 +178,38 @@ export default function FamilyProfilePage() {
             </div>
           </div>
         </div>
+
+        {/* Action Buttons */}
+        {(showEdit || showArchive) && (
+          <div className="flex items-center gap-2.5 sm:self-center">
+            {showEdit && (
+              <button
+                type="button"
+                onClick={() => setIsEditOpen(true)}
+                id="edit-family-button"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800 px-3.5 py-2 text-xs font-medium text-slate-200 shadow-sm hover:bg-slate-700 hover:text-white transition-colors"
+              >
+                <svg className="h-3.5 w-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Edit Family
+              </button>
+            )}
+            {showArchive && (
+              <button
+                type="button"
+                onClick={() => setIsArchiveOpen(true)}
+                id="archive-family-button"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-rose-900/60 bg-rose-950/20 px-3.5 py-2 text-xs font-medium text-rose-300 shadow-sm hover:bg-rose-900/40 hover:text-rose-200 transition-colors"
+              >
+                <svg className="h-3.5 w-3.5 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                </svg>
+                Archive Family
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Family Member Roster */}
@@ -174,6 +221,26 @@ export default function FamilyProfilePage() {
         members={members}
         canViewRelationships={canViewRelationships}
       />
+
+      {/* Modals */}
+      {showEdit && orgId && (
+        <EditFamilyModal
+          isOpen={isEditOpen}
+          onClose={() => setIsEditOpen(false)}
+          organizationId={orgId}
+          family={family}
+        />
+      )}
+
+      {showArchive && orgId && (
+        <ArchiveFamilyModal
+          isOpen={isArchiveOpen}
+          onClose={() => setIsArchiveOpen(false)}
+          organizationId={orgId}
+          familyId={family.id}
+          familyName={familyName}
+        />
+      )}
     </div>
   );
 }
