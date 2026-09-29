@@ -40,6 +40,9 @@ export const Permissions = {
   SecurityScopeAssignmentsManage: 'security.scope_assignments.manage',
 
   FamiliesRecordsView: 'families.records.view',
+  FamiliesRecordsCreate: 'families.records.create',
+  FamiliesRecordsUpdate: 'families.records.update',
+  FamiliesRecordsArchive: 'families.records.archive',
   FamiliesRelationshipsView: 'families.relationships.view',
 } as const;
 

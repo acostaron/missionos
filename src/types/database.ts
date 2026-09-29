@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -5703,6 +5703,15 @@ export type Database = {
         Args: { p_actor_profile_id: string; p_assignment_id: string }
         Returns: undefined
       }
+      archive_family_record: {
+        Args: {
+          p_confirm_with_active_members?: boolean
+          p_family_id: string
+          p_organization_id: string
+          p_reason: string
+        }
+        Returns: Json
+      }
       archive_member_record: {
         Args: {
           p_member_id: string
@@ -5800,6 +5809,17 @@ export type Database = {
           p_reason?: string
         }
         Returns: undefined
+      }
+      create_family: {
+        Args: {
+          p_confirm_duplicate?: boolean
+          p_display_name: string
+          p_family_name: string
+          p_family_type?: string
+          p_formed_on?: string
+          p_organization_id: string
+        }
+        Returns: Json
       }
       create_governance_node: {
         Args: {
@@ -6110,6 +6130,17 @@ export type Database = {
           p_reason: string
         }
         Returns: undefined
+      }
+      update_family_identity: {
+        Args: {
+          p_display_name: string
+          p_family_id: string
+          p_family_name: string
+          p_family_type?: string
+          p_formed_on?: string
+          p_organization_id: string
+        }
+        Returns: Json
       }
       update_member_basic_profile: {
         Args: {
