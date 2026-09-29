@@ -5999,20 +5999,20 @@ export type Database = {
       }
       update_member_basic_profile: {
         Args: {
-          p_birth_date?: string
-          p_change_reason?: string
-          p_civil_status?: string
-          p_effective_from?: string
+          p_birth_date?: string | null
+          p_change_reason?: string | null
+          p_civil_status?: string | null
+          p_effective_from?: string | null
           p_family_name: string
           p_given_names: string
-          p_home_country_code?: string
+          p_home_country_code?: string | null
           p_is_name_change?: boolean
           p_member_id: string
-          p_middle_names?: string
+          p_middle_names?: string | null
           p_organization_id: string
-          p_preferred_language_code?: string
-          p_preferred_name?: string
-          p_sex?: string
+          p_preferred_language_code?: string | null
+          p_preferred_name?: string | null
+          p_sex?: string | null
         }
         Returns: Json
       }

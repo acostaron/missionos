@@ -144,6 +144,20 @@ export interface MemberProfile {
   member_number: string | null;
   membership_status: MemberStatus | null;
 
+  /** Phase 5C structured identity fields (from current primary member_names row) */
+  given_names: string | null;
+  middle_names: string | null;
+  family_name: string | null;
+  preferred_given_name: string | null;
+  name_effective_from: string | null;
+
+  /** Phase 5C demographic fields (from members row) */
+  birth_date: string | null;
+  sex: string | null;
+  civil_status: string | null;
+  home_country_code: string | null;
+  preferred_language_code: string | null;
+
   /** null = no members.identifiers.view for this member */
   identifiers: MemberIdentifier[] | null;
 
