@@ -149,3 +149,88 @@ export interface ArchiveFamilyWarningResponse {
 }
 
 export type ArchiveFamilyResult = ArchiveFamilySuccessResponse | ArchiveFamilyWarningResponse;
+
+export const FAMILY_ROLES = [
+  { value: 'parent', label: 'Parent' },
+  { value: 'spouse', label: 'Spouse' },
+  { value: 'child', label: 'Child' },
+  { value: 'guardian', label: 'Guardian' },
+  { value: 'dependent', label: 'Dependent' },
+  { value: 'relative', label: 'Relative' },
+  { value: 'family_contact', label: 'Family contact' },
+  { value: 'other', label: 'Other' },
+] as const;
+
+export type FamilyRoleCode = (typeof FAMILY_ROLES)[number]['value'];
+
+export interface ExistingFamilyMembership {
+  family_id: string;
+  family_name: string;
+  display_name: string;
+  family_status: string;
+  family_role: string | null;
+}
+
+export interface AddFamilyMemberInput {
+  organizationId: string;
+  familyId: string;
+  memberId: string;
+  familyRole?: string | null;
+  isPrimaryContact?: boolean;
+  isDependent?: boolean;
+  effectiveFrom?: string | null;
+  confirmMultipleActiveFamily?: boolean;
+}
+
+export interface AddFamilyMemberSuccessResponse {
+  status: 'created';
+  family_member_id: string;
+  family_id: string;
+  member_id: string;
+  family_role: string | null;
+  effective_from: string;
+  warning_count: number;
+}
+
+export interface AddFamilyMemberWarningResponse {
+  status: 'warning';
+  warning_type: 'multiple_active_family_memberships';
+  warning_count: number;
+  existing_families: ExistingFamilyMembership[];
+}
+
+export type AddFamilyMemberResult = AddFamilyMemberSuccessResponse | AddFamilyMemberWarningResponse;
+
+export interface UpdateFamilyMemberInput {
+  organizationId: string;
+  familyMemberId: string;
+  familyRole?: string | null;
+  isPrimaryContact?: boolean;
+  isDependent?: boolean;
+}
+
+export interface UpdateFamilyMemberResponse {
+  status: 'success';
+  family_member_id: string;
+  family_id: string;
+  member_id: string;
+  family_role: string | null;
+  is_primary_contact: boolean;
+  is_dependent: boolean;
+}
+
+export interface EndFamilyMembershipInput {
+  organizationId: string;
+  familyMemberId: string;
+  effectiveTo?: string | null;
+  reason: string;
+}
+
+export interface EndFamilyMembershipResponse {
+  status: 'success';
+  family_member_id: string;
+  family_id: string;
+  member_id: string;
+  membership_status: 'ended';
+  effective_to: string;
+}

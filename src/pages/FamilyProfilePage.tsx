@@ -8,6 +8,10 @@ import { FamilyMemberRoster } from '../features/families/components/FamilyMember
 import { FamilyRelationshipList } from '../features/families/components/FamilyRelationshipList';
 import { EditFamilyModal } from '../features/families/components/EditFamilyModal';
 import { ArchiveFamilyModal } from '../features/families/components/ArchiveFamilyModal';
+import { AddFamilyMemberModal } from '../features/families/components/AddFamilyMemberModal';
+import { EditFamilyMemberModal } from '../features/families/components/EditFamilyMemberModal';
+import { EndFamilyMembershipModal } from '../features/families/components/EndFamilyMembershipModal';
+import type { FamilyProfileMember } from '../features/families/types';
 
 function formatFamilyType(type: string | null): string {
   if (!type) return 'Family';
@@ -23,6 +27,9 @@ export default function FamilyProfilePage() {
 
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isArchiveOpen, setIsArchiveOpen] = useState(false);
+  const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
+  const [editingMember, setEditingMember] = useState<FamilyProfileMember | null>(null);
+  const [endingMember, setEndingMember] = useState<FamilyProfileMember | null>(null);
 
   const orgId = activeOrganization?.id ?? null;
 
@@ -30,6 +37,9 @@ export default function FamilyProfilePage() {
   const canViewRelationships = !isPermLoading && hasPermission(Permissions.FamiliesRelationshipsView);
   const canUpdateFamily = !isPermLoading && hasPermission(Permissions.FamiliesRecordsUpdate);
   const canArchiveFamily = !isPermLoading && hasPermission(Permissions.FamiliesRecordsArchive);
+  const canAddMember = !isPermLoading && hasPermission(Permissions.FamiliesMembersAdd);
+  const canUpdateMember = !isPermLoading && hasPermission(Permissions.FamiliesMembersUpdate);
+  const canEndMember = !isPermLoading && hasPermission(Permissions.FamiliesMembersEnd);
 
   const {
     data: profile,
@@ -213,7 +223,16 @@ export default function FamilyProfilePage() {
       </div>
 
       {/* Family Member Roster */}
-      <FamilyMemberRoster members={members} />
+      <FamilyMemberRoster
+        members={members}
+        canAddMember={canAddMember}
+        canUpdateMember={canUpdateMember}
+        canEndMember={canEndMember}
+        isFamilyOperational={isEditable}
+        onAddMember={() => setIsAddMemberOpen(true)}
+        onEditMember={(member) => setEditingMember(member)}
+        onEndMember={(member) => setEndingMember(member)}
+      />
 
       {/* Family Relationships */}
       <FamilyRelationshipList
@@ -222,7 +241,7 @@ export default function FamilyProfilePage() {
         canViewRelationships={canViewRelationships}
       />
 
-      {/* Modals */}
+      {/* Identity Modals */}
       {showEdit && orgId && (
         <EditFamilyModal
           isOpen={isEditOpen}
@@ -239,6 +258,37 @@ export default function FamilyProfilePage() {
           organizationId={orgId}
           familyId={family.id}
           familyName={familyName}
+        />
+      )}
+
+      {/* Membership Management Modals */}
+      {canAddMember && orgId && isEditable && (
+        <AddFamilyMemberModal
+          isOpen={isAddMemberOpen}
+          onClose={() => setIsAddMemberOpen(false)}
+          organizationId={orgId}
+          familyId={family.id}
+          familyName={familyName}
+        />
+      )}
+
+      {canUpdateMember && orgId && editingMember && (
+        <EditFamilyMemberModal
+          isOpen={editingMember !== null}
+          onClose={() => setEditingMember(null)}
+          organizationId={orgId}
+          familyId={family.id}
+          member={editingMember}
+        />
+      )}
+
+      {canEndMember && orgId && endingMember && (
+        <EndFamilyMembershipModal
+          isOpen={endingMember !== null}
+          onClose={() => setEndingMember(null)}
+          organizationId={orgId}
+          familyId={family.id}
+          member={endingMember}
         />
       )}
     </div>

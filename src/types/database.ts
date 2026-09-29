@@ -5677,6 +5677,19 @@ export type Database = {
         Args: { p_actor_profile_id: string; p_assignment_id: string }
         Returns: undefined
       }
+      add_family_member: {
+        Args: {
+          p_confirm_multiple_active_family?: boolean
+          p_effective_from?: string
+          p_family_id: string
+          p_family_role?: string
+          p_is_dependent?: boolean
+          p_is_primary_contact?: boolean
+          p_member_id: string
+          p_organization_id: string
+        }
+        Returns: Json
+      }
       appoint_leader: {
         Args: {
           p_actor_profile_id?: string
@@ -5859,6 +5872,15 @@ export type Database = {
           p_preferred_name?: string
           p_sex?: string
           p_state_province_name?: string
+        }
+        Returns: Json
+      }
+      end_family_membership: {
+        Args: {
+          p_effective_to?: string
+          p_family_member_id: string
+          p_organization_id: string
+          p_reason?: string
         }
         Returns: Json
       }
@@ -6138,6 +6160,16 @@ export type Database = {
           p_family_name: string
           p_family_type?: string
           p_formed_on?: string
+          p_organization_id: string
+        }
+        Returns: Json
+      }
+      update_family_member: {
+        Args: {
+          p_family_member_id: string
+          p_family_role: string
+          p_is_dependent: boolean
+          p_is_primary_contact: boolean
           p_organization_id: string
         }
         Returns: Json
