@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useMemberFamilies } from '../api/get-member-families';
 import type { MemberFamilySummary } from '../types';
 
@@ -35,7 +36,14 @@ function FamilyItem({ family }: { family: MemberFamilySummary }) {
     <div className="rounded-lg border border-slate-700 bg-slate-900/40 p-3.5 space-y-2">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h3 className="text-sm font-semibold text-slate-100">{familyLabel}</h3>
+          <h3 className="text-sm font-semibold text-slate-100">
+            <Link
+              to={`/app/families/${family.family_id}`}
+              className="hover:text-indigo-300 hover:underline transition-colors"
+            >
+              {familyLabel}
+            </Link>
+          </h3>
           <p className="text-xs text-slate-400 mt-0.5">{countLabel}</p>
         </div>
         <div className="flex items-center gap-1.5 flex-wrap justify-end">
