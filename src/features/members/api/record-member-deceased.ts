@@ -21,10 +21,10 @@ export async function recordMemberDeceased(
   const { data, error } = await supabase.rpc('record_member_deceased', {
     p_organization_id: input.organizationId,
     p_member_id: input.memberId,
-    p_deceased_on: input.deceasedOn ? input.deceasedOn : null,
+    p_deceased_on: input.deceasedOn ? input.deceasedOn : undefined,
     p_deceased_on_precision: input.deceasedOnPrecision ?? 'unknown',
     p_effective_from: input.effectiveFrom,
-    p_reason: input.reason?.trim() ? input.reason.trim() : null,
+    p_reason: input.reason?.trim() ? input.reason.trim() : undefined,
   });
 
   if (error) {

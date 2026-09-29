@@ -18,18 +18,18 @@ export async function updateMemberBasicProfile(
     p_member_id: input.memberId,
     p_given_names: input.givenNames.trim(),
     p_family_name: input.familyName.trim(),
-    p_middle_names: cleanOrNull(input.middleNames),
-    p_preferred_name: cleanOrNull(input.preferredName),
-    p_birth_date: cleanOrNull(input.birthDate),
-    p_sex: cleanOrNull(input.sex),
-    p_civil_status: cleanOrNull(input.civilStatus),
-    p_home_country_code: cleanOrNull(input.homeCountryCode),
-    p_preferred_language_code: cleanOrNull(input.preferredLanguageCode),
+    p_middle_names: cleanOrNull(input.middleNames) ?? undefined,
+    p_preferred_name: cleanOrNull(input.preferredName) ?? undefined,
+    p_birth_date: cleanOrNull(input.birthDate) ?? undefined,
+    p_sex: cleanOrNull(input.sex) ?? undefined,
+    p_civil_status: cleanOrNull(input.civilStatus) ?? undefined,
+    p_home_country_code: cleanOrNull(input.homeCountryCode) ?? undefined,
+    p_preferred_language_code: cleanOrNull(input.preferredLanguageCode) ?? undefined,
     p_is_name_change: input.isNameChange,
     p_effective_from: input.isNameChange
       ? (cleanOrNull(input.effectiveFrom) ?? new Date().toISOString().split('T')[0])
       : new Date().toISOString().split('T')[0],
-    p_change_reason: input.isNameChange ? cleanOrNull(input.changeReason) : null,
+    p_change_reason: input.isNameChange ? (cleanOrNull(input.changeReason) ?? undefined) : undefined,
   };
 
   const { data, error } = await supabase.rpc(

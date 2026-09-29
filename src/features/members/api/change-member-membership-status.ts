@@ -29,7 +29,7 @@ export async function changeMemberMembershipStatus(
     p_member_id: input.memberId,
     p_target_status_id: input.targetStatusId,
     p_effective_from: input.effectiveFrom,
-    p_reason: cleanOrNull(input.reason),
+    p_reason: cleanOrNull(input.reason) ?? undefined,
   };
 
   const { data, error } = await supabase.rpc(

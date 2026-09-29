@@ -48,28 +48,28 @@ export async function createMember(
     p_organization_id: input.organizationId,
     p_given_names: input.givenNames.trim(),
     p_family_name: input.familyName.trim(),
-    p_middle_names: cleanOrNull(input.middleNames),
-    p_preferred_name: cleanOrNull(input.preferredName),
-    p_birth_date: cleanOrNull(input.birthDate),
-    p_sex: cleanOrNull(input.sex),
-    p_civil_status: cleanOrNull(input.civilStatus),
+    p_middle_names: cleanOrNull(input.middleNames) ?? undefined,
+    p_preferred_name: cleanOrNull(input.preferredName) ?? undefined,
+    p_birth_date: cleanOrNull(input.birthDate) ?? undefined,
+    p_sex: cleanOrNull(input.sex) ?? undefined,
+    p_civil_status: cleanOrNull(input.civilStatus) ?? undefined,
     p_joined_on: cleanOrNull(input.joinedOn) || new Date().toISOString().split('T')[0],
     p_home_country_code: cleanOrNull(input.homeCountryCode) || 'US',
-    // Only pass governance_node_id if authorized, otherwise explicit null
-    p_governance_node_id: permissions.canManagePlacements ? cleanOrNull(input.governanceNodeId) : null,
+    // Only pass governance_node_id if authorized, otherwise undefined
+    p_governance_node_id: permissions.canManagePlacements ? (cleanOrNull(input.governanceNodeId) ?? undefined) : undefined,
     // Explicit booleans
     p_allocate_member_number: permissions.canManageIdentifiers ? (input.allocateMemberNumber ?? true) : false,
     p_allow_potential_duplicate: input.allowPotentialDuplicate ?? false,
-    // Only pass email/phone if authorized, otherwise explicit null
-    p_email: permissions.canManageContacts ? cleanOrNull(input.email) : null,
-    p_phone: permissions.canManageContacts ? cleanOrNull(input.phone) : null,
+    // Only pass email/phone if authorized, otherwise undefined
+    p_email: permissions.canManageContacts ? (cleanOrNull(input.email) ?? undefined) : undefined,
+    p_phone: permissions.canManageContacts ? (cleanOrNull(input.phone) ?? undefined) : undefined,
     p_phone_country_code: permissions.canManageContacts ? (cleanOrNull(input.phoneCountryCode) || 'US') : 'US',
-    // Only pass address if authorized, otherwise explicit null
-    p_address_line_1: permissions.canManageAddresses ? cleanOrNull(input.addressLine1) : null,
-    p_address_line_2: permissions.canManageAddresses ? cleanOrNull(input.addressLine2) : null,
-    p_city_name: permissions.canManageAddresses ? cleanOrNull(input.cityName) : null,
-    p_state_province_name: permissions.canManageAddresses ? cleanOrNull(input.stateProvinceName) : null,
-    p_postal_code: permissions.canManageAddresses ? cleanOrNull(input.postalCode) : null,
+    // Only pass address if authorized, otherwise undefined
+    p_address_line_1: permissions.canManageAddresses ? (cleanOrNull(input.addressLine1) ?? undefined) : undefined,
+    p_address_line_2: permissions.canManageAddresses ? (cleanOrNull(input.addressLine2) ?? undefined) : undefined,
+    p_city_name: permissions.canManageAddresses ? (cleanOrNull(input.cityName) ?? undefined) : undefined,
+    p_state_province_name: permissions.canManageAddresses ? (cleanOrNull(input.stateProvinceName) ?? undefined) : undefined,
+    p_postal_code: permissions.canManageAddresses ? (cleanOrNull(input.postalCode) ?? undefined) : undefined,
     p_address_country_code: permissions.canManageAddresses ? (cleanOrNull(input.addressCountryCode) || 'US') : 'US',
   };
 

@@ -1,4 +1,4 @@
-export type Json =
+﻿export type Json =
   | string
   | number
   | boolean
@@ -5783,10 +5783,10 @@ export type Database = {
       }
       change_member_membership_status: {
         Args: {
-          p_effective_from?: string | null
+          p_effective_from?: string
           p_member_id: string
           p_organization_id: string
-          p_reason?: string | null
+          p_reason?: string
           p_target_status_id: string
         }
         Returns: Json
@@ -5817,28 +5817,28 @@ export type Database = {
       }
       create_member: {
         Args: {
-          p_address_country_code?: string | null
-          p_address_line_1?: string | null
-          p_address_line_2?: string | null
+          p_address_country_code?: string
+          p_address_line_1?: string
+          p_address_line_2?: string
           p_allocate_member_number?: boolean
           p_allow_potential_duplicate?: boolean
-          p_birth_date?: string | null
-          p_city_name?: string | null
-          p_civil_status?: string | null
-          p_email?: string | null
+          p_birth_date?: string
+          p_city_name?: string
+          p_civil_status?: string
+          p_email?: string
           p_family_name: string
           p_given_names: string
-          p_governance_node_id?: string | null
-          p_home_country_code?: string | null
-          p_joined_on?: string | null
-          p_middle_names?: string | null
+          p_governance_node_id?: string
+          p_home_country_code?: string
+          p_joined_on?: string
+          p_middle_names?: string
           p_organization_id: string
-          p_phone?: string | null
-          p_phone_country_code?: string | null
-          p_postal_code?: string | null
-          p_preferred_name?: string | null
-          p_sex?: string | null
-          p_state_province_name?: string | null
+          p_phone?: string
+          p_phone_country_code?: string
+          p_postal_code?: string
+          p_preferred_name?: string
+          p_sex?: string
+          p_state_province_name?: string
         }
         Returns: Json
       }
@@ -5884,16 +5884,16 @@ export type Database = {
       get_member_status_history: {
         Args: { p_member_id: string; p_organization_id: string }
         Returns: {
-          change_reason_code: string | null
-          change_summary: string | null
+          change_reason_code: string
+          change_summary: string
           effective_from_at: string
-          effective_to_at: string | null
+          effective_to_at: string
           history_id: string
           is_active_membership: boolean
           is_current: boolean
           recorded_at: string
-          recorded_by_name: string | null
-          recorded_by_profile_id: string | null
+          recorded_by_name: string
+          recorded_by_profile_id: string
           source: string
           status_category: string
           status_code: string
@@ -5976,12 +5976,12 @@ export type Database = {
       }
       record_member_deceased: {
         Args: {
-          p_deceased_on?: string | null
-          p_deceased_on_precision?: string | null
-          p_effective_from?: string | null
+          p_deceased_on?: string
+          p_deceased_on_precision?: string
+          p_effective_from?: string
           p_member_id: string
           p_organization_id: string
-          p_reason?: string | null
+          p_reason?: string
         }
         Returns: Json
       }
@@ -5995,6 +5995,23 @@ export type Database = {
           p_push_token?: string
         }
         Returns: string
+      }
+      restore_member_record: {
+        Args: {
+          p_member_id: string
+          p_organization_id: string
+          p_reason: string
+        }
+        Returns: Json
+      }
+      revert_member_deceased: {
+        Args: {
+          p_effective_from?: string
+          p_member_id: string
+          p_organization_id: string
+          p_reason?: string
+        }
+        Returns: Json
       }
       revoke_device: {
         Args: {
@@ -6060,20 +6077,20 @@ export type Database = {
       }
       update_member_basic_profile: {
         Args: {
-          p_birth_date?: string | null
-          p_change_reason?: string | null
-          p_civil_status?: string | null
-          p_effective_from?: string | null
+          p_birth_date?: string
+          p_change_reason?: string
+          p_civil_status?: string
+          p_effective_from?: string
           p_family_name: string
           p_given_names: string
-          p_home_country_code?: string | null
+          p_home_country_code?: string
           p_is_name_change?: boolean
           p_member_id: string
-          p_middle_names?: string | null
+          p_middle_names?: string
           p_organization_id: string
-          p_preferred_language_code?: string | null
-          p_preferred_name?: string | null
-          p_sex?: string | null
+          p_preferred_language_code?: string
+          p_preferred_name?: string
+          p_sex?: string
         }
         Returns: Json
       }

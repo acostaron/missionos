@@ -12,6 +12,8 @@ import { ChangeGovernancePlacementModal } from '../features/members/components/C
 import { ChangeMemberStatusModal } from '../features/members/components/ChangeMemberStatusModal';
 import { RecordMemberDeceasedModal } from '../features/members/components/RecordMemberDeceasedModal';
 import { ArchiveMemberRecordModal } from '../features/members/components/ArchiveMemberRecordModal';
+import { RevertMemberDeceasedModal } from '../features/members/components/RevertMemberDeceasedModal';
+import { RestoreMemberRecordModal } from '../features/members/components/RestoreMemberRecordModal';
 import { MemberStatusTimeline } from '../features/members/components/MemberStatusTimeline';
 import {
   RemoveContactConfirmModal,
@@ -705,6 +707,12 @@ export default function MemberProfilePage() {
   // Archive record modal state
   const [isArchiveModalOpen, setIsArchiveModalOpen] = useState(false);
 
+  // Revert deceased modal state
+  const [isRevertDeceasedModalOpen, setIsRevertDeceasedModalOpen] = useState(false);
+
+  // Restore archived record modal state
+  const [isRestoreRecordModalOpen, setIsRestoreRecordModalOpen] = useState(false);
+
   // Remove confirmation modal state
   const [removeModalState, setRemoveModalState] = useState<{
     isOpen: boolean;
@@ -730,6 +738,8 @@ export default function MemberProfilePage() {
   const canViewStatus = !isPermLoading && hasPermission(Permissions.MembersStatusView);
   const canManageDeceased = !isPermLoading && hasPermission(Permissions.MembersDeceasedManage);
   const canArchiveRecord = !isPermLoading && hasPermission(Permissions.MembersRecordsArchive);
+  const canRevertDeceased = !isPermLoading && hasPermission(Permissions.MembersDeceasedRevert);
+  const canRestoreRecord = !isPermLoading && hasPermission(Permissions.MembersRecordsRestore);
 
   const {
     data: profile,
@@ -847,12 +857,27 @@ export default function MemberProfilePage() {
 
       {/* Archived Record Banner */}
       {profile.record_status === 'archived' && (
-        <div className="rounded-xl border border-slate-700 bg-slate-800/80 p-4 space-y-1.5 shadow-sm">
-          <div className="flex items-center gap-2 text-sm font-semibold text-slate-200">
-            <svg className="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-            </svg>
-            <span>Archived Member Record</span>
+        <div className="rounded-xl border border-slate-700 bg-slate-800/80 p-4 space-y-2 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm font-semibold text-slate-200">
+              <svg className="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+              </svg>
+              <span>Archived Member Record</span>
+            </div>
+            {canRestoreRecord && orgId && (
+              <button
+                type="button"
+                id="restore-record-button"
+                onClick={() => setIsRestoreRecordModalOpen(true)}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-700/60 bg-emerald-950/30 px-3 py-1.5 text-xs font-semibold text-emerald-300 hover:bg-emerald-950/60 hover:border-emerald-600 transition-colors"
+              >
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Restore Record
+              </button>
+            )}
           </div>
           <p className="text-xs text-slate-400 leading-relaxed">
             This record is archived and excluded from standard active directory searches.
@@ -917,6 +942,21 @@ export default function MemberProfilePage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
               Record as Deceased
+            </button>
+          )}
+
+          {/* Correct Deceased Status (correction workflow) */}
+          {canRevertDeceased && orgId && profile.is_deceased && profile.membership_status?.code === 'deceased' && (
+            <button
+              type="button"
+              id="revert-deceased-button"
+              onClick={() => setIsRevertDeceasedModalOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-amber-600/60 bg-amber-950/30 px-3.5 py-2 text-xs font-semibold text-amber-300 hover:bg-amber-950/60 hover:border-amber-500 transition-colors shadow-sm"
+            >
+              <svg className="h-4 w-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Correct Deceased Status
             </button>
           )}
 
@@ -1108,7 +1148,32 @@ export default function MemberProfilePage() {
         />
       )}
 
+      {/* Correct Deceased Status Modal */}
+      {canRevertDeceased && orgId && isRevertDeceasedModalOpen && (
+        <RevertMemberDeceasedModal
+          isOpen={isRevertDeceasedModalOpen}
+          onClose={() => setIsRevertDeceasedModalOpen(false)}
+          organizationId={orgId}
+          memberId={profile.id}
+          displayName={profile.display_name}
+          onSuccessToast={triggerToast}
+        />
+      )}
+
+      {/* Restore Archived Record Modal */}
+      {canRestoreRecord && orgId && isRestoreRecordModalOpen && (
+        <RestoreMemberRecordModal
+          isOpen={isRestoreRecordModalOpen}
+          onClose={() => setIsRestoreRecordModalOpen(false)}
+          organizationId={orgId}
+          memberId={profile.id}
+          displayName={profile.display_name}
+          onSuccessToast={triggerToast}
+        />
+      )}
+
       {/* Edit / Add Email Modal */}
+
       {canManageContacts && orgId && emailModalState.isOpen && (
         <EditEmailModal
           isOpen={emailModalState.isOpen}
