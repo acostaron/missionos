@@ -10,6 +10,7 @@ import { EditPhoneModal } from '../features/members/components/EditPhoneModal';
 import { EditAddressModal } from '../features/members/components/EditAddressModal';
 import { ChangeGovernancePlacementModal } from '../features/members/components/ChangeGovernancePlacementModal';
 import { ChangeMemberStatusModal } from '../features/members/components/ChangeMemberStatusModal';
+import { MemberStatusTimeline } from '../features/members/components/MemberStatusTimeline';
 import {
   RemoveContactConfirmModal,
   type RemoveTargetType,
@@ -703,6 +704,7 @@ export default function MemberProfilePage() {
   const canManageAddresses = !isPermLoading && hasPermission(Permissions.MembersAddressesManage);
   const canManagePlacements = !isPermLoading && hasPermission(Permissions.MembersPlacementsManage);
   const canManageStatus = !isPermLoading && hasPermission(Permissions.MembersStatusManage);
+  const canViewStatus = !isPermLoading && hasPermission(Permissions.MembersStatusView);
 
   const {
     data: profile,
@@ -948,6 +950,25 @@ export default function MemberProfilePage() {
         canManagePlacements={canManagePlacements}
         onChangeGovernancePlacement={() => setIsChangePlacementModalOpen(true)}
       />
+
+      {/* Membership Lifecycle Section */}
+      <Section
+        title="Membership Lifecycle"
+        icon={
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        }
+      >
+        {canViewStatus && orgId ? (
+          <MemberStatusTimeline
+            organizationId={orgId}
+            memberId={profile.id}
+          />
+        ) : (
+          <RestrictedSection label="Membership Lifecycle" />
+        )}
+      </Section>
 
       {/* Edit Profile Modal */}
       {canEditProfile && orgId && isEditModalOpen && (

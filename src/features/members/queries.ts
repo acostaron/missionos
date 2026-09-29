@@ -190,6 +190,8 @@ export const memberKeys = {
   profile: (orgId: string, memberId: string) =>
     [...memberKeys.profiles(), orgId, memberId] as const,
   statuses: (orgId: string) => [...memberKeys.all, 'statuses', orgId] as const,
+  statusHistory: (orgId: string, memberId: string) =>
+    [...memberKeys.all, 'status-history', orgId, memberId] as const,
 };
 
 // ---------------------------------------------------------------------------

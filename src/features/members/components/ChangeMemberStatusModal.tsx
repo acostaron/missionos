@@ -90,6 +90,9 @@ export function ChangeMemberStatusModal({
       await queryClient.invalidateQueries({
         queryKey: memberKeys.lists(),
       });
+      await queryClient.invalidateQueries({
+        queryKey: memberKeys.statusHistory(organizationId, memberId),
+      });
 
       onSuccessToast?.('Membership status updated.');
       onClose();

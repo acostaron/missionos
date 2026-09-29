@@ -5873,6 +5873,26 @@ export type Database = {
         Args: { p_member_id: string; p_organization_id: string }
         Returns: Json
       }
+      get_member_status_history: {
+        Args: { p_member_id: string; p_organization_id: string }
+        Returns: {
+          change_reason_code: string | null
+          change_summary: string | null
+          effective_from_at: string
+          effective_to_at: string | null
+          history_id: string
+          is_active_membership: boolean
+          is_current: boolean
+          recorded_at: string
+          recorded_by_name: string | null
+          recorded_by_profile_id: string | null
+          source: string
+          status_category: string
+          status_code: string
+          status_id: string
+          status_name: string
+        }[]
+      }
       get_member_statuses: {
         Args: { p_organization_id: string }
         Returns: {

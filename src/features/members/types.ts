@@ -130,3 +130,21 @@ export interface ChangeMemberMembershipStatusResponse {
   new_status_code: string;
   effective_from: string;
 }
+
+export interface MemberStatusHistoryItem {
+  history_id: string;
+  status_id: string;
+  status_code: string;
+  status_name: string;
+  status_category: string;
+  is_active_membership: boolean;
+  effective_from_at: string;
+  effective_to_at: string | null;
+  change_reason_code: string | null;
+  change_summary: string | null;
+  source: string;
+  recorded_at: string;
+  recorded_by_profile_id: string | null;
+  recorded_by_name: string | null;
+  is_current: boolean;
+}
