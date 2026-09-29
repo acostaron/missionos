@@ -1,6 +1,10 @@
+import { useState } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { useOrganizationContext } from '../hooks/use-organization-context';
+import { usePermissions } from '../hooks/use-permissions';
+import { Permissions } from '../types/permissions';
 import { useMemberProfile } from '../features/members/queries';
+import { EditMemberProfileModal } from '../features/members/components/EditMemberProfileModal';
 import type {
   MemberProfile,
   MemberIdentifier,
@@ -118,6 +122,21 @@ function OverviewSection({ profile }: { profile: MemberProfile }) {
             )
           }
         />
+        {profile.birth_date && (
+          <DataRow label="Birth date" value={profile.birth_date} />
+        )}
+        {profile.sex && (
+          <DataRow label="Sex" value={<span className="capitalize">{profile.sex}</span>} />
+        )}
+        {profile.civil_status && (
+          <DataRow label="Civil status" value={<span className="capitalize">{profile.civil_status}</span>} />
+        )}
+        {profile.home_country_code && (
+          <DataRow label="Home country" value={profile.home_country_code} />
+        )}
+        {profile.preferred_language_code && (
+          <DataRow label="Preferred language" value={profile.preferred_language_code} />
+        )}
       </dl>
     </Section>
   );
@@ -389,7 +408,13 @@ function PlacementsSection({
 export default function MemberProfilePage() {
   const { memberId } = useParams<{ memberId: string }>();
   const { activeOrganization, isLoading: isOrgLoading } = useOrganizationContext();
+  const { hasPermission, isLoading: isPermLoading } = usePermissions();
   const orgId = activeOrganization?.id ?? null;
+
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [successToast, setSuccessToast] = useState<string | null>(null);
+
+  const canEditProfile = !isPermLoading && hasPermission(Permissions.MembersRecordsUpdate);
 
   const {
     data: profile,
@@ -466,6 +491,24 @@ export default function MemberProfilePage() {
 
   return (
     <div className="space-y-6">
+      {/* Toast Notification */}
+      {successToast && (
+        <div className="flex items-center justify-between rounded-xl border border-emerald-600/40 bg-emerald-950/40 px-4 py-3 text-sm text-emerald-200 shadow-lg">
+          <div className="flex items-center gap-2">
+            <svg className="h-5 w-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+            <span>{successToast}</span>
+          </div>
+          <button
+            onClick={() => setSuccessToast(null)}
+            className="text-xs text-emerald-400 hover:text-emerald-200"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
       {/* Back */}
       <Link
         to="/app/members"
@@ -478,25 +521,44 @@ export default function MemberProfilePage() {
         Member Directory
       </Link>
 
-      {/* Hero */}
-      <div className="flex items-center gap-5">
-        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-indigo-900 text-xl font-bold text-indigo-200">
-          {initials}
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-100">
-            {profile.display_name}
-          </h1>
-          <div className="mt-1 flex items-center gap-3">
-            {profile.membership_status && (
-              <StatusBadge
-                name={profile.membership_status.name}
-                isActive={profile.membership_status.is_active_membership}
-              />
-            )}
-            <span className="text-xs text-slate-500 capitalize">{profile.record_status}</span>
+      {/* Hero Header with Actions */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-5">
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-indigo-900 text-xl font-bold text-indigo-200">
+            {initials}
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-100">
+              {profile.display_name}
+            </h1>
+            <div className="mt-1 flex items-center gap-3">
+              {profile.membership_status && (
+                <StatusBadge
+                  name={profile.membership_status.name}
+                  isActive={profile.membership_status.is_active_membership}
+                />
+              )}
+              <span className="text-xs text-slate-500 capitalize">{profile.record_status}</span>
+            </div>
           </div>
         </div>
+
+        {/* Action Controls */}
+        {canEditProfile && orgId && (
+          <div>
+            <button
+              type="button"
+              id="edit-profile-button"
+              onClick={() => setIsEditModalOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800/80 px-4 py-2 text-xs font-semibold text-slate-200 hover:border-indigo-500 hover:text-indigo-300 transition-colors shadow-sm"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              Edit Profile
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Sections */}
@@ -509,6 +571,20 @@ export default function MemberProfilePage() {
         household={profile.household_placement}
         governance={profile.governance_placement}
       />
+
+      {/* Edit Profile Modal */}
+      {canEditProfile && orgId && isEditModalOpen && (
+        <EditMemberProfileModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          organizationId={orgId}
+          profile={profile}
+          onSuccessToast={(msg) => {
+            setSuccessToast(msg);
+            setTimeout(() => setSuccessToast(null), 5000);
+          }}
+        />
+      )}
 
       {/* Dev: raw JSON (DEV only) */}
       {import.meta.env.DEV && (

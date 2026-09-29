@@ -32,3 +32,27 @@ export interface PlacementNodeItem {
   parent_node_name: string | null;
   hierarchy_rank: number;
 }
+
+export interface UpdateMemberBasicProfileInput {
+  organizationId: string;
+  memberId: string;
+  givenNames: string;
+  familyName: string;
+  middleNames?: string | null;
+  preferredName?: string | null;
+  birthDate?: string | null;
+  sex?: string | null;
+  civilStatus?: string | null;
+  homeCountryCode?: string | null;
+  preferredLanguageCode?: string | null;
+  isNameChange: boolean;
+  effectiveFrom?: string | null;
+  changeReason?: string | null;
+}
+
+export interface UpdateMemberBasicProfileResponse {
+  status: 'success';
+  member_id: string;
+  display_name: string;
+  is_name_change: boolean;
+}
