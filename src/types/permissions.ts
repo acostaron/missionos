@@ -38,6 +38,9 @@ export const Permissions = {
 
   SecurityRoleAssignmentsManage: 'security.role_assignments.manage',
   SecurityScopeAssignmentsManage: 'security.scope_assignments.manage',
+
+  FamiliesRecordsView: 'families.records.view',
+  FamiliesRelationshipsView: 'families.relationships.view',
 } as const;
 
 export type PermissionCode = typeof Permissions[keyof typeof Permissions];

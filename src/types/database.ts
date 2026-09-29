@@ -5877,6 +5877,42 @@ export type Database = {
         Returns: Json
       }
       get_current_profile_context: { Args: never; Returns: Json }
+      get_family_profile: {
+        Args: { p_family_id: string; p_organization_id: string }
+        Returns: Json
+      }
+      get_family_relationship_types: {
+        Args: { p_organization_id: string }
+        Returns: {
+          allows_multiple_current: boolean
+          code: string
+          display_order: number
+          inverse_code: string
+          is_active: boolean
+          is_symmetric: boolean
+          name: string
+          relationship_category: string
+          requires_same_family: boolean
+          type_id: string
+        }[]
+      }
+      get_member_families: {
+        Args: { p_member_id: string; p_organization_id: string }
+        Returns: {
+          active_member_count: number
+          display_name: string
+          effective_from: string
+          effective_to: string
+          family_id: string
+          family_member_id: string
+          family_name: string
+          family_role: string
+          family_status: string
+          family_type: string
+          is_dependent: boolean
+          is_primary_contact: boolean
+        }[]
+      }
       get_member_profile: {
         Args: { p_member_id: string; p_organization_id: string }
         Returns: Json
