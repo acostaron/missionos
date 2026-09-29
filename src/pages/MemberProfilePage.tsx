@@ -5,6 +5,13 @@ import { usePermissions } from '../hooks/use-permissions';
 import { Permissions } from '../types/permissions';
 import { useMemberProfile } from '../features/members/queries';
 import { EditMemberProfileModal } from '../features/members/components/EditMemberProfileModal';
+import { EditEmailModal } from '../features/members/components/EditEmailModal';
+import { EditPhoneModal } from '../features/members/components/EditPhoneModal';
+import { EditAddressModal } from '../features/members/components/EditAddressModal';
+import {
+  RemoveContactConfirmModal,
+  type RemoveTargetType,
+} from '../features/members/components/RemoveContactConfirmModal';
 import type {
   MemberProfile,
   MemberIdentifier,
@@ -16,6 +23,7 @@ import type {
   GovernancePlacement,
 } from '../features/members/queries';
 
+
 // ---------------------------------------------------------------------------
 // Shared UI primitives
 // ---------------------------------------------------------------------------
@@ -23,24 +31,30 @@ import type {
 function Section({
   title,
   icon,
+  action,
   children,
 }: {
   title: string;
   icon: React.ReactNode;
+  action?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
     <div className="rounded-xl border border-slate-700 bg-slate-800/60 overflow-hidden">
-      <div className="flex items-center gap-3 border-b border-slate-700 px-5 py-3.5">
-        <span className="text-slate-400">{icon}</span>
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-300">
-          {title}
-        </h2>
+      <div className="flex items-center justify-between border-b border-slate-700 px-5 py-3.5">
+        <div className="flex items-center gap-3">
+          <span className="text-slate-400">{icon}</span>
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-300">
+            {title}
+          </h2>
+        </div>
+        {action && <div>{action}</div>}
       </div>
       <div className="px-5 py-4">{children}</div>
     </div>
   );
 }
+
 
 function RestrictedSection({ label }: { label: string }) {
   return (
@@ -214,7 +228,27 @@ function IdentifiersSection({ identifiers }: { identifiers: MemberIdentifier[] |
   );
 }
 
-function ContactsSection({ contacts }: { contacts: MemberProfile['contacts'] }) {
+interface ContactsSectionProps {
+  contacts: MemberProfile['contacts'];
+  canManageContacts: boolean;
+  onAddEmail: () => void;
+  onReplaceEmail: (email: MemberEmail) => void;
+  onRemoveEmail: (email: MemberEmail) => void;
+  onAddPhone: () => void;
+  onReplacePhone: (phone: MemberPhone) => void;
+  onRemovePhone: (phone: MemberPhone) => void;
+}
+
+function ContactsSection({
+  contacts,
+  canManageContacts,
+  onAddEmail,
+  onReplaceEmail,
+  onRemoveEmail,
+  onAddPhone,
+  onReplacePhone,
+  onRemovePhone,
+}: ContactsSectionProps) {
   const icon = (
     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round"
@@ -226,62 +260,186 @@ function ContactsSection({ contacts }: { contacts: MemberProfile['contacts'] }) 
     return <Section title="Contact Information" icon={icon}><RestrictedSection label="Contacts" /></Section>;
   }
 
+  const headerActions = canManageContacts ? (
+    <div className="flex items-center gap-2">
+      <button
+        type="button"
+        id="add-email-button"
+        onClick={onAddEmail}
+        className="inline-flex items-center gap-1 rounded-md border border-slate-700 bg-slate-800/80 px-2.5 py-1 text-xs font-medium text-slate-200 hover:border-indigo-500 hover:text-indigo-300 transition-colors"
+      >
+        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
+        Add Email
+      </button>
+      <button
+        type="button"
+        id="add-phone-button"
+        onClick={onAddPhone}
+        className="inline-flex items-center gap-1 rounded-md border border-slate-700 bg-slate-800/80 px-2.5 py-1 text-xs font-medium text-slate-200 hover:border-indigo-500 hover:text-indigo-300 transition-colors"
+      >
+        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
+        Add Phone
+      </button>
+    </div>
+  ) : undefined;
+
   const hasAny = contacts.emails.length > 0 || contacts.phones.length > 0;
   if (!hasAny) {
-    return <Section title="Contact Information" icon={icon}><p className="text-xs text-slate-500 italic">No contact information on record.</p></Section>;
+    return (
+      <Section title="Contact Information" icon={icon} action={headerActions}>
+        <p className="text-xs text-slate-500 italic">No contact information on record.</p>
+      </Section>
+    );
   }
 
   return (
-    <Section title="Contact Information" icon={icon}>
-      <div className="space-y-3">
-        {/* Emails */}
-        {contacts.emails.map((e: MemberEmail) => (
-          <div key={e.id} className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-slate-400">
-                Email{e.email_type ? ` (${e.email_type})` : ''}
-                {e.is_primary && (
-                  <span className="ml-2 text-[10px] uppercase text-indigo-400">primary</span>
-                )}
-              </p>
-              <a
-                href={`mailto:${e.email_address}`}
-                className="text-sm text-indigo-300 hover:text-indigo-200"
+    <Section title="Contact Information" icon={icon} action={headerActions}>
+      <div className="space-y-4">
+        {/* Emails Sub-group */}
+        <div className="space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+            Email Addresses
+          </p>
+          {contacts.emails.length === 0 ? (
+            <p className="text-xs text-slate-500 italic">No email addresses on record.</p>
+          ) : (
+            contacts.emails.map((e: MemberEmail) => (
+              <div
+                key={e.id}
+                className="flex items-center justify-between rounded-lg border border-slate-700/60 bg-slate-900/30 px-3.5 py-2.5"
               >
-                {e.email_address}
-              </a>
-            </div>
-            {e.verification_status && (
-              <span className="text-xs text-slate-500 capitalize">{e.verification_status}</span>
-            )}
-          </div>
-        ))}
+                <div>
+                  <div className="flex items-center gap-2">
+                    <a
+                      href={`mailto:${e.email_address}`}
+                      className="text-sm font-medium text-indigo-300 hover:text-indigo-200"
+                    >
+                      {e.email_address}
+                    </a>
+                    {e.is_primary && (
+                      <span className="rounded-full bg-indigo-950/80 border border-indigo-700/60 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-indigo-300">
+                        primary
+                      </span>
+                    )}
+                    {e.email_type && (
+                      <span className="text-xs text-slate-400">({e.email_type})</span>
+                    )}
+                  </div>
+                  {e.verification_status && (
+                    <span className="text-xs text-slate-500 capitalize">{e.verification_status}</span>
+                  )}
+                </div>
 
-        {/* Phones */}
-        {contacts.phones.map((p: MemberPhone) => (
-          <div key={p.id} className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-slate-400">
-                Phone{p.phone_type ? ` (${p.phone_type})` : ''}
-                {p.is_primary && (
-                  <span className="ml-2 text-[10px] uppercase text-indigo-400">primary</span>
+                {canManageContacts && (
+                  <div className="flex items-center gap-2">
+                    {e.is_primary && (
+                      <button
+                        type="button"
+                        onClick={() => onReplaceEmail(e)}
+                        className="rounded px-2 py-1 text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-indigo-300 transition-colors"
+                      >
+                        Replace
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => onRemoveEmail(e)}
+                      className="rounded px-2 py-1 text-xs font-medium text-rose-400 hover:bg-rose-950/40 hover:text-rose-300 transition-colors"
+                    >
+                      Remove
+                    </button>
+                  </div>
                 )}
-              </p>
-              <a
-                href={`tel:${p.normalized_e164 ?? p.phone_number}`}
-                className="text-sm text-slate-100 hover:text-slate-50"
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Phones Sub-group */}
+        <div className="space-y-2 pt-2 border-t border-slate-700/50">
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+            Phone Numbers
+          </p>
+          {contacts.phones.length === 0 ? (
+            <p className="text-xs text-slate-500 italic">No phone numbers on record.</p>
+          ) : (
+            contacts.phones.map((p: MemberPhone) => (
+              <div
+                key={p.id}
+                className="flex items-center justify-between rounded-lg border border-slate-700/60 bg-slate-900/30 px-3.5 py-2.5"
               >
-                {p.phone_number}
-              </a>
-            </div>
-          </div>
-        ))}
+                <div>
+                  <div className="flex items-center gap-2">
+                    <a
+                      href={`tel:${p.normalized_e164 ?? p.phone_number}`}
+                      className="text-sm font-medium text-slate-100 hover:text-slate-50"
+                    >
+                      {p.phone_number}
+                    </a>
+                    {p.is_primary && (
+                      <span className="rounded-full bg-indigo-950/80 border border-indigo-700/60 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-indigo-300">
+                        primary
+                      </span>
+                    )}
+                    {p.phone_type && (
+                      <span className="text-xs text-slate-400">({p.phone_type})</span>
+                    )}
+                  </div>
+                  {p.normalized_e164 && p.normalized_e164 !== p.phone_number && (
+                    <p className="text-[11px] font-mono text-slate-500">
+                      E.164: {p.normalized_e164}
+                    </p>
+                  )}
+                </div>
+
+                {canManageContacts && (
+                  <div className="flex items-center gap-2">
+                    {p.is_primary && (
+                      <button
+                        type="button"
+                        onClick={() => onReplacePhone(p)}
+                        className="rounded px-2 py-1 text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-indigo-300 transition-colors"
+                      >
+                        Replace
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => onRemovePhone(p)}
+                      className="rounded px-2 py-1 text-xs font-medium text-rose-400 hover:bg-rose-950/40 hover:text-rose-300 transition-colors"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </Section>
   );
 }
 
-function AddressesSection({ addresses }: { addresses: MemberProfile['addresses'] }) {
+interface AddressesSectionProps {
+  addresses: MemberProfile['addresses'];
+  canManageAddresses: boolean;
+  onAddAddress: () => void;
+  onReplaceAddress: (address: MemberAddress) => void;
+  onRemoveAddress: (address: MemberAddress) => void;
+}
+
+function AddressesSection({
+  addresses,
+  canManageAddresses,
+  onAddAddress,
+  onReplaceAddress,
+  onRemoveAddress,
+}: AddressesSectionProps) {
   const icon = (
     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round"
@@ -293,28 +451,84 @@ function AddressesSection({ addresses }: { addresses: MemberProfile['addresses']
   if (addresses === null) {
     return <Section title="Addresses" icon={icon}><RestrictedSection label="Addresses" /></Section>;
   }
+
+  // Phase 5D manages the single current PRIMARY HOME address
+  const currentPrimaryHomeAddress =
+    addresses.find((a) => a.is_primary && (a.address_type === 'home' || !a.address_type)) ??
+    addresses.find((a) => a.is_primary) ??
+    null;
+
+  const headerAction = canManageAddresses && (
+    <button
+      type="button"
+      id="address-action-button"
+      onClick={
+        currentPrimaryHomeAddress
+          ? () => onReplaceAddress(currentPrimaryHomeAddress)
+          : onAddAddress
+      }
+      className="inline-flex items-center gap-1 rounded-md border border-slate-700 bg-slate-800/80 px-2.5 py-1 text-xs font-medium text-slate-200 hover:border-indigo-500 hover:text-indigo-300 transition-colors"
+    >
+      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+      </svg>
+      {currentPrimaryHomeAddress ? 'Replace Address' : 'Add Address'}
+    </button>
+  );
+
+
   if (addresses.length === 0) {
-    return <Section title="Addresses" icon={icon}><p className="text-xs text-slate-500 italic">No addresses on record.</p></Section>;
+    return (
+      <Section title="Addresses" icon={icon} action={headerAction}>
+        <p className="text-xs text-slate-500 italic">No addresses on record.</p>
+      </Section>
+    );
   }
 
   return (
-    <Section title="Addresses" icon={icon}>
+    <Section title="Addresses" icon={icon} action={headerAction}>
       <div className="space-y-4">
         {addresses.map((a: MemberAddress) => (
           <div key={a.id} className="rounded-md border border-slate-700 bg-slate-900/40 px-4 py-3">
-            <div className="mb-1 flex items-center gap-2">
-              {a.address_type && (
-                <span className="text-xs font-medium text-slate-400 capitalize">
-                  {a.address_type.replace(/_/g, ' ')}
-                </span>
-              )}
-              {a.is_primary && (
-                <span className="text-[10px] uppercase tracking-wider text-indigo-400">primary</span>
-              )}
-              {a.is_mailing_address && (
-                <span className="text-[10px] uppercase tracking-wider text-amber-400">mailing</span>
+            <div className="mb-2 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {a.address_type && (
+                  <span className="text-xs font-medium text-slate-400 capitalize">
+                    {a.address_type.replace(/_/g, ' ')}
+                  </span>
+                )}
+                {a.is_primary && (
+                  <span className="rounded-full bg-indigo-950/80 border border-indigo-700/60 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-indigo-300">
+                    primary
+                  </span>
+                )}
+                {a.is_mailing_address && (
+                  <span className="rounded-full bg-amber-950/80 border border-amber-700/60 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-300">
+                    mailing
+                  </span>
+                )}
+              </div>
+
+              {canManageAddresses && (
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => onReplaceAddress(a)}
+                    className="rounded px-2 py-1 text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-indigo-300 transition-colors"
+                  >
+                    Replace
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onRemoveAddress(a)}
+                    className="rounded px-2 py-1 text-xs font-medium text-rose-400 hover:bg-rose-950/40 hover:text-rose-300 transition-colors"
+                  >
+                    Remove
+                  </button>
+                </div>
               )}
             </div>
+
             <address className="not-italic text-sm text-slate-200 leading-relaxed">
               {a.address.formatted_address ? (
                 a.address.formatted_address
@@ -338,6 +552,7 @@ function AddressesSection({ addresses }: { addresses: MemberProfile['addresses']
     </Section>
   );
 }
+
 
 function PlacementsSection({
   section,
@@ -414,7 +629,46 @@ export default function MemberProfilePage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [successToast, setSuccessToast] = useState<string | null>(null);
 
+  // Email modal state
+  const [emailModalState, setEmailModalState] = useState<{
+    isOpen: boolean;
+    mode: 'add' | 'replace';
+    existingEmail?: string | null;
+  }>({ isOpen: false, mode: 'add' });
+
+  // Phone modal state
+  const [phoneModalState, setPhoneModalState] = useState<{
+    isOpen: boolean;
+    mode: 'add' | 'replace';
+    existingRawPhone?: string | null;
+  }>({ isOpen: false, mode: 'add' });
+
+  // Address modal state
+  const [addressModalState, setAddressModalState] = useState<{
+    isOpen: boolean;
+    existingPrimaryAddress?: MemberAddress | null;
+  }>({ isOpen: false });
+
+  // Remove confirmation modal state
+  const [removeModalState, setRemoveModalState] = useState<{
+    isOpen: boolean;
+    contactType: RemoveTargetType;
+    targetId: string;
+    label: string;
+    isPrimary: boolean;
+    hasSecondaryContacts: boolean;
+  }>({
+    isOpen: false,
+    contactType: 'email',
+    targetId: '',
+    label: '',
+    isPrimary: false,
+    hasSecondaryContacts: false,
+  });
+
   const canEditProfile = !isPermLoading && hasPermission(Permissions.MembersRecordsUpdate);
+  const canManageContacts = !isPermLoading && hasPermission(Permissions.MembersContactsManage);
+  const canManageAddresses = !isPermLoading && hasPermission(Permissions.MembersAddressesManage);
 
   const {
     data: profile,
@@ -488,6 +742,14 @@ export default function MemberProfilePage() {
     .slice(0, 2)
     .join('')
     .toUpperCase();
+
+  const hasPrimaryEmail = profile.contacts?.emails.some((e) => e.is_primary) ?? false;
+  const hasPrimaryPhone = profile.contacts?.phones.some((p) => p.is_primary) ?? false;
+
+  const triggerToast = (msg: string) => {
+    setSuccessToast(msg);
+    setTimeout(() => setSuccessToast(null), 5000);
+  };
 
   return (
     <div className="space-y-6">
@@ -564,8 +826,74 @@ export default function MemberProfilePage() {
       {/* Sections */}
       <OverviewSection profile={profile} />
       <IdentifiersSection identifiers={profile.identifiers} />
-      <ContactsSection contacts={profile.contacts} />
-      <AddressesSection addresses={profile.addresses} />
+      <ContactsSection
+        contacts={profile.contacts}
+        canManageContacts={canManageContacts}
+        onAddEmail={() =>
+          setEmailModalState({ isOpen: true, mode: 'add', existingEmail: null })
+        }
+        onReplaceEmail={(e) =>
+          setEmailModalState({
+            isOpen: true,
+            mode: 'replace',
+            existingEmail: e.email_address,
+          })
+        }
+        onRemoveEmail={(e) =>
+          setRemoveModalState({
+            isOpen: true,
+            contactType: 'email',
+            targetId: e.id,
+            label: e.email_address,
+            isPrimary: e.is_primary,
+            hasSecondaryContacts: (profile.contacts?.emails.length ?? 0) > 1,
+          })
+        }
+        onAddPhone={() =>
+          setPhoneModalState({ isOpen: true, mode: 'add', existingRawPhone: null })
+        }
+        onReplacePhone={(p) =>
+          setPhoneModalState({
+            isOpen: true,
+            mode: 'replace',
+            existingRawPhone: p.phone_number,
+          })
+        }
+        onRemovePhone={(p) =>
+          setRemoveModalState({
+            isOpen: true,
+            contactType: 'phone',
+            targetId: p.id,
+            label: p.phone_number,
+            isPrimary: p.is_primary,
+            hasSecondaryContacts: (profile.contacts?.phones.length ?? 0) > 1,
+          })
+        }
+      />
+      <AddressesSection
+        addresses={profile.addresses}
+        canManageAddresses={canManageAddresses}
+        onAddAddress={() =>
+          setAddressModalState({ isOpen: true, existingPrimaryAddress: null })
+        }
+        onReplaceAddress={(addr) =>
+          setAddressModalState({ isOpen: true, existingPrimaryAddress: addr })
+        }
+        onRemoveAddress={(addr) =>
+          setRemoveModalState({
+            isOpen: true,
+            contactType: 'address',
+            targetId: addr.id,
+            label:
+              addr.address.formatted_address ||
+              [addr.address.address_line_1, addr.address.city_name]
+                .filter(Boolean)
+                .join(', '),
+            isPrimary: addr.is_primary,
+            hasSecondaryContacts: false,
+          })
+        }
+      />
       <PlacementsSection
         section={profile.section_placement}
         household={profile.household_placement}
@@ -579,10 +907,63 @@ export default function MemberProfilePage() {
           onClose={() => setIsEditModalOpen(false)}
           organizationId={orgId}
           profile={profile}
-          onSuccessToast={(msg) => {
-            setSuccessToast(msg);
-            setTimeout(() => setSuccessToast(null), 5000);
-          }}
+          onSuccessToast={triggerToast}
+        />
+      )}
+
+      {/* Edit / Add Email Modal */}
+      {canManageContacts && orgId && emailModalState.isOpen && (
+        <EditEmailModal
+          isOpen={emailModalState.isOpen}
+          onClose={() => setEmailModalState({ isOpen: false, mode: 'add' })}
+          organizationId={orgId}
+          memberId={profile.id}
+          mode={emailModalState.mode}
+          existingEmail={emailModalState.existingEmail}
+          hasExistingPrimary={hasPrimaryEmail}
+          onSuccessToast={triggerToast}
+        />
+      )}
+
+      {/* Edit / Add Phone Modal */}
+      {canManageContacts && orgId && phoneModalState.isOpen && (
+        <EditPhoneModal
+          isOpen={phoneModalState.isOpen}
+          onClose={() => setPhoneModalState({ isOpen: false, mode: 'add' })}
+          organizationId={orgId}
+          memberId={profile.id}
+          mode={phoneModalState.mode}
+          existingRawPhone={phoneModalState.existingRawPhone}
+          hasExistingPrimary={hasPrimaryPhone}
+          onSuccessToast={triggerToast}
+        />
+      )}
+
+      {/* Edit / Add Address Modal */}
+      {canManageAddresses && orgId && addressModalState.isOpen && (
+        <EditAddressModal
+          isOpen={addressModalState.isOpen}
+          onClose={() => setAddressModalState({ isOpen: false })}
+          organizationId={orgId}
+          memberId={profile.id}
+          existingPrimaryAddress={addressModalState.existingPrimaryAddress}
+          onSuccessToast={triggerToast}
+        />
+      )}
+
+      {/* Remove Confirmation Modal */}
+      {orgId && removeModalState.isOpen && (
+        <RemoveContactConfirmModal
+          isOpen={removeModalState.isOpen}
+          onClose={() => setRemoveModalState((prev) => ({ ...prev, isOpen: false }))}
+          organizationId={orgId}
+          memberId={profile.id}
+          contactType={removeModalState.contactType}
+          targetId={removeModalState.targetId}
+          label={removeModalState.label}
+          isPrimary={removeModalState.isPrimary}
+          hasSecondaryContacts={removeModalState.hasSecondaryContacts}
+          onSuccessToast={triggerToast}
         />
       )}
 

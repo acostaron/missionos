@@ -56,3 +56,33 @@ export interface UpdateMemberBasicProfileResponse {
   display_name: string;
   is_name_change: boolean;
 }
+
+export interface SetMemberAddressData {
+  line1: string;
+  line2?: string | null;
+  city: string;
+  state?: string | null;
+  postal?: string | null;
+  country?: string | null;
+}
+
+export interface SetMemberContactPointInput {
+  organizationId: string;
+  memberId: string;
+  contactType: 'email' | 'phone' | 'address';
+  operation: 'add' | 'replace_primary' | 'remove';
+  targetId?: string | null;
+  value?: string | null;
+  phoneCountryCode?: string | null;
+  addressData?: SetMemberAddressData | null;
+  effectiveFrom?: string | null;
+  reason?: string | null;
+}
+
+export interface SetMemberContactPointResponse {
+  status: 'success';
+  member_id: string;
+  contact_type: 'email' | 'phone' | 'address';
+  operation: 'add' | 'replace_primary' | 'remove';
+  record_id: string;
+}
