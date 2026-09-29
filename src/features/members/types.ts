@@ -148,3 +148,27 @@ export interface MemberStatusHistoryItem {
   recorded_by_name: string | null;
   is_current: boolean;
 }
+
+export type DeceasedDatePrecision = 'exact' | 'month_and_year' | 'year_only' | 'unknown';
+
+export interface RecordMemberDeceasedInput {
+  organizationId: string;
+  memberId: string;
+  deceasedOn?: string | null; // YYYY-MM-DD
+  deceasedOnPrecision?: DeceasedDatePrecision;
+  effectiveFrom: string; // YYYY-MM-DD
+  reason?: string | null;
+}
+
+export interface RecordMemberDeceasedResponse {
+  status: 'success';
+  member_id: string;
+  previous_status_id: string;
+  previous_status_code: string;
+  new_status_id: string;
+  new_status_code: string;
+  is_deceased: boolean;
+  deceased_on: string | null;
+  deceased_on_precision: string;
+  effective_from: string;
+}

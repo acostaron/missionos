@@ -24,6 +24,7 @@ export const Permissions = {
 
   MembersStatusView: 'members.status.view',
   MembersStatusManage: 'members.status.manage',
+  MembersDeceasedManage: 'members.deceased.manage',
 
   MembersQrView: 'members.qr.view',
   MembersQrManage: 'members.qr.manage',

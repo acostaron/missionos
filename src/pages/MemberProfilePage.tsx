@@ -10,6 +10,7 @@ import { EditPhoneModal } from '../features/members/components/EditPhoneModal';
 import { EditAddressModal } from '../features/members/components/EditAddressModal';
 import { ChangeGovernancePlacementModal } from '../features/members/components/ChangeGovernancePlacementModal';
 import { ChangeMemberStatusModal } from '../features/members/components/ChangeMemberStatusModal';
+import { RecordMemberDeceasedModal } from '../features/members/components/RecordMemberDeceasedModal';
 import { MemberStatusTimeline } from '../features/members/components/MemberStatusTimeline';
 import {
   RemoveContactConfirmModal,
@@ -139,6 +140,21 @@ function OverviewSection({ profile }: { profile: MemberProfile }) {
             )
           }
         />
+        {profile.is_deceased && (
+          <DataRow
+            label="Date of death"
+            value={
+              <div className="flex items-center justify-end gap-2 text-slate-200">
+                <span>{profile.deceased_on ?? 'Unknown'}</span>
+                {profile.deceased_on_precision && (
+                  <span className="text-[10px] text-slate-400 bg-slate-800/80 px-1.5 py-0.5 rounded border border-slate-700">
+                    {profile.deceased_on_precision.replace(/_/g, ' ')}
+                  </span>
+                )}
+              </div>
+            }
+          />
+        )}
         {profile.birth_date && (
           <DataRow label="Birth date" value={profile.birth_date} />
         )}
@@ -682,6 +698,9 @@ export default function MemberProfilePage() {
   // Status change modal state
   const [isChangeStatusModalOpen, setIsChangeStatusModalOpen] = useState(false);
 
+  // Record deceased modal state
+  const [isRecordDeceasedModalOpen, setIsRecordDeceasedModalOpen] = useState(false);
+
   // Remove confirmation modal state
   const [removeModalState, setRemoveModalState] = useState<{
     isOpen: boolean;
@@ -705,6 +724,7 @@ export default function MemberProfilePage() {
   const canManagePlacements = !isPermLoading && hasPermission(Permissions.MembersPlacementsManage);
   const canManageStatus = !isPermLoading && hasPermission(Permissions.MembersStatusManage);
   const canViewStatus = !isPermLoading && hasPermission(Permissions.MembersStatusView);
+  const canManageDeceased = !isPermLoading && hasPermission(Permissions.MembersDeceasedManage);
 
   const {
     data: profile,
@@ -856,6 +876,20 @@ export default function MemberProfilePage() {
 
         {/* Action Controls */}
         <div className="flex items-center gap-3">
+          {canManageDeceased && orgId && !profile.is_deceased && profile.membership_status?.code !== 'deceased' && (
+            <button
+              type="button"
+              id="record-deceased-button"
+              onClick={() => setIsRecordDeceasedModalOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-amber-700/60 bg-amber-950/30 px-3.5 py-2 text-xs font-semibold text-amber-300 hover:bg-amber-950/60 hover:border-amber-600 transition-colors shadow-sm"
+            >
+              <svg className="h-4 w-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              Record as Deceased
+            </button>
+          )}
+
           {canEditProfile && orgId && (
             <button
               type="button"
@@ -1001,6 +1035,18 @@ export default function MemberProfilePage() {
           organizationId={orgId}
           memberId={profile.id}
           currentStatus={profile.membership_status}
+          onSuccessToast={triggerToast}
+        />
+      )}
+
+      {/* Record Member Deceased Modal */}
+      {canManageDeceased && orgId && isRecordDeceasedModalOpen && (
+        <RecordMemberDeceasedModal
+          isOpen={isRecordDeceasedModalOpen}
+          onClose={() => setIsRecordDeceasedModalOpen(false)}
+          organizationId={orgId}
+          memberId={profile.id}
+          displayName={profile.display_name}
           onSuccessToast={triggerToast}
         />
       )}

@@ -140,6 +140,9 @@ export interface MemberProfile {
   preferred_name: string | null;
   sort_name: string;
   record_status: string;
+  is_deceased: boolean;
+  deceased_on: string | null;
+  deceased_on_precision: string | null;
   /** null when caller lacks members.identifiers.view for this member */
   member_number: string | null;
   membership_status: MemberStatus | null;

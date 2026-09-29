@@ -5966,6 +5966,17 @@ export type Database = {
         }
         Returns: string
       }
+      record_member_deceased: {
+        Args: {
+          p_deceased_on?: string | null
+          p_deceased_on_precision?: string | null
+          p_effective_from?: string | null
+          p_member_id: string
+          p_organization_id: string
+          p_reason?: string | null
+        }
+        Returns: Json
+      }
       register_user_device: {
         Args: {
           p_app_version?: string
