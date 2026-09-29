@@ -16,6 +16,7 @@ export default function AppLayout() {
   const { hasPermission, isLoading: isPermLoading } = usePermissions();
 
   const canViewMembers = !isPermLoading && hasPermission(Permissions.MembersRecordsView);
+  const canViewHouseholds = !isPermLoading && hasPermission(Permissions.HouseholdsRecordsView);
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-950 text-slate-100">
@@ -58,6 +59,23 @@ export default function AppLayout() {
                   }
                 >
                   Members
+                </NavLink>
+              )}
+
+              {/* Households — only rendered when households.records.view is held */}
+              {canViewHouseholds && (
+                <NavLink
+                  to="/app/households"
+                  id="nav-households"
+                  className={({ isActive }) =>
+                    `rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                      isActive
+                        ? 'bg-slate-800 text-slate-100'
+                        : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200'
+                    }`
+                  }
+                >
+                  Households
                 </NavLink>
               )}
             </nav>

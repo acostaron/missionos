@@ -1,4 +1,4 @@
-export type Json =
+﻿export type Json =
   | string
   | number
   | boolean
@@ -5958,6 +5958,10 @@ export type Database = {
           type_id: string
         }[]
       }
+      get_household_profile: {
+        Args: { p_household_id: string; p_organization_id: string }
+        Returns: Json
+      }
       get_member_families: {
         Args: { p_member_id: string; p_organization_id: string }
         Returns: {
@@ -5974,6 +5978,10 @@ export type Database = {
           is_dependent: boolean
           is_primary_contact: boolean
         }[]
+      }
+      get_member_households: {
+        Args: { p_member_id: string; p_organization_id: string }
+        Returns: Json
       }
       get_member_profile: {
         Args: { p_member_id: string; p_organization_id: string }
@@ -6144,6 +6152,17 @@ export type Database = {
           p_scope_assignment_id: string
         }
         Returns: undefined
+      }
+      search_households: {
+        Args: {
+          p_lifecycle_status?: string
+          p_limit?: number
+          p_offset?: number
+          p_organization_id: string
+          p_parent_governance_node_id?: string
+          p_search?: string
+        }
+        Returns: Json
       }
       search_members: {
         Args: {

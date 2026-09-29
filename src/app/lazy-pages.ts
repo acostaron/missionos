@@ -12,3 +12,5 @@ export const MembersPage = lazy(() => import('../pages/MembersPage'));
 export const MemberProfilePage = lazy(() => import('../pages/MemberProfilePage'));
 export const NewMemberPage = lazy(() => import('../pages/NewMemberPage'));
 export const FamilyProfilePage = lazy(() => import('../pages/FamilyProfilePage'));
+export const HouseholdsPage = lazy(() => import('../pages/HouseholdsPage'));
+export const HouseholdProfilePage = lazy(() => import('../pages/HouseholdProfilePage'));

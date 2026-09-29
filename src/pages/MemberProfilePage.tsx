@@ -16,6 +16,7 @@ import { RevertMemberDeceasedModal } from '../features/members/components/Revert
 import { RestoreMemberRecordModal } from '../features/members/components/RestoreMemberRecordModal';
 import { MemberStatusTimeline } from '../features/members/components/MemberStatusTimeline';
 import { MemberFamilyCard } from '../features/members/components/MemberFamilyCard';
+import { MemberHouseholdCard } from '../features/households/components/MemberHouseholdCard';
 import {
   RemoveContactConfirmModal,
   type RemoveTargetType,
@@ -742,6 +743,7 @@ export default function MemberProfilePage() {
   const canRevertDeceased = !isPermLoading && hasPermission(Permissions.MembersDeceasedRevert);
   const canRestoreRecord = !isPermLoading && hasPermission(Permissions.MembersRecordsRestore);
   const canViewFamilies = !isPermLoading && hasPermission(Permissions.FamiliesRecordsView);
+  const canViewHouseholds = !isPermLoading && hasPermission(Permissions.MembersHouseholdsView);
 
   const {
     data: profile,
@@ -1074,6 +1076,11 @@ export default function MemberProfilePage() {
         governance={profile.governance_placement}
         canManagePlacements={canManagePlacements}
         onChangeGovernancePlacement={() => setIsChangePlacementModalOpen(true)}
+      />
+      <MemberHouseholdCard
+        organizationId={orgId}
+        memberId={profile.id}
+        canViewHouseholds={canViewHouseholds}
       />
 
       {/* Membership Lifecycle Section */}

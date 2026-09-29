@@ -5,7 +5,14 @@ import DashboardPage from '../pages/DashboardPage';
 import AppLayout from '../components/layout/AppLayout';
 import { ProtectedRoute } from '../components/auth/ProtectedRoute';
 import PageLoadingFallback from '../components/ui/PageLoadingFallback';
-import { MembersPage, MemberProfilePage, NewMemberPage, FamilyProfilePage } from './lazy-pages';
+import {
+  MembersPage,
+  MemberProfilePage,
+  NewMemberPage,
+  FamilyProfilePage,
+  HouseholdsPage,
+  HouseholdProfilePage,
+} from './lazy-pages';
 
 /**
  * Development-only RLS diagnostics page.
@@ -105,6 +112,22 @@ export const router = createBrowserRouter([
             element: (
               <Suspense fallback={<PageLoadingFallback />}>
                 <FamilyProfilePage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'households',
+            element: (
+              <Suspense fallback={<PageLoadingFallback />}>
+                <HouseholdsPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'households/:householdId',
+            element: (
+              <Suspense fallback={<PageLoadingFallback />}>
+                <HouseholdProfilePage />
               </Suspense>
             ),
           },
