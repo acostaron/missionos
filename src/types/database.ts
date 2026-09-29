@@ -5690,6 +5690,17 @@ export type Database = {
         }
         Returns: Json
       }
+      add_family_relationship: {
+        Args: {
+          p_effective_from?: string
+          p_family_id: string
+          p_from_member_id: string
+          p_organization_id: string
+          p_relationship_type_code: string
+          p_to_member_id: string
+        }
+        Returns: Json
+      }
       appoint_leader: {
         Args: {
           p_actor_profile_id?: string
@@ -5884,6 +5895,15 @@ export type Database = {
         }
         Returns: Json
       }
+      end_family_relationship: {
+        Args: {
+          p_effective_to?: string
+          p_organization_id: string
+          p_reason?: string
+          p_relationship_id: string
+        }
+        Returns: Json
+      }
       end_leadership_assignment: {
         Args: {
           p_actor_profile_id: string
@@ -6073,6 +6093,14 @@ export type Database = {
           p_push_token?: string
         }
         Returns: string
+      }
+      repair_family_relationship_reciprocal: {
+        Args: {
+          p_organization_id: string
+          p_reason: string
+          p_relationship_id: string
+        }
+        Returns: Json
       }
       restore_member_record: {
         Args: {

@@ -234,3 +234,65 @@ export interface EndFamilyMembershipResponse {
   membership_status: 'ended';
   effective_to: string;
 }
+
+export interface FamilyRelationshipType {
+  type_id: string;
+  code: string;
+  name: string;
+  inverse_code: string | null;
+  relationship_category: string;
+  is_symmetric: boolean;
+  requires_same_family: boolean;
+  allows_multiple_current: boolean;
+  display_order: number;
+  is_active: boolean;
+}
+
+export interface AddFamilyRelationshipInput {
+  organizationId: string;
+  familyId: string;
+  fromMemberId: string;
+  toMemberId: string;
+  relationshipTypeCode: string;
+  effectiveFrom?: string | null;
+}
+
+export interface AddFamilyRelationshipResponse {
+  status: 'created';
+  relationship_id: string;
+  reciprocal_relationship_id?: string;
+  family_id: string;
+  from_member_id: string;
+  to_member_id: string;
+  relationship_code: string;
+  effective_from: string;
+}
+
+export interface EndFamilyRelationshipInput {
+  organizationId: string;
+  relationshipId: string;
+  effectiveTo?: string | null;
+  reason: string;
+}
+
+export interface EndFamilyRelationshipResponse {
+  status: 'success';
+  relationship_id: string;
+  family_id: string;
+  relationship_status: 'ended';
+  effective_to: string;
+}
+
+export interface RepairFamilyRelationshipReciprocalInput {
+  organizationId: string;
+  relationshipId: string;
+  reason: string;
+}
+
+export interface RepairFamilyRelationshipReciprocalResponse {
+  status: 'repaired';
+  existing_relationship_id: string;
+  reciprocal_relationship_id: string;
+  existing_relationship_code: string;
+  reciprocal_relationship_code: string;
+}

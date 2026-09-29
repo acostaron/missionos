@@ -11,7 +11,10 @@ import { ArchiveFamilyModal } from '../features/families/components/ArchiveFamil
 import { AddFamilyMemberModal } from '../features/families/components/AddFamilyMemberModal';
 import { EditFamilyMemberModal } from '../features/families/components/EditFamilyMemberModal';
 import { EndFamilyMembershipModal } from '../features/families/components/EndFamilyMembershipModal';
-import type { FamilyProfileMember } from '../features/families/types';
+import { AddFamilyRelationshipModal } from '../features/families/components/AddFamilyRelationshipModal';
+import { EndFamilyRelationshipModal } from '../features/families/components/EndFamilyRelationshipModal';
+import { RepairFamilyRelationshipModal } from '../features/families/components/RepairFamilyRelationshipModal';
+import type { FamilyProfileMember, FamilyProfileRelationship } from '../features/families/types';
 
 function formatFamilyType(type: string | null): string {
   if (!type) return 'Family';
@@ -30,6 +33,9 @@ export default function FamilyProfilePage() {
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<FamilyProfileMember | null>(null);
   const [endingMember, setEndingMember] = useState<FamilyProfileMember | null>(null);
+  const [isAddRelationshipOpen, setIsAddRelationshipOpen] = useState(false);
+  const [endingRelationship, setEndingRelationship] = useState<FamilyProfileRelationship | null>(null);
+  const [repairingRelationship, setRepairingRelationship] = useState<FamilyProfileRelationship | null>(null);
 
   const orgId = activeOrganization?.id ?? null;
 
@@ -40,6 +46,9 @@ export default function FamilyProfilePage() {
   const canAddMember = !isPermLoading && hasPermission(Permissions.FamiliesMembersAdd);
   const canUpdateMember = !isPermLoading && hasPermission(Permissions.FamiliesMembersUpdate);
   const canEndMember = !isPermLoading && hasPermission(Permissions.FamiliesMembersEnd);
+  const canAddRelationship = !isPermLoading && hasPermission(Permissions.FamiliesRelationshipsAdd);
+  const canEndRelationship = !isPermLoading && hasPermission(Permissions.FamiliesRelationshipsEnd);
+  const canCorrectRelationship = !isPermLoading && hasPermission(Permissions.FamiliesRelationshipsCorrect);
 
   const {
     data: profile,
@@ -239,6 +248,13 @@ export default function FamilyProfilePage() {
         relationships={relationships}
         members={members}
         canViewRelationships={canViewRelationships}
+        canAddRelationship={canAddRelationship}
+        canEndRelationship={canEndRelationship}
+        canCorrectRelationship={canCorrectRelationship}
+        isFamilyOperational={isEditable}
+        onAddRelationship={() => setIsAddRelationshipOpen(true)}
+        onEndRelationship={(rel) => setEndingRelationship(rel)}
+        onRepairRelationship={(rel) => setRepairingRelationship(rel)}
       />
 
       {/* Identity Modals */}
@@ -289,6 +305,40 @@ export default function FamilyProfilePage() {
           organizationId={orgId}
           familyId={family.id}
           member={endingMember}
+        />
+      )}
+
+      {/* Relationship Management Modals */}
+      {canAddRelationship && orgId && isEditable && (
+        <AddFamilyRelationshipModal
+          isOpen={isAddRelationshipOpen}
+          onClose={() => setIsAddRelationshipOpen(false)}
+          organizationId={orgId}
+          familyId={family.id}
+          familyName={familyName}
+          members={members}
+        />
+      )}
+
+      {canEndRelationship && orgId && endingRelationship && (
+        <EndFamilyRelationshipModal
+          isOpen={endingRelationship !== null}
+          onClose={() => setEndingRelationship(null)}
+          organizationId={orgId}
+          familyId={family.id}
+          relationship={endingRelationship}
+          members={members}
+        />
+      )}
+
+      {canCorrectRelationship && orgId && isEditable && repairingRelationship && (
+        <RepairFamilyRelationshipModal
+          isOpen={repairingRelationship !== null}
+          onClose={() => setRepairingRelationship(null)}
+          organizationId={orgId}
+          familyId={family.id}
+          relationship={repairingRelationship}
+          members={members}
         />
       )}
     </div>
