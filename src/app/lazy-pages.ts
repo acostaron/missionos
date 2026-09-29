@@ -10,3 +10,4 @@ import { lazy } from 'react';
 
 export const MembersPage = lazy(() => import('../pages/MembersPage'));
 export const MemberProfilePage = lazy(() => import('../pages/MemberProfilePage'));
+export const NewMemberPage = lazy(() => import('../pages/NewMemberPage'));

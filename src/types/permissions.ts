@@ -2,16 +2,19 @@ export const Permissions = {
   GovernanceStructureView: 'governance.structure.view',
   GovernanceStructureManage: 'governance.structure.manage',
 
+  MembersRecordsCreate: 'members.records.create',
   MembersRecordsView: 'members.records.view',
   MembersRecordsUpdate: 'members.records.update',
 
-  // Identifier visibility (high risk — gated by members.identifiers.view)
+  // Identifier visibility & management
   MembersIdentifiersView: 'members.identifiers.view',
+  MembersIdentifiersManage: 'members.identifiers.manage',
 
   MembersContactsView: 'members.contacts.view',
   MembersContactsManage: 'members.contacts.manage',
 
   MembersAddressesView: 'members.addresses.view',
+  MembersAddressesManage: 'members.addresses.manage',
 
   MembersSectionsView: 'members.sections.view',
   MembersHouseholdsView: 'members.households.view',

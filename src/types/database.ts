@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -11,188 +11,6 @@ export type Database = {
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.5"
-  }
-  audit: {
-    Tables: {
-      entity_changes: {
-        Row: {
-          after_hash: string | null
-          audit_event_id: string
-          before_hash: string | null
-          changed_fields: string[]
-          created_at: string
-          entity_id: string
-          entity_type: string
-          id: string
-          operation: string
-          organization_id: string | null
-          redacted_diff: Json
-        }
-        Insert: {
-          after_hash?: string | null
-          audit_event_id: string
-          before_hash?: string | null
-          changed_fields?: string[]
-          created_at?: string
-          entity_id: string
-          entity_type: string
-          id?: string
-          operation: string
-          organization_id?: string | null
-          redacted_diff?: Json
-        }
-        Update: {
-          after_hash?: string | null
-          audit_event_id?: string
-          before_hash?: string | null
-          changed_fields?: string[]
-          created_at?: string
-          entity_id?: string
-          entity_type?: string
-          id?: string
-          operation?: string
-          organization_id?: string | null
-          redacted_diff?: Json
-        }
-        Relationships: [
-          {
-            foreignKeyName: "fk_audit_entity_changes__events"
-            columns: ["audit_event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      events: {
-        Row: {
-          access_reason: string | null
-          action: string
-          actor_member_id: string | null
-          actor_profile_id: string | null
-          correlation_id: string | null
-          created_at: string
-          entity_id: string | null
-          entity_type: string | null
-          event_category: string
-          event_code: string
-          id: string
-          ip_address: unknown
-          metadata: Json
-          occurred_at: string
-          organization_id: string | null
-          outcome: string
-          request_id: string | null
-          user_agent: string | null
-        }
-        Insert: {
-          access_reason?: string | null
-          action: string
-          actor_member_id?: string | null
-          actor_profile_id?: string | null
-          correlation_id?: string | null
-          created_at?: string
-          entity_id?: string | null
-          entity_type?: string | null
-          event_category: string
-          event_code: string
-          id?: string
-          ip_address?: unknown
-          metadata?: Json
-          occurred_at?: string
-          organization_id?: string | null
-          outcome?: string
-          request_id?: string | null
-          user_agent?: string | null
-        }
-        Update: {
-          access_reason?: string | null
-          action?: string
-          actor_member_id?: string | null
-          actor_profile_id?: string | null
-          correlation_id?: string | null
-          created_at?: string
-          entity_id?: string | null
-          entity_type?: string | null
-          event_category?: string
-          event_code?: string
-          id?: string
-          ip_address?: unknown
-          metadata?: Json
-          occurred_at?: string
-          organization_id?: string | null
-          outcome?: string
-          request_id?: string | null
-          user_agent?: string | null
-        }
-        Relationships: []
-      }
-      permission_events: {
-        Row: {
-          app_role_id: string | null
-          audit_event_id: string
-          created_at: string
-          event_type: string
-          id: string
-          new_state: Json | null
-          organization_id: string | null
-          permission_code: string | null
-          previous_state: Json | null
-          profile_id: string
-          profile_role_assignment_id: string | null
-          profile_scope_assignment_id: string | null
-        }
-        Insert: {
-          app_role_id?: string | null
-          audit_event_id: string
-          created_at?: string
-          event_type: string
-          id?: string
-          new_state?: Json | null
-          organization_id?: string | null
-          permission_code?: string | null
-          previous_state?: Json | null
-          profile_id: string
-          profile_role_assignment_id?: string | null
-          profile_scope_assignment_id?: string | null
-        }
-        Update: {
-          app_role_id?: string | null
-          audit_event_id?: string
-          created_at?: string
-          event_type?: string
-          id?: string
-          new_state?: Json | null
-          organization_id?: string | null
-          permission_code?: string | null
-          previous_state?: Json | null
-          profile_id?: string
-          profile_role_assignment_id?: string | null
-          profile_scope_assignment_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "fk_audit_permission_events__events"
-            columns: ["audit_event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      [_ in never]: never
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
   }
   public: {
     Tables: {
@@ -5945,6 +5763,16 @@ export type Database = {
         }
         Returns: string
       }
+      change_member_governance_assignment: {
+        Args: {
+          p_effective_from?: string
+          p_member_id: string
+          p_organization_id: string
+          p_reason?: string
+          p_target_governance_node_id?: string
+        }
+        Returns: Json
+      }
       close_governance_node: {
         Args: {
           p_actor_profile_id?: string
@@ -5968,6 +5796,33 @@ export type Database = {
           p_parent_node_id?: string
         }
         Returns: string
+      }
+      create_member: {
+        Args: {
+          p_address_country_code?: string | null
+          p_address_line_1?: string | null
+          p_address_line_2?: string | null
+          p_allocate_member_number?: boolean
+          p_allow_potential_duplicate?: boolean
+          p_birth_date?: string | null
+          p_city_name?: string | null
+          p_civil_status?: string | null
+          p_email?: string | null
+          p_family_name: string
+          p_given_names: string
+          p_governance_node_id?: string | null
+          p_home_country_code?: string | null
+          p_joined_on?: string | null
+          p_middle_names?: string | null
+          p_organization_id: string
+          p_phone?: string | null
+          p_phone_country_code?: string | null
+          p_postal_code?: string | null
+          p_preferred_name?: string | null
+          p_sex?: string | null
+          p_state_province_name?: string | null
+        }
+        Returns: Json
       }
       end_leadership_assignment: {
         Args: {
@@ -6007,6 +5862,18 @@ export type Database = {
       get_member_profile: {
         Args: { p_member_id: string; p_organization_id: string }
         Returns: Json
+      }
+      get_placement_nodes: {
+        Args: { p_organization_id: string }
+        Returns: {
+          governance_node_id: string
+          hierarchy_rank: number
+          node_code: string
+          node_name: string
+          node_type_code: string
+          parent_governance_node_id: string
+          parent_node_name: string
+        }[]
       }
       issue_member_qr_token: {
         Args: {
@@ -6105,6 +5972,21 @@ export type Database = {
         }
         Returns: Json
       }
+      set_member_contact_point: {
+        Args: {
+          p_address_data?: Json
+          p_contact_type: string
+          p_effective_from?: string
+          p_member_id: string
+          p_operation: string
+          p_organization_id: string
+          p_phone_country_code?: string
+          p_reason?: string
+          p_target_id?: string
+          p_value?: string
+        }
+        Returns: Json
+      }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
       suspend_profile_role_assignment: {
@@ -6114,6 +5996,25 @@ export type Database = {
           p_reason: string
         }
         Returns: undefined
+      }
+      update_member_basic_profile: {
+        Args: {
+          p_birth_date?: string
+          p_change_reason?: string
+          p_civil_status?: string
+          p_effective_from?: string
+          p_family_name: string
+          p_given_names: string
+          p_home_country_code?: string
+          p_is_name_change?: boolean
+          p_member_id: string
+          p_middle_names?: string
+          p_organization_id: string
+          p_preferred_language_code?: string
+          p_preferred_name?: string
+          p_sex?: string
+        }
+        Returns: Json
       }
       validate_governance_parent: {
         Args: {
@@ -6270,9 +6171,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  audit: {
-    Enums: {},
-  },
   public: {
     Enums: {},
   },
