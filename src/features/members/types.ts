@@ -86,3 +86,19 @@ export interface SetMemberContactPointResponse {
   operation: 'add' | 'replace_primary' | 'remove';
   record_id: string;
 }
+
+export interface ChangeMemberGovernanceAssignmentInput {
+  organizationId: string;
+  memberId: string;
+  targetGovernanceNodeId?: string | null;
+  effectiveFrom: string; // YYYY-MM-DD
+  reason?: string | null;
+}
+
+export interface ChangeMemberGovernanceAssignmentResponse {
+  status: 'success';
+  member_id: string;
+  previous_node_id: string | null;
+  new_node_id: string | null;
+  assignment_id: string | null;
+}

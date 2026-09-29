@@ -8,6 +8,7 @@ import { EditMemberProfileModal } from '../features/members/components/EditMembe
 import { EditEmailModal } from '../features/members/components/EditEmailModal';
 import { EditPhoneModal } from '../features/members/components/EditPhoneModal';
 import { EditAddressModal } from '../features/members/components/EditAddressModal';
+import { ChangeGovernancePlacementModal } from '../features/members/components/ChangeGovernancePlacementModal';
 import {
   RemoveContactConfirmModal,
   type RemoveTargetType,
@@ -554,15 +555,21 @@ function AddressesSection({
 }
 
 
+interface PlacementsSectionProps {
+  section: SectionPlacement | null;
+  household: HouseholdPlacement | null;
+  governance: GovernancePlacement | null;
+  canManagePlacements: boolean;
+  onChangeGovernancePlacement: () => void;
+}
+
 function PlacementsSection({
   section,
   household,
   governance,
-}: {
-  section: SectionPlacement | null;
-  household: HouseholdPlacement | null;
-  governance: GovernancePlacement | null;
-}) {
+  canManagePlacements,
+  onChangeGovernancePlacement,
+}: PlacementsSectionProps) {
   const allRestricted = section === null && household === null && governance === null;
   const icon = (
     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -574,6 +581,30 @@ function PlacementsSection({
   if (allRestricted) {
     return <Section title="Placements" icon={icon}><RestrictedSection label="Placements" /></Section>;
   }
+
+  const governanceRowValue = governance !== null ? (
+    <div className="flex items-center justify-end gap-3 flex-1">
+      {governance ? (
+        <span className="text-sm text-slate-200">
+          {governance.node_name} ({governance.node_code}) · {governance.assignment_type ?? governance.assignment_status}
+        </span>
+      ) : (
+        <span className="text-slate-400 italic text-sm">Unplaced</span>
+      )}
+      {canManagePlacements && (
+        <button
+          type="button"
+          id="change-placement-button"
+          onClick={onChangeGovernancePlacement}
+          className="rounded px-2 py-0.5 text-xs font-semibold text-indigo-400 hover:bg-indigo-950/40 hover:text-indigo-300 transition-colors border border-indigo-700/60"
+        >
+          Change Placement
+        </button>
+      )}
+    </div>
+  ) : (
+    <span className="text-slate-500 italic text-xs">restricted</span>
+  );
 
   return (
     <Section title="Placements" icon={icon}>
@@ -598,23 +629,17 @@ function PlacementsSection({
             <DataRow label="Household" value={<span className="text-slate-500 italic text-xs">No household assignment</span>} />
           )
         )}
-        {governance !== null && (
-          governance ? (
-            <DataRow
-              label="Governance"
-              value={`${governance.node_name} (${governance.node_code}) · ${governance.assignment_type ?? governance.assignment_status}`}
-            />
-          ) : (
-            <DataRow label="Governance" value={<span className="text-slate-500 italic text-xs">No governance assignment</span>} />
-          )
-        )}
+        <div className="flex items-start justify-between gap-4 py-1.5">
+          <dt className="shrink-0 text-xs font-medium text-slate-400 w-32">Governance</dt>
+          <dd className="text-sm text-slate-200 text-right flex-1">{governanceRowValue}</dd>
+        </div>
         {section === null && <DataRow label="Section" value={<span className="text-slate-500 italic text-xs">restricted</span>} />}
         {household === null && <DataRow label="Household" value={<span className="text-slate-500 italic text-xs">restricted</span>} />}
-        {governance === null && <DataRow label="Governance" value={<span className="text-slate-500 italic text-xs">restricted</span>} />}
       </dl>
     </Section>
   );
 }
+
 
 // ---------------------------------------------------------------------------
 // Main page
@@ -649,6 +674,9 @@ export default function MemberProfilePage() {
     existingPrimaryAddress?: MemberAddress | null;
   }>({ isOpen: false });
 
+  // Placement modal state
+  const [isChangePlacementModalOpen, setIsChangePlacementModalOpen] = useState(false);
+
   // Remove confirmation modal state
   const [removeModalState, setRemoveModalState] = useState<{
     isOpen: boolean;
@@ -669,10 +697,12 @@ export default function MemberProfilePage() {
   const canEditProfile = !isPermLoading && hasPermission(Permissions.MembersRecordsUpdate);
   const canManageContacts = !isPermLoading && hasPermission(Permissions.MembersContactsManage);
   const canManageAddresses = !isPermLoading && hasPermission(Permissions.MembersAddressesManage);
+  const canManagePlacements = !isPermLoading && hasPermission(Permissions.MembersPlacementsManage);
 
   const {
     data: profile,
     isLoading,
+
     error,
   } = useMemberProfile(orgId, memberId ?? null);
 
@@ -898,6 +928,8 @@ export default function MemberProfilePage() {
         section={profile.section_placement}
         household={profile.household_placement}
         governance={profile.governance_placement}
+        canManagePlacements={canManagePlacements}
+        onChangeGovernancePlacement={() => setIsChangePlacementModalOpen(true)}
       />
 
       {/* Edit Profile Modal */}
@@ -907,6 +939,18 @@ export default function MemberProfilePage() {
           onClose={() => setIsEditModalOpen(false)}
           organizationId={orgId}
           profile={profile}
+          onSuccessToast={triggerToast}
+        />
+      )}
+
+      {/* Change Governance Placement Modal */}
+      {canManagePlacements && orgId && isChangePlacementModalOpen && (
+        <ChangeGovernancePlacementModal
+          isOpen={isChangePlacementModalOpen}
+          onClose={() => setIsChangePlacementModalOpen(false)}
+          organizationId={orgId}
+          memberId={profile.id}
+          currentPlacement={profile.governance_placement}
           onSuccessToast={triggerToast}
         />
       )}
@@ -958,6 +1002,7 @@ export default function MemberProfilePage() {
           onClose={() => setRemoveModalState((prev) => ({ ...prev, isOpen: false }))}
           organizationId={orgId}
           memberId={profile.id}
+
           contactType={removeModalState.contactType}
           targetId={removeModalState.targetId}
           label={removeModalState.label}
