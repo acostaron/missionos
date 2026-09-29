@@ -5773,6 +5773,16 @@ export type Database = {
         }
         Returns: Json
       }
+      change_member_membership_status: {
+        Args: {
+          p_effective_from?: string
+          p_member_id: string
+          p_organization_id: string
+          p_reason?: string
+          p_target_status_id: string
+        }
+        Returns: Json
+      }
       close_governance_node: {
         Args: {
           p_actor_profile_id?: string
@@ -5862,6 +5872,18 @@ export type Database = {
       get_member_profile: {
         Args: { p_member_id: string; p_organization_id: string }
         Returns: Json
+      }
+      get_member_statuses: {
+        Args: { p_organization_id: string }
+        Returns: {
+          code: string
+          description: string
+          display_order: number
+          is_active_membership: boolean
+          name: string
+          status_category: string
+          status_id: string
+        }[]
       }
       get_placement_nodes: {
         Args: { p_organization_id: string }
