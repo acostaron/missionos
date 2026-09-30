@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -5736,6 +5736,14 @@ export type Database = {
         }
         Returns: Json
       }
+      archive_household: {
+        Args: {
+          p_household_id: string
+          p_organization_id: string
+          p_reason: string
+        }
+        Returns: Json
+      }
       archive_member_record: {
         Args: {
           p_member_id: string
@@ -5858,6 +5866,28 @@ export type Database = {
           p_parent_node_id?: string
         }
         Returns: string
+      }
+      create_household: {
+        Args: {
+          p_accepts_new_members?: boolean
+          p_code: string
+          p_effective_from?: string
+          p_household_category?: string
+          p_is_couple_household?: boolean
+          p_language_code?: string
+          p_maximum_member_count?: number
+          p_meeting_day_of_week?: number
+          p_meeting_frequency?: string
+          p_meeting_location_text?: string
+          p_meeting_location_type?: string
+          p_meeting_start_time?: string
+          p_meeting_timezone_name?: string
+          p_name: string
+          p_organization_id: string
+          p_parent_governance_node_id: string
+          p_target_member_count?: number
+        }
+        Returns: Json
       }
       create_member: {
         Args: {
@@ -6218,6 +6248,27 @@ export type Database = {
           p_is_dependent: boolean
           p_is_primary_contact: boolean
           p_organization_id: string
+        }
+        Returns: Json
+      }
+      update_household: {
+        Args: {
+          p_accepts_new_members?: boolean
+          p_code: string
+          p_household_category?: string
+          p_household_id: string
+          p_is_couple_household?: boolean
+          p_language_code?: string
+          p_maximum_member_count?: number
+          p_meeting_day_of_week?: number
+          p_meeting_frequency?: string
+          p_meeting_location_text?: string
+          p_meeting_location_type?: string
+          p_meeting_start_time?: string
+          p_meeting_timezone_name?: string
+          p_name: string
+          p_organization_id: string
+          p_target_member_count?: number
         }
         Returns: Json
       }

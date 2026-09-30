@@ -1,8 +1,11 @@
+import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useOrganizationContext } from '../hooks/use-organization-context';
 import { usePermissions } from '../hooks/use-permissions';
 import { Permissions } from '../types/permissions';
 import { useHouseholdProfile } from '../features/households/api/get-household-profile';
+import { EditHouseholdModal } from '../features/households/components/EditHouseholdModal';
+import { ArchiveHouseholdModal } from '../features/households/components/ArchiveHouseholdModal';
 
 function formatFrequency(freq: string | null): string {
   if (!freq) return 'Weekly';
@@ -24,9 +27,14 @@ export default function HouseholdProfilePage() {
   const { householdId } = useParams<{ householdId: string }>();
   const { activeOrganization } = useOrganizationContext();
   const { hasPermission, isLoading: isPermLoading } = usePermissions();
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isArchiveModalOpen, setIsArchiveModalOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const orgId = activeOrganization?.id ?? null;
   const canViewHouseholds = !isPermLoading && hasPermission(Permissions.HouseholdsRecordsView);
+  const canEditHouseholds = !isPermLoading && hasPermission(Permissions.HouseholdsRecordsUpdate);
+  const canArchiveHouseholds = !isPermLoading && hasPermission(Permissions.HouseholdsRecordsArchive);
   const canViewMembers = !isPermLoading && hasPermission(Permissions.MembersRecordsView);
 
   const {
@@ -38,6 +46,11 @@ export default function HouseholdProfilePage() {
     householdId ?? null,
     canViewHouseholds && !!householdId
   );
+
+  const triggerToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 5000);
+  };
 
   if (!canViewHouseholds && !isPermLoading) {
     return (
@@ -87,11 +100,27 @@ export default function HouseholdProfilePage() {
 
   const { household, parent_governance, leaders, members, counts } = data;
   const isStatusActive = household.lifecycle_status === 'active';
+  const isEditable = ['planned', 'active', 'temporarily_inactive'].includes(household.lifecycle_status);
+  const isArchivable = ['planned', 'active', 'temporarily_inactive'].includes(household.lifecycle_status);
   const meetingDay = formatDayOfWeek(household.meeting_day_of_week);
   const meetingFreq = formatFrequency(household.meeting_frequency);
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8 space-y-6">
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="rounded-lg border border-emerald-700/60 bg-emerald-950/40 p-4 text-emerald-300 text-xs flex items-center justify-between">
+          <span>{toastMessage}</span>
+          <button
+            type="button"
+            onClick={() => setToastMessage(null)}
+            className="text-emerald-400 hover:text-emerald-200"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* Navigation Breadcrumb */}
       <div>
         <Link
@@ -147,26 +176,58 @@ export default function HouseholdProfilePage() {
             </p>
           </div>
 
-          {/* Quick counts */}
-          <div className="flex items-center gap-4 bg-slate-900/50 rounded-lg p-3 border border-slate-700/60">
-            <div className="text-center sm:text-right">
-              <p className="text-xs text-slate-400">Active Members</p>
-              <p className="text-lg font-bold text-slate-100">
-                {counts.active_member_count}{' '}
-                {counts.target_member_count && (
-                  <span className="text-xs font-normal text-slate-400">
-                    / {counts.target_member_count}
-                  </span>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            {/* Quick counts */}
+            <div className="flex items-center gap-4 bg-slate-900/50 rounded-lg p-3 border border-slate-700/60">
+              <div className="text-center sm:text-right">
+                <p className="text-xs text-slate-400">Active Members</p>
+                <p className="text-lg font-bold text-slate-100">
+                  {counts.active_member_count}{' '}
+                  {counts.target_member_count && (
+                    <span className="text-xs font-normal text-slate-400">
+                      / {counts.target_member_count}
+                    </span>
+                  )}
+                </p>
+              </div>
+              <div className="h-8 w-px bg-slate-700/60" />
+              <div className="text-center sm:text-left">
+                <p className="text-xs text-slate-400">Accepting Members</p>
+                <p className={`text-xs font-semibold ${counts.accepts_new_members ? 'text-emerald-400' : 'text-amber-400'}`}>
+                  {counts.accepts_new_members ? 'Open' : 'Full'}
+                </p>
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            {(canEditHouseholds || canArchiveHouseholds) && (
+              <div className="flex items-center gap-2">
+                {canEditHouseholds && isEditable && (
+                  <button
+                    type="button"
+                    onClick={() => setIsEditModalOpen(true)}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-700 transition-colors"
+                  >
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Edit
+                  </button>
                 )}
-              </p>
-            </div>
-            <div className="h-8 w-px bg-slate-700/60" />
-            <div className="text-center sm:text-left">
-              <p className="text-xs text-slate-400">Accepting Members</p>
-              <p className={`text-xs font-semibold ${counts.accepts_new_members ? 'text-emerald-400' : 'text-amber-400'}`}>
-                {counts.accepts_new_members ? 'Open' : 'Full'}
-              </p>
-            </div>
+                {canArchiveHouseholds && isArchivable && (
+                  <button
+                    type="button"
+                    onClick={() => setIsArchiveModalOpen(true)}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-rose-900/50 bg-rose-950/20 px-3 py-2 text-xs font-semibold text-rose-300 hover:bg-rose-900/40 transition-colors"
+                  >
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4m-14 0v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                    </svg>
+                    Archive
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -347,6 +408,25 @@ export default function HouseholdProfilePage() {
           </div>
         )}
       </div>
+
+      {orgId && (
+        <>
+          <EditHouseholdModal
+            isOpen={isEditModalOpen}
+            onClose={() => setIsEditModalOpen(false)}
+            organizationId={orgId}
+            householdData={data}
+            onSuccessToast={triggerToast}
+          />
+          <ArchiveHouseholdModal
+            isOpen={isArchiveModalOpen}
+            onClose={() => setIsArchiveModalOpen(false)}
+            organizationId={orgId}
+            householdData={data}
+            onSuccessToast={triggerToast}
+          />
+        </>
+      )}
     </div>
   );
 }

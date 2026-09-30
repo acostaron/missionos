@@ -54,6 +54,9 @@ export const Permissions = {
   FamiliesRelationshipsCorrect: 'families.relationships.correct',
 
   HouseholdsRecordsView: 'households.records.view',
+  HouseholdsRecordsCreate: 'households.records.create',
+  HouseholdsRecordsUpdate: 'households.records.update',
+  HouseholdsRecordsArchive: 'households.records.archive',
 } as const;
 
 export type PermissionCode = typeof Permissions[keyof typeof Permissions];

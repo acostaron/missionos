@@ -4,6 +4,7 @@ import { useOrganizationContext } from '../hooks/use-organization-context';
 import { usePermissions } from '../hooks/use-permissions';
 import { Permissions } from '../types/permissions';
 import { useSearchHouseholds } from '../features/households/api/search-households';
+import { CreateHouseholdModal } from '../features/households/components/CreateHouseholdModal';
 
 function formatFrequency(freq: string | null): string {
   if (!freq) return 'Weekly';
@@ -21,9 +22,12 @@ export default function HouseholdsPage() {
   const { hasPermission, isLoading: isPermLoading } = usePermissions();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('active');
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const orgId = activeOrganization?.id ?? null;
   const canViewHouseholds = !isPermLoading && hasPermission(Permissions.HouseholdsRecordsView);
+  const canCreateHouseholds = !isPermLoading && hasPermission(Permissions.HouseholdsRecordsCreate);
 
   const {
     data,
@@ -37,6 +41,11 @@ export default function HouseholdsPage() {
     },
     canViewHouseholds
   );
+
+  const triggerToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 5000);
+  };
 
   if (!canViewHouseholds && !isPermLoading) {
     return (
@@ -55,6 +64,24 @@ export default function HouseholdsPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-6">
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="flex items-center justify-between rounded-xl border border-emerald-600/40 bg-emerald-950/40 px-4 py-3 text-sm text-emerald-200 shadow-lg">
+          <div className="flex items-center gap-2">
+            <svg className="h-5 w-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+            <span>{toastMessage}</span>
+          </div>
+          <button
+            onClick={() => setToastMessage(null)}
+            className="text-xs text-emerald-400 hover:text-emerald-200"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -65,6 +92,20 @@ export default function HouseholdsPage() {
             Browse pastoral household groupings and placements across units and chapters.
           </p>
         </div>
+
+        {canCreateHouseholds && (
+          <button
+            type="button"
+            id="btn-create-household"
+            onClick={() => setIsCreateModalOpen(true)}
+            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 transition-colors self-start sm:self-auto"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            Create Household
+          </button>
+        )}
       </div>
 
       {/* Filter bar */}
@@ -96,7 +137,10 @@ export default function HouseholdsPage() {
             className="rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2 text-xs text-slate-100 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
           >
             <option value="active">Active</option>
+            <option value="planned">Planned</option>
             <option value="temporarily_inactive">Temporarily Inactive</option>
+            <option value="closed">Closed</option>
+            <option value="merged">Merged</option>
             <option value="archived">Archived</option>
             <option value="all">All Statuses</option>
           </select>
@@ -129,6 +173,21 @@ export default function HouseholdsPage() {
               ? 'No households matched your search query. Try clearing filters.'
               : 'Pastoral households are formed under Chapters and Units to shepherd and group members into prayer and pastoral communities.'}
           </p>
+          {!searchTerm && canCreateHouseholds && (
+            <div className="mt-5">
+              <button
+                type="button"
+                id="btn-create-first-household"
+                onClick={() => setIsCreateModalOpen(true)}
+                className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 transition-colors"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                Create the first household
+              </button>
+            </div>
+          )}
         </div>
       ) : (
         <div className="rounded-xl border border-slate-700 bg-slate-800/60 overflow-hidden">
@@ -215,6 +274,16 @@ export default function HouseholdsPage() {
             })}
           </div>
         </div>
+      )}
+
+      {/* Create Household Modal */}
+      {canCreateHouseholds && orgId && isCreateModalOpen && (
+        <CreateHouseholdModal
+          isOpen={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          organizationId={orgId}
+          onSuccessToast={triggerToast}
+        />
       )}
     </div>
   );
