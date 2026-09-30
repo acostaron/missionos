@@ -1,4 +1,4 @@
-export type Json =
+﻿export type Json =
   | string
   | number
   | boolean
@@ -5754,14 +5754,13 @@ export type Database = {
       }
       assign_member_to_household: {
         Args: {
-          p_actor_profile_id?: string
+          p_confirm_governance_mismatch?: boolean
           p_effective_from?: string
-          p_household_node_id: string
+          p_household_id: string
           p_member_id: string
           p_organization_id: string
-          p_temporary?: boolean
         }
-        Returns: string
+        Returns: Json
       }
       assign_member_to_section: {
         Args: {
@@ -5931,6 +5930,15 @@ export type Database = {
           p_organization_id: string
           p_reason?: string
           p_relationship_id: string
+        }
+        Returns: Json
+      }
+      end_household_membership: {
+        Args: {
+          p_effective_to?: string
+          p_member_id: string
+          p_organization_id: string
+          p_reason?: string
         }
         Returns: Json
       }
@@ -6205,6 +6213,15 @@ export type Database = {
         }
         Returns: Json
       }
+      search_members_without_household: {
+        Args: {
+          p_limit?: number
+          p_offset?: number
+          p_organization_id: string
+          p_search?: string
+        }
+        Returns: Json
+      }
       set_member_contact_point: {
         Args: {
           p_address_data?: Json
@@ -6229,6 +6246,17 @@ export type Database = {
           p_reason: string
         }
         Returns: undefined
+      }
+      transfer_household_member: {
+        Args: {
+          p_confirm_governance_mismatch?: boolean
+          p_destination_household_id: string
+          p_effective_date?: string
+          p_member_id: string
+          p_organization_id: string
+          p_reason?: string
+        }
+        Returns: Json
       }
       update_family_identity: {
         Args: {

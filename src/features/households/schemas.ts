@@ -170,3 +170,62 @@ export const archiveHouseholdSchema = z.object({
 });
 
 export type ArchiveHouseholdFormValues = z.infer<typeof archiveHouseholdSchema>;
+
+export const assignHouseholdMemberSchema = z.object({
+  member_id: z.string().uuid('Please select a valid member'),
+  household_id: z.string().uuid('Please select a valid household'),
+  effective_from: z
+    .string()
+    .min(1, 'Effective date is required')
+    .refine((val) => {
+      const today = new Date().toISOString().split('T')[0];
+      return val <= today;
+    }, {
+      message: 'Future household assignment changes are not supported yet',
+    }),
+  confirm_governance_mismatch: z.boolean(),
+});
+
+export type AssignHouseholdMemberFormValues = z.infer<typeof assignHouseholdMemberSchema>;
+
+export const transferHouseholdMemberSchema = z.object({
+  member_id: z.string().uuid('Invalid member'),
+  destination_household_id: z.string().uuid('Please select a destination household'),
+  effective_date: z
+    .string()
+    .min(1, 'Effective date is required')
+    .refine((val) => {
+      const today = new Date().toISOString().split('T')[0];
+      return val <= today;
+    }, {
+      message: 'Future household assignment changes are not supported yet',
+    }),
+  reason: z
+    .string()
+    .min(1, 'A transfer reason is required')
+    .max(500, 'Reason must not exceed 500 characters')
+    .refine((v) => v.trim().length > 0, { message: 'Reason cannot be empty' }),
+  confirm_governance_mismatch: z.boolean(),
+});
+
+export type TransferHouseholdMemberFormValues = z.infer<typeof transferHouseholdMemberSchema>;
+
+export const endHouseholdMembershipSchema = z.object({
+  member_id: z.string().uuid('Invalid member'),
+  effective_to: z
+    .string()
+    .min(1, 'Effective end date is required')
+    .refine((val) => {
+      const today = new Date().toISOString().split('T')[0];
+      return val <= today;
+    }, {
+      message: 'Future household assignment changes are not supported yet',
+    }),
+  reason: z
+    .string()
+    .min(1, 'A reason is required')
+    .max(500, 'Reason must not exceed 500 characters')
+    .refine((v) => v.trim().length > 0, { message: 'Reason cannot be empty' }),
+});
+
+export type EndHouseholdMembershipFormValues = z.infer<typeof endHouseholdMembershipSchema>;

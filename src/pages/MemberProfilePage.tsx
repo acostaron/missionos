@@ -744,6 +744,9 @@ export default function MemberProfilePage() {
   const canRestoreRecord = !isPermLoading && hasPermission(Permissions.MembersRecordsRestore);
   const canViewFamilies = !isPermLoading && hasPermission(Permissions.FamiliesRecordsView);
   const canViewHouseholds = !isPermLoading && hasPermission(Permissions.MembersHouseholdsView);
+  const canAssignHousehold = !isPermLoading && hasPermission(Permissions.HouseholdsMembersAssign);
+  const canTransferHousehold = !isPermLoading && hasPermission(Permissions.HouseholdsMembersTransfer);
+  const canEndHousehold = !isPermLoading && hasPermission(Permissions.HouseholdsMembersEnd);
 
   const {
     data: profile,
@@ -1080,7 +1083,11 @@ export default function MemberProfilePage() {
       <MemberHouseholdCard
         organizationId={orgId}
         memberId={profile.id}
+        memberName={profile.display_name}
         canViewHouseholds={canViewHouseholds}
+        canAssignHousehold={canAssignHousehold}
+        canTransferHousehold={canTransferHousehold}
+        canEndHousehold={canEndHousehold}
       />
 
       {/* Membership Lifecycle Section */}

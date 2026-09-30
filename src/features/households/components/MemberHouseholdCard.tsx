@@ -1,11 +1,18 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useMemberHouseholds } from '../api/get-member-households';
 import type { MemberHouseholdAssignment } from '../types';
+import { TransferHouseholdMemberModal } from './TransferHouseholdMemberModal';
+import { EndHouseholdMembershipModal } from './EndHouseholdMembershipModal';
 
 interface MemberHouseholdCardProps {
   organizationId: string | null;
   memberId: string;
+  memberName?: string;
   canViewHouseholds: boolean;
+  canAssignHousehold?: boolean;
+  canTransferHousehold?: boolean;
+  canEndHousehold?: boolean;
 }
 
 function formatRole(role: string | null): string {
@@ -15,7 +22,19 @@ function formatRole(role: string | null): string {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
-function HouseholdItem({ assignment }: { assignment: MemberHouseholdAssignment }) {
+function HouseholdItem({
+  assignment,
+  canTransfer,
+  canEnd,
+  onOpenTransfer,
+  onOpenEnd,
+}: {
+  assignment: MemberHouseholdAssignment;
+  canTransfer: boolean;
+  canEnd: boolean;
+  onOpenTransfer: (h: MemberHouseholdAssignment) => void;
+  onOpenEnd: (h: MemberHouseholdAssignment) => void;
+}) {
   const isStatusActive = assignment.household_status === 'active';
   const roleLabel = formatRole(assignment.membership_role);
 
@@ -80,6 +99,30 @@ function HouseholdItem({ assignment }: { assignment: MemberHouseholdAssignment }
           </div>
         )}
       </div>
+
+      {/* Pastoral Actions for current assignment */}
+      {(canTransfer || canEnd) && (
+        <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800/60">
+          {canTransfer && (
+            <button
+              type="button"
+              onClick={() => onOpenTransfer(assignment)}
+              className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium text-indigo-300 hover:bg-indigo-950/40 hover:text-indigo-200 transition-colors"
+            >
+              Transfer Household
+            </button>
+          )}
+          {canEnd && (
+            <button
+              type="button"
+              onClick={() => onOpenEnd(assignment)}
+              className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium text-rose-400 hover:bg-rose-950/30 hover:text-rose-300 transition-colors"
+            >
+              End Assignment
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -87,13 +130,31 @@ function HouseholdItem({ assignment }: { assignment: MemberHouseholdAssignment }
 export function MemberHouseholdCard({
   organizationId,
   memberId,
+  memberName = 'Member',
   canViewHouseholds,
+  canAssignHousehold = false,
+  canTransferHousehold = false,
+  canEndHousehold = false,
 }: MemberHouseholdCardProps) {
   const {
     data: households,
     isLoading,
     error,
   } = useMemberHouseholds(organizationId, memberId, canViewHouseholds);
+
+  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+  const [isEndModalOpen, setIsEndModalOpen] = useState(false);
+  const [activeAssignment, setActiveAssignment] = useState<MemberHouseholdAssignment | null>(null);
+
+  const handleOpenTransfer = (assignment: MemberHouseholdAssignment) => {
+    setActiveAssignment(assignment);
+    setIsTransferModalOpen(true);
+  };
+
+  const handleOpenEnd = (assignment: MemberHouseholdAssignment) => {
+    setActiveAssignment(assignment);
+    setIsEndModalOpen(true);
+  };
 
   const icon = (
     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -105,6 +166,8 @@ export function MemberHouseholdCard({
     </svg>
   );
 
+  const hasAssignment = Boolean(households && households.length > 0);
+
   return (
     <div className="rounded-xl border border-slate-700 bg-slate-800/60 overflow-hidden">
       <div className="flex items-center justify-between border-b border-slate-700 px-5 py-3.5">
@@ -114,7 +177,17 @@ export function MemberHouseholdCard({
             Household Assignment
           </h2>
         </div>
+
+        {!hasAssignment && canAssignHousehold && (
+          <Link
+            to="/app/households/unassigned"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-700/60 bg-indigo-950/40 px-2.5 py-1 text-xs font-semibold text-indigo-300 hover:bg-indigo-900/60 transition-colors"
+          >
+            Assign Household
+          </Link>
+        )}
       </div>
+
       <div className="px-5 py-4">
         {!canViewHouseholds ? (
           <p className="flex items-center gap-2 text-xs text-slate-500 italic">
@@ -133,15 +206,61 @@ export function MemberHouseholdCard({
             Failed to load household assignment.
           </div>
         ) : !households || households.length === 0 ? (
-          <p className="text-xs text-slate-500 italic py-1">No household assigned.</p>
+          <div className="flex items-center justify-between py-1">
+            <p className="text-xs text-slate-500 italic">No household assigned.</p>
+            {canAssignHousehold && (
+              <span className="text-[11px] text-slate-400">
+                Use the Unassigned Members directory to place this member.
+              </span>
+            )}
+          </div>
         ) : (
           <div className="space-y-3">
             {households.map((h) => (
-              <HouseholdItem key={h.household_membership_id} assignment={h} />
+              <HouseholdItem
+                key={h.household_membership_id}
+                assignment={h}
+                canTransfer={canTransferHousehold}
+                canEnd={canEndHousehold}
+                onOpenTransfer={handleOpenTransfer}
+                onOpenEnd={handleOpenEnd}
+              />
             ))}
           </div>
         )}
       </div>
+
+      {/* Transfer Modal */}
+      {organizationId && activeAssignment && isTransferModalOpen && (
+        <TransferHouseholdMemberModal
+          isOpen={isTransferModalOpen}
+          onClose={() => {
+            setIsTransferModalOpen(false);
+            setActiveAssignment(null);
+          }}
+          organizationId={organizationId}
+          memberId={memberId}
+          memberName={memberName}
+          currentHouseholdId={activeAssignment.household_id}
+          currentHouseholdName={activeAssignment.household_name}
+        />
+      )}
+
+      {/* End Modal */}
+      {organizationId && activeAssignment && isEndModalOpen && (
+        <EndHouseholdMembershipModal
+          isOpen={isEndModalOpen}
+          onClose={() => {
+            setIsEndModalOpen(false);
+            setActiveAssignment(null);
+          }}
+          organizationId={organizationId}
+          memberId={memberId}
+          memberName={memberName}
+          currentHouseholdId={activeAssignment.household_id}
+          currentHouseholdName={activeAssignment.household_name}
+        />
+      )}
     </div>
   );
 }

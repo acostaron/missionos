@@ -57,6 +57,10 @@ export const Permissions = {
   HouseholdsRecordsCreate: 'households.records.create',
   HouseholdsRecordsUpdate: 'households.records.update',
   HouseholdsRecordsArchive: 'households.records.archive',
+
+  HouseholdsMembersAssign: 'households.members.assign',
+  HouseholdsMembersTransfer: 'households.members.transfer',
+  HouseholdsMembersEnd: 'households.members.end',
 } as const;
 
 export type PermissionCode = typeof Permissions[keyof typeof Permissions];

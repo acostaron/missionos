@@ -6,6 +6,10 @@ import { Permissions } from '../types/permissions';
 import { useHouseholdProfile } from '../features/households/api/get-household-profile';
 import { EditHouseholdModal } from '../features/households/components/EditHouseholdModal';
 import { ArchiveHouseholdModal } from '../features/households/components/ArchiveHouseholdModal';
+import { AssignHouseholdMemberModal } from '../features/households/components/AssignHouseholdMemberModal';
+import { TransferHouseholdMemberModal } from '../features/households/components/TransferHouseholdMemberModal';
+import { EndHouseholdMembershipModal } from '../features/households/components/EndHouseholdMembershipModal';
+import type { HouseholdMember } from '../features/households/types';
 
 function formatFrequency(freq: string | null): string {
   if (!freq) return 'Weekly';
@@ -29,6 +33,10 @@ export default function HouseholdProfilePage() {
   const { hasPermission, isLoading: isPermLoading } = usePermissions();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isArchiveModalOpen, setIsArchiveModalOpen] = useState(false);
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+  const [isEndModalOpen, setIsEndModalOpen] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<HouseholdMember | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const orgId = activeOrganization?.id ?? null;
@@ -36,6 +44,9 @@ export default function HouseholdProfilePage() {
   const canEditHouseholds = !isPermLoading && hasPermission(Permissions.HouseholdsRecordsUpdate);
   const canArchiveHouseholds = !isPermLoading && hasPermission(Permissions.HouseholdsRecordsArchive);
   const canViewMembers = !isPermLoading && hasPermission(Permissions.MembersRecordsView);
+  const canAssignMembers = !isPermLoading && hasPermission(Permissions.HouseholdsMembersAssign);
+  const canTransferMembers = !isPermLoading && hasPermission(Permissions.HouseholdsMembersTransfer);
+  const canEndMembers = !isPermLoading && hasPermission(Permissions.HouseholdsMembersEnd);
 
   const {
     data,
@@ -328,7 +339,7 @@ export default function HouseholdProfilePage() {
 
       {/* Active Member Roster */}
       <div className="rounded-xl border border-slate-700 bg-slate-800/60 overflow-hidden">
-        <div className="flex items-center justify-between border-b border-slate-700 px-5 py-3.5">
+        <div className="flex items-center justify-between border-b border-slate-700 px-5 py-3.5 flex-wrap gap-2">
           <div className="flex items-center gap-3">
             <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-300">
               Active Household Roster
@@ -337,6 +348,20 @@ export default function HouseholdProfilePage() {
               {members.length} {members.length === 1 ? 'member' : 'members'}
             </span>
           </div>
+
+          {canAssignMembers && household.lifecycle_status === 'active' && (
+            <button
+              type="button"
+              id="btn-add-household-member"
+              onClick={() => setIsAssignModalOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-700/60 bg-indigo-950/40 px-3 py-1.5 text-xs font-semibold text-indigo-300 hover:bg-indigo-900/60 transition-colors"
+            >
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+              Add Member
+            </button>
+          )}
         </div>
 
         {members.length === 0 ? (
@@ -353,6 +378,9 @@ export default function HouseholdProfilePage() {
                   <th className="px-5 py-3 font-medium">Household Role</th>
                   <th className="px-5 py-3 font-medium">Status</th>
                   <th className="px-5 py-3 font-medium">Joined Date</th>
+                  {(canTransferMembers || canEndMembers) && (
+                    <th className="px-5 py-3 font-medium text-right">Actions</th>
+                  )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-700/40 text-slate-200">
@@ -400,6 +428,36 @@ export default function HouseholdProfilePage() {
                       <td className="px-5 py-3 text-slate-400">
                         {m.effective_from}
                       </td>
+                      {(canTransferMembers || canEndMembers) && (
+                        <td className="px-5 py-3 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            {canTransferMembers && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSelectedMember(m);
+                                  setIsTransferModalOpen(true);
+                                }}
+                                className="inline-flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium text-indigo-300 hover:bg-indigo-950/50 hover:text-indigo-200 transition-colors"
+                              >
+                                Transfer
+                              </button>
+                            )}
+                            {canEndMembers && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSelectedMember(m);
+                                  setIsEndModalOpen(true);
+                                }}
+                                className="inline-flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium text-rose-400 hover:bg-rose-950/40 hover:text-rose-300 transition-colors"
+                              >
+                                End Assignment
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      )}
                     </tr>
                   );
                 })}
@@ -425,6 +483,45 @@ export default function HouseholdProfilePage() {
             householdData={data}
             onSuccessToast={triggerToast}
           />
+          <AssignHouseholdMemberModal
+            isOpen={isAssignModalOpen}
+            onClose={() => setIsAssignModalOpen(false)}
+            organizationId={orgId}
+            householdId={household.id}
+            householdName={household.name}
+            parentGovernanceName={parent_governance?.parent_node_name}
+            onSuccessToast={triggerToast}
+          />
+          {selectedMember && (
+            <>
+              <TransferHouseholdMemberModal
+                isOpen={isTransferModalOpen}
+                onClose={() => {
+                  setIsTransferModalOpen(false);
+                  setSelectedMember(null);
+                }}
+                organizationId={orgId}
+                memberId={selectedMember.member_id}
+                memberName={selectedMember.display_name}
+                currentHouseholdId={household.id}
+                currentHouseholdName={household.name}
+                onSuccessToast={triggerToast}
+              />
+              <EndHouseholdMembershipModal
+                isOpen={isEndModalOpen}
+                onClose={() => {
+                  setIsEndModalOpen(false);
+                  setSelectedMember(null);
+                }}
+                organizationId={orgId}
+                memberId={selectedMember.member_id}
+                memberName={selectedMember.display_name}
+                currentHouseholdId={household.id}
+                currentHouseholdName={household.name}
+                onSuccessToast={triggerToast}
+              />
+            </>
+          )}
         </>
       )}
     </div>

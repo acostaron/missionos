@@ -12,6 +12,7 @@ import {
   FamilyProfilePage,
   HouseholdsPage,
   HouseholdProfilePage,
+  MembersWithoutHouseholdPage,
 } from './lazy-pages';
 
 /**
@@ -120,6 +121,14 @@ export const router = createBrowserRouter([
             element: (
               <Suspense fallback={<PageLoadingFallback />}>
                 <HouseholdsPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'households/unassigned',
+            element: (
+              <Suspense fallback={<PageLoadingFallback />}>
+                <MembersWithoutHouseholdPage />
               </Suspense>
             ),
           },

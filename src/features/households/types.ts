@@ -188,3 +188,143 @@ export interface ArchiveHouseholdBlockedResult {
 export type ArchiveHouseholdResult =
   | ArchiveHouseholdSuccessResult
   | ArchiveHouseholdBlockedResult;
+
+export interface AssignHouseholdMemberInput {
+  member_id: string;
+  household_id: string;
+  effective_from?: string;
+  confirm_governance_mismatch?: boolean;
+}
+
+export interface AssignHouseholdMemberSuccessResult {
+  status: 'assigned';
+  household_membership_id: string;
+  organization_id: string;
+  member_id: string;
+  household_id: string;
+  household_name: string;
+  membership_status: string;
+  membership_role: string;
+  is_primary: boolean;
+  effective_from: string;
+}
+
+export interface AssignHouseholdMemberBlockedResult {
+  status: 'blocked';
+  blocker_type: 'existing_primary_household' | 'already_member_of_destination';
+  existing_household_id?: string;
+  existing_household_name?: string;
+  destination_household_id?: string;
+  message: string;
+}
+
+export interface AssignHouseholdMemberWarningResult {
+  status: 'warning';
+  warning_type: 'governance_mismatch' | 'governance_unplaced';
+  member_id: string;
+  member_governance_node_id: string | null;
+  member_governance_name: string | null;
+  household_parent_node_id: string;
+  household_parent_name: string;
+  message: string;
+  requires_confirmation: true;
+}
+
+export type AssignHouseholdMemberResult =
+  | AssignHouseholdMemberSuccessResult
+  | AssignHouseholdMemberBlockedResult
+  | AssignHouseholdMemberWarningResult;
+
+export interface TransferHouseholdMemberInput {
+  member_id: string;
+  destination_household_id: string;
+  effective_date?: string;
+  reason: string;
+  confirm_governance_mismatch?: boolean;
+}
+
+export interface TransferHouseholdMemberSuccessResult {
+  status: 'transferred';
+  member_id: string;
+  source_household_id: string;
+  source_household_name: string;
+  destination_household_id: string;
+  destination_household_name: string;
+  ended_household_membership_id: string;
+  new_household_membership_id: string;
+  effective_date: string;
+}
+
+export interface TransferHouseholdMemberBlockedResult {
+  status: 'blocked';
+  blocker_type:
+    | 'no_current_household'
+    | 'multiple_current_households'
+    | 'destination_same_as_source'
+    | 'active_household_leadership'
+    | 'leadership_role_inconsistency';
+  message: string;
+  active_leadership_count?: number;
+  membership_role?: string;
+}
+
+export interface TransferHouseholdMemberWarningResult {
+  status: 'warning';
+  warning_type: 'governance_mismatch' | 'governance_unplaced';
+  member_id: string;
+  member_governance_node_id: string | null;
+  member_governance_name: string | null;
+  household_parent_node_id: string;
+  household_parent_name: string;
+  message: string;
+  requires_confirmation: true;
+}
+
+export type TransferHouseholdMemberResult =
+  | TransferHouseholdMemberSuccessResult
+  | TransferHouseholdMemberBlockedResult
+  | TransferHouseholdMemberWarningResult;
+
+export interface EndHouseholdMembershipInput {
+  member_id: string;
+  effective_to?: string;
+  reason: string;
+}
+
+export interface EndHouseholdMembershipSuccessResult {
+  status: 'ended';
+  member_id: string;
+  household_id: string;
+  household_name: string;
+  household_membership_id: string;
+  effective_to: string;
+}
+
+export interface EndHouseholdMembershipBlockedResult {
+  status: 'blocked';
+  blocker_type: 'active_household_leadership' | 'leadership_role_inconsistency';
+  message: string;
+  active_leadership_count?: number;
+  membership_role?: string;
+}
+
+export type EndHouseholdMembershipResult =
+  | EndHouseholdMembershipSuccessResult
+  | EndHouseholdMembershipBlockedResult;
+
+export interface MemberWithoutHousehold {
+  member_id: string;
+  member_number: string | null;
+  display_name: string;
+  primary_governance_node_id: string | null;
+  primary_governance_name: string | null;
+  primary_governance_type: string | null;
+  joined_on: string | null;
+}
+
+export interface SearchMembersWithoutHouseholdResult {
+  members: MemberWithoutHousehold[];
+  total_count: number;
+  limit: number;
+  offset: number;
+}
