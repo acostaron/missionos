@@ -87,10 +87,25 @@ export interface HouseholdProfileIdentity {
   updated_at: string;
 }
 
+export interface HouseholdLeadersCouple {
+  husband: {
+    member_id: string;
+    display_name: string;
+  };
+  wife: {
+    member_id: string;
+    display_name: string;
+  };
+  pastoral_label: string;
+  formatted_names: string;
+  effective_from: string;
+}
+
 export interface HouseholdProfileData {
   household: HouseholdProfileIdentity;
   parent_governance: HouseholdParentGovernance | null;
   leaders: HouseholdLeader[];
+  household_leaders?: HouseholdLeadersCouple | null;
   members: HouseholdMember[];
   counts: {
     active_member_count: number;

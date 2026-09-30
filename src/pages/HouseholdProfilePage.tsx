@@ -305,9 +305,25 @@ export default function HouseholdProfilePage() {
         {/* Pastoral Leadership */}
         <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-5 space-y-4">
           <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-400 border-b border-slate-700 pb-2.5">
-            Pastoral Leadership
+            Leadership
           </h2>
 
+          {/* Derived Pastoral Couple (Couples Section only) */}
+          {data.household_leaders && (
+            <div className="rounded-lg border border-indigo-700/60 bg-indigo-950/30 p-3.5 space-y-1.5">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-indigo-400">
+                HOUSEHOLD LEADERS
+              </span>
+              <p className="text-sm font-semibold text-slate-100">
+                {data.household_leaders.formatted_names}
+              </p>
+              <p className="text-[10px] text-slate-400">
+                Pastoral couple designation for Couples Section
+              </p>
+            </div>
+          )}
+
+          {/* Formal Office Holders */}
           {leaders.length === 0 ? (
             <p className="text-xs text-slate-500 italic py-2">
               No formal leaders currently assigned.
@@ -320,15 +336,18 @@ export default function HouseholdProfilePage() {
                   className="rounded-lg border border-slate-700/60 bg-slate-900/40 p-3 flex items-center justify-between text-xs"
                 >
                   <div>
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 block mb-0.5">
+                      {lead.leadership_role_name}
+                    </span>
                     <p className="font-medium text-slate-100">
                       {lead.display_name}
                     </p>
                     <p className="text-[10px] text-slate-400 mt-0.5">
-                      Since {lead.effective_from}
+                      Serving since {lead.effective_from}
                     </p>
                   </div>
                   <span className="inline-flex items-center rounded-full border border-indigo-700/60 bg-indigo-950/40 px-2 py-0.5 text-[10px] font-medium text-indigo-300">
-                    {lead.leadership_role_name}
+                    Formal Office
                   </span>
                 </div>
               ))}
@@ -385,7 +404,10 @@ export default function HouseholdProfilePage() {
               </thead>
               <tbody className="divide-y divide-slate-700/40 text-slate-200">
                 {members.map((m) => {
-                  const isServant = m.membership_role === 'servant' || m.membership_role === 'assistant_servant';
+                  const isServant = m.membership_role === 'servant';
+                  const isDerivedWifeLeader =
+                    data.household_leaders &&
+                    m.member_id === data.household_leaders.wife.member_id;
 
                   return (
                     <tr key={m.household_membership_id} className="hover:bg-slate-800/40 transition-colors">
@@ -412,13 +434,23 @@ export default function HouseholdProfilePage() {
                         {m.member_number || '—'}
                       </td>
                       <td className="px-5 py-3">
-                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                          isServant
-                            ? 'border border-indigo-700/60 bg-indigo-950/40 text-indigo-300'
-                            : 'text-slate-300'
-                        }`}>
-                          {formatRole(m.membership_role)}
-                        </span>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                            isServant
+                              ? 'border border-indigo-700/60 bg-indigo-950/40 text-indigo-300'
+                              : 'text-slate-300'
+                          }`}>
+                            {formatRole(m.membership_role)}
+                          </span>
+                          {isDerivedWifeLeader && (
+                            <span
+                              title="Pastoral couple designation derived from verified marriage to current Household Servant. No separate formal leadership assignment exists."
+                              className="inline-flex items-center rounded-full border border-sky-700/60 bg-sky-950/40 px-2 py-0.5 text-[10px] font-medium text-sky-300"
+                            >
+                              Household Leader
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-5 py-3">
                         <span className="inline-flex items-center rounded-full border border-emerald-700/60 bg-emerald-950/40 px-2 py-0.5 text-[10px] font-medium text-emerald-300">
