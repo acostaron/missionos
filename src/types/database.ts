@@ -5996,6 +5996,17 @@ export type Database = {
         Args: { p_actor_profile_id: string; p_merge_request_id: string }
         Returns: string
       }
+      execute_pastoral_placement: {
+        Args: {
+          p_destination_household_id: string
+          p_effective_date?: string
+          p_include_verified_spouse?: boolean
+          p_leadership_assignment_id: string
+          p_organization_id: string
+          p_reason?: string
+        }
+        Returns: Json
+      }
       get_current_authorization_context: {
         Args: { p_organization_id: string }
         Returns: Json
@@ -6080,6 +6091,10 @@ export type Database = {
           status_category: string
           status_id: string
         }[]
+      }
+      get_pastoral_placement_review: {
+        Args: { p_leadership_assignment_id: string; p_organization_id: string }
+        Returns: Json
       }
       get_placement_nodes: {
         Args: { p_organization_id: string }
@@ -6262,6 +6277,15 @@ export type Database = {
           p_offset?: number
           p_organization_id: string
           p_search?: string
+        }
+        Returns: Json
+      }
+      search_servant_leaders_needing_pastoral_placement: {
+        Args: {
+          p_include_correct?: boolean
+          p_limit?: number
+          p_offset?: number
+          p_organization_id: string
         }
         Returns: Json
       }

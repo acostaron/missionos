@@ -311,3 +311,28 @@ export const replaceServantLeaderSchema = z.object({
 });
 
 export type ReplaceServantLeaderFormValues = z.infer<typeof replaceServantLeaderSchema>;
+
+// =============================================================================
+// Phase 6B-6: Pastoral Placement Execution Schema
+// =============================================================================
+
+export const executePastoralPlacementSchema = z.object({
+  destination_household_id: z.string().uuid('Please select a destination household'),
+  effective_date: z
+    .string()
+    .min(1, 'Effective date is required')
+    .refine((val) => {
+      const today = new Date().toISOString().split('T')[0];
+      return val <= today;
+    }, {
+      message: 'Future pastoral placement dates are not supported yet',
+    }),
+  reason: z
+    .string()
+    .min(1, 'A reason is required for pastoral placement')
+    .max(500, 'Reason must not exceed 500 characters')
+    .refine((v) => v.trim().length > 0, { message: 'Reason cannot be empty' }),
+  include_verified_spouse: z.boolean(),
+});
+
+export type ExecutePastoralPlacementFormValues = z.infer<typeof executePastoralPlacementSchema>;

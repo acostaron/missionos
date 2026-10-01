@@ -65,6 +65,9 @@ export const Permissions = {
   LeadershipServantLeadersAppoint: 'leadership.servant_leaders.appoint',
   LeadershipServantLeadersConclude: 'leadership.servant_leaders.conclude',
   LeadershipServantLeadersReplace: 'leadership.servant_leaders.replace',
+
+  LeadershipPastoralPlacementReview: 'leadership.pastoral_placement.review',
+  LeadershipPastoralPlacementExecute: 'leadership.pastoral_placement.execute',
 } as const;
 
 export type PermissionCode = typeof Permissions[keyof typeof Permissions];

@@ -473,3 +473,138 @@ export interface ServantLeaderPlacementGuidanceResult {
   };
   message?: string;
 }
+
+export type PastoralPlacementWorkflowStatus =
+  | 'already_correct'
+  | 'ready_to_assign'
+  | 'ready_to_transfer'
+  | 'blocked_no_destination'
+  | 'blocked_spouse_review'
+  | 'blocked_invalid_context'
+  | 'manual_review_required';
+
+export type PastoralPlacementRecommendedAction =
+  | 'none'
+  | 'assign'
+  | 'transfer'
+  | 'review_spouse'
+  | 'create_destination_household';
+
+export type CouplesContextStatus = 'couples' | 'non_couples' | 'ambiguous';
+
+export type CouplesContextSource =
+  | 'originating_household'
+  | 'primary_section'
+  | 'member_governance_assignment'
+  | 'pastoral_lineage'
+  | 'governance_node_metadata'
+  | 'unmarried_individual'
+  | 'unresolved';
+
+export type DestinationCapacityStatus =
+  | 'available'
+  | 'at_target'
+  | 'full'
+  | 'not_accepting';
+
+export interface PastoralPlacementDestination {
+  household_id: string;
+  household_name: string;
+  pastoral_level: PastoralLevel;
+  scope_node_id: string;
+  scope_node_name: string;
+  is_couple_household: boolean;
+  current_member_count: number;
+  target_member_count: number | null;
+  maximum_member_count: number | null;
+  accepts_new_members: boolean;
+  capacity_status: DestinationCapacityStatus;
+  is_eligible: boolean;
+}
+
+export interface PastoralPlacementReview {
+  leadership_assignment_id: string;
+  formal_role_code: ServantLeaderRoleCode;
+  formal_role_name: string;
+  leader_member_id: string;
+  leader_member_name: string;
+  formal_governance_node_id: string;
+  formal_governance_node_name: string;
+  recommended_pastoral_level: PastoralLevel;
+  recommended_scope_node_id: string;
+  recommended_scope_node_name: string;
+  current_primary_household_id: string | null;
+  current_primary_household_name: string | null;
+  current_primary_pastoral_level: PastoralLevel | null;
+  current_primary_scope_node_id: string | null;
+  placement_status: PlacementStatus;
+  workflow_status: PastoralPlacementWorkflowStatus;
+  recommended_action: PastoralPlacementRecommendedAction;
+  required_seats: number;
+  couples_context: boolean | null;
+  couples_context_status: CouplesContextStatus;
+  couples_context_source: CouplesContextSource;
+  spouse_context: {
+    has_spouse: boolean;
+    has_verified_spouse: boolean;
+    spouse_member_id: string | null;
+    spouse_name: string | null;
+  };
+  spouse_current_primary_household: {
+    household_id: string | null;
+    household_name: string | null;
+    pastoral_level: PastoralLevel | null;
+    scope_node_id: string | null;
+  };
+  spouse_placement_status: PlacementStatus | null;
+  available_destination_households: PastoralPlacementDestination[];
+}
+
+export interface PastoralPlacementExecutionInput {
+  organizationId: string;
+  leadershipAssignmentId: string;
+  destinationHouseholdId: string;
+  effectiveDate?: string;
+  reason: string;
+  includeVerifiedSpouse?: boolean;
+}
+
+export interface PastoralPlacementMemberPlanResult {
+  action: 'assign' | 'transfer' | 'none';
+  household_membership_id: string;
+  source_household_id: string | null;
+  destination_household_id: string;
+}
+
+export interface PastoralPlacementExecutionResult {
+  status: 'completed';
+  leadership_assignment_id: string;
+  formal_role_code: ServantLeaderRoleCode;
+  destination_household_id: string;
+  destination_household_name: string;
+  effective_date: string;
+  couples_placement: boolean;
+  leader_result: PastoralPlacementMemberPlanResult;
+  spouse_result: PastoralPlacementMemberPlanResult | null;
+  message: string;
+}
+
+export interface PastoralPlacementQueueItem {
+  leadership_assignment_id: string;
+  role_code: ServantLeaderRoleCode;
+  role_name: string;
+  leader_member_id: string;
+  leader_name: string;
+  governance_node_id: string;
+  governance_node_name: string;
+  recommended_pastoral_level: PastoralLevel;
+  recommended_scope_node_id: string;
+  recommended_scope_name: string;
+  current_household_id: string | null;
+  current_household_name: string | null;
+  placement_status: PlacementStatus;
+  couples_context: boolean | null;
+  couples_context_status?: CouplesContextStatus;
+  spouse_name: string | null;
+  spouse_current_household_name: string | null;
+}

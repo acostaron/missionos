@@ -12,6 +12,7 @@ import { EndHouseholdMembershipModal } from '../features/households/components/E
 import { AppointServantLeaderModal } from '../features/households/components/AppointServantLeaderModal';
 import { ReplaceServantLeaderModal } from '../features/households/components/ReplaceServantLeaderModal';
 import { ConcludeServantLeaderModal } from '../features/households/components/ConcludeServantLeaderModal';
+import { PastoralPlacementReviewModal } from '../features/households/components/PastoralPlacementReviewModal';
 import type { HouseholdMember, HouseholdLeader, ServantLeaderRoleCode } from '../features/households/types';
 
 function formatFrequency(freq: string | null): string {
@@ -42,6 +43,7 @@ export default function HouseholdProfilePage() {
   const [isAppointLeaderModalOpen, setIsAppointLeaderModalOpen] = useState(false);
   const [isReplaceLeaderModalOpen, setIsReplaceLeaderModalOpen] = useState(false);
   const [isConcludeLeaderModalOpen, setIsConcludeLeaderModalOpen] = useState(false);
+  const [isPlacementModalOpen, setIsPlacementModalOpen] = useState(false);
   const [selectedLeader, setSelectedLeader] = useState<HouseholdLeader | null>(null);
   const [selectedMember, setSelectedMember] = useState<HouseholdMember | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -57,6 +59,7 @@ export default function HouseholdProfilePage() {
   const canAppointLeader = !isPermLoading && hasPermission(Permissions.LeadershipServantLeadersAppoint);
   const canConcludeLeader = !isPermLoading && hasPermission(Permissions.LeadershipServantLeadersConclude);
   const canReplaceLeader = !isPermLoading && hasPermission(Permissions.LeadershipServantLeadersReplace);
+  const canReviewPlacement = !isPermLoading && hasPermission(Permissions.LeadershipPastoralPlacementReview);
 
   const {
     data,
@@ -400,6 +403,18 @@ export default function HouseholdProfilePage() {
                         <span className="inline-flex items-center rounded-full border border-indigo-700/60 bg-indigo-950/40 px-2 py-0.5 text-[10px] font-medium text-indigo-300">
                           Formal Office
                         </span>
+                        {canReviewPlacement && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedLeader(lead);
+                              setIsPlacementModalOpen(true);
+                            }}
+                            className="rounded px-2 py-0.5 text-[11px] font-medium text-amber-300 hover:text-amber-100 bg-amber-950/40 hover:bg-amber-900/60 border border-amber-800/40 transition-colors"
+                          >
+                            Placement Review
+                          </button>
+                        )}
                         {canReplaceLeader && isStatusActive && (
                           <button
                             type="button"
@@ -670,6 +685,16 @@ export default function HouseholdProfilePage() {
                 leadershipAssignmentId={selectedLeader.leadership_assignment_id}
                 leaderDisplayName={selectedLeader.display_name}
                 roleName={selectedLeader.leadership_role_name}
+                onSuccessToast={triggerToast}
+              />
+              <PastoralPlacementReviewModal
+                isOpen={isPlacementModalOpen}
+                onClose={() => {
+                  setIsPlacementModalOpen(false);
+                  setSelectedLeader(null);
+                }}
+                organizationId={orgId}
+                leadershipAssignmentId={selectedLeader.leadership_assignment_id}
                 onSuccessToast={triggerToast}
               />
             </>
