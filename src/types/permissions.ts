@@ -1,4 +1,4 @@
-export const Permissions = {
+﻿export const Permissions = {
   GovernanceStructureView: 'governance.structure.view',
   GovernanceStructureManage: 'governance.structure.manage',
 
@@ -68,6 +68,8 @@ export const Permissions = {
 
   LeadershipPastoralPlacementReview: 'leadership.pastoral_placement.review',
   LeadershipPastoralPlacementExecute: 'leadership.pastoral_placement.execute',
+
+  LeadershipPastoralDashboardView: 'leadership.pastoral_dashboard.view',
 } as const;
 
 export type PermissionCode = typeof Permissions[keyof typeof Permissions];

@@ -269,6 +269,13 @@ export default function HouseholdProfilePage() {
 
           <div className="space-y-3 text-xs">
             <div className="flex justify-between items-center">
+              <span className="text-slate-400">Pastoral Level</span>
+              <span className="rounded bg-slate-700/60 px-2 py-0.5 font-semibold text-slate-200 uppercase text-[10px]">
+                {household.pastoral_level ?? 'member'}
+              </span>
+            </div>
+
+            <div className="flex justify-between items-center">
               <span className="text-slate-400">Parent Governance</span>
               <span className="font-medium text-slate-200">
                 {parent_governance ? (
@@ -283,6 +290,7 @@ export default function HouseholdProfilePage() {
                 )}
               </span>
             </div>
+
 
             <div className="flex justify-between items-center">
               <span className="text-slate-400">Meeting Frequency</span>

@@ -1,4 +1,4 @@
-export type Json =
+﻿export type Json =
   | string
   | number
   | boolean
@@ -6091,6 +6091,14 @@ export type Database = {
           status_category: string
           status_id: string
         }[]
+      }
+      get_pastoral_household_roster: {
+        Args: { p_household_id: string; p_organization_id: string }
+        Returns: Json
+      }
+      get_pastoral_operations_dashboard: {
+        Args: { p_governance_node_id?: string; p_organization_id: string }
+        Returns: Json
       }
       get_pastoral_placement_review: {
         Args: { p_leadership_assignment_id: string; p_organization_id: string }

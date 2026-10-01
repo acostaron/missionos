@@ -13,7 +13,9 @@ import {
   HouseholdsPage,
   HouseholdProfilePage,
   MembersWithoutHouseholdPage,
+  PastoralOperationsDashboardPage,
 } from './lazy-pages';
+
 
 /**
  * Development-only RLS diagnostics page.
@@ -141,9 +143,18 @@ export const router = createBrowserRouter([
             ),
           },
           {
+            path: 'pastoral-operations',
+            element: (
+              <Suspense fallback={<PageLoadingFallback />}>
+                <PastoralOperationsDashboardPage />
+              </Suspense>
+            ),
+          },
+          {
             index: true,
             element: <Navigate to="/app/dashboard" replace />,
           }
+
         ],
       },
     ],

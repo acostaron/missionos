@@ -1,4 +1,4 @@
-export type HouseholdLifecycleStatus =
+﻿export type HouseholdLifecycleStatus =
   | 'planned'
   | 'active'
   | 'temporarily_inactive'
@@ -607,4 +607,214 @@ export interface PastoralPlacementQueueItem {
   couples_context_status?: CouplesContextStatus;
   spouse_name: string | null;
   spouse_current_household_name: string | null;
+}
+
+// =============================================================================
+// Phase 6B-7: Pastoral Household Operations & Leader Care Dashboard
+// =============================================================================
+
+export type PastoralCapacityStatus = 'available' | 'at_target' | 'full' | 'not_accepting';
+
+export type PastoralLeadershipStatus = 'assigned' | 'vacant' | 'not_applicable' | 'review_required';
+
+export type PastoralOperationalStatus =
+  | 'ready'
+  | 'needs_leader'
+  | 'needs_members'
+  | 'at_capacity'
+  | 'not_accepting'
+  | 'placement_review_required'
+  | 'inactive';
+
+export interface PastoralServingAssignment {
+  leadership_assignment_id: string;
+  role_code: ServantLeaderRoleCode;
+  role_name: string;
+  governance_node_id: string;
+  governance_node_name: string;
+  pastoral_level: PastoralLevel | null;
+  effective_from: string;
+  effective_to: string | null;
+}
+
+export interface PastoralCareMembership {
+  household_id: string;
+  household_name: string;
+  pastoral_level: PastoralLevel;
+  scope_node_id: string | null;
+  scope_node_name: string | null;
+  membership_role: string;
+  effective_from: string;
+  meeting_frequency: string;
+  meeting_day_of_week: number | null;
+  meeting_start_time: string | null;
+  meeting_timezone_name: string | null;
+  is_fraternal: boolean;
+}
+
+export interface PastoralDashboardIdentity {
+  profile_id: string;
+  member_id: string | null;
+  display_name: string;
+  has_linked_member: boolean;
+  serving_assignments: PastoralServingAssignment[];
+  pastoral_membership: PastoralCareMembership | null;
+  pastoral_household_placement_needed: boolean;
+}
+
+export interface PastoralCareResponsibility {
+  leadership_assignment_id: string;
+  responsibility_level: 'household' | 'unit' | 'chapter' | 'area';
+  scope_id: string;
+  scope_name: string;
+  details: {
+    type: 'household_members' | 'household_leaders' | 'unit_leaders' | 'chapter_leaders';
+    household_id?: string;
+    household_name?: string;
+    unit_id?: string;
+    unit_name?: string;
+    chapter_id?: string;
+    chapter_name?: string;
+    area_id?: string;
+    area_name?: string;
+    member_count?: number;
+    members?: Array<{
+      member_id: string;
+      display_name: string;
+      member_number: string | null;
+      membership_role: string;
+      effective_from: string;
+    }>;
+    leaders?: Array<{
+      household_id?: string;
+      household_name?: string;
+      unit_id?: string;
+      unit_name?: string;
+      chapter_id?: string;
+      chapter_name?: string;
+      is_couple_household?: boolean;
+      leader_member_id: string;
+      leader_name: string;
+      role_code: ServantLeaderRoleCode;
+      effective_from: string;
+      couples_context_status?: CouplesContextStatus;
+      has_derived_spouse: boolean;
+      derived_spouse_name: string | null;
+      derived_pastoral_title: string;
+    }>;
+  };
+}
+
+export interface PastoralHouseholdSummary {
+  household_id: string;
+  household_name: string;
+  pastoral_level: PastoralLevel;
+  household_category: string;
+  lifecycle_status: string;
+  is_couple_household: boolean;
+  scope_node_id: string | null;
+  scope_node_name: string | null;
+  formal_leader: {
+    leadership_assignment_id: string;
+    member_id: string;
+    display_name: string;
+    role_code: ServantLeaderRoleCode;
+    role_name: string;
+  } | null;
+  derived_leader_spouse: string | null;
+  leader_display_label: string;
+  member_count: number;
+  target_member_count: number | null;
+  maximum_member_count: number | null;
+  accepts_new_members: boolean;
+  capacity_status: PastoralCapacityStatus;
+  leadership_status: PastoralLeadershipStatus;
+  operational_status: PastoralOperationalStatus;
+  meeting_frequency: string;
+  meeting_day_of_week: number | null;
+  meeting_start_time: string | null;
+}
+
+export interface PastoralLeadershipVacancy {
+  governance_node_id: string;
+  governance_node_name: string;
+  role_code: ServantLeaderRoleCode;
+  role_name: string;
+  pastoral_level: PastoralLevel | null;
+  vacancy_status: 'vacant';
+}
+
+export interface PastoralOperationsDashboard {
+  organization_id: string;
+  identity: PastoralDashboardIdentity;
+  care_responsibilities: PastoralCareResponsibility[];
+  household_summary: PastoralHouseholdSummary[];
+  leadership_vacancies: PastoralLeadershipVacancy[];
+  capacity_summary: {
+    available: number;
+    at_target: number;
+    full: number;
+    not_accepting: number;
+    total: number;
+  };
+  operational_summary: {
+    ready: number;
+    needs_leader: number;
+    needs_members: number;
+    at_capacity: number;
+    not_accepting: number;
+    placement_review_required: number;
+    inactive: number;
+    total: number;
+  };
+  placement_review_summary: {
+    missing_household: number;
+    different_level: number;
+    no_matching_household_available: number;
+    manual_review_required: number;
+    total: number;
+    actionable_items: PastoralPlacementQueueItem[];
+  };
+  unassigned_members_count: number;
+}
+
+export interface PastoralHouseholdRosterMember {
+  member_id: string;
+  member_number: string | null;
+  display_name: string;
+  membership_id: string;
+  membership_role: string;
+  membership_status: string;
+  effective_from: string;
+  is_primary: boolean;
+}
+
+export interface PastoralHouseholdRoster {
+  household_id: string;
+  household_name: string;
+  household_category: string;
+  pastoral_level: PastoralLevel;
+  lifecycle_status: string;
+  is_couple_household: boolean;
+  scope_node_id: string | null;
+  scope_node_name: string | null;
+  target_member_count: number | null;
+  maximum_member_count: number | null;
+  accepts_new_members: boolean;
+  meeting_frequency: string;
+  meeting_day_of_week: number | null;
+  meeting_start_time: string | null;
+  meeting_timezone_name: string | null;
+  formal_leader: {
+    leadership_assignment_id: string;
+    member_id: string;
+    display_name: string;
+    role_code: ServantLeaderRoleCode;
+    role_name: string;
+    effective_from: string;
+  } | null;
+  derived_leader_spouse: string | null;
+  is_fraternal: boolean;
+  members_count: number;
+  members: PastoralHouseholdRosterMember[];
 }

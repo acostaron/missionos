@@ -17,6 +17,7 @@ export default function AppLayout() {
 
   const canViewMembers = !isPermLoading && hasPermission(Permissions.MembersRecordsView);
   const canViewHouseholds = !isPermLoading && hasPermission(Permissions.HouseholdsRecordsView);
+  const canViewPastoralDashboard = !isPermLoading && hasPermission(Permissions.LeadershipPastoralDashboardView);
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-950 text-slate-100">
@@ -78,8 +79,26 @@ export default function AppLayout() {
                   Households
                 </NavLink>
               )}
+
+              {/* Pastoral Operations — only rendered when leadership.pastoral_dashboard.view is held */}
+              {canViewPastoralDashboard && (
+                <NavLink
+                  to="/app/pastoral-operations"
+                  id="nav-pastoral-operations"
+                  className={({ isActive }) =>
+                    `rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                      isActive
+                        ? 'bg-slate-800 text-slate-100'
+                        : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200'
+                    }`
+                  }
+                >
+                  Pastoral Operations
+                </NavLink>
+              )}
             </nav>
           </div>
+
 
           {/* User controls */}
           <div className="flex items-center gap-4">

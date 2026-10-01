@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Lazy-loaded page components for code-split routes.
  *
  * Isolated in their own module so that router.tsx remains a pure
@@ -16,4 +16,7 @@ export const HouseholdsPage = lazy(() => import('../pages/HouseholdsPage'));
 export const HouseholdProfilePage = lazy(() => import('../pages/HouseholdProfilePage'));
 export const MembersWithoutHouseholdPage = lazy(
   () => import('../pages/MembersWithoutHouseholdPage')
+);
+export const PastoralOperationsDashboardPage = lazy(
+  () => import('../pages/PastoralOperationsDashboardPage')
 );
