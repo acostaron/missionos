@@ -61,6 +61,10 @@ export const Permissions = {
   HouseholdsMembersAssign: 'households.members.assign',
   HouseholdsMembersTransfer: 'households.members.transfer',
   HouseholdsMembersEnd: 'households.members.end',
+
+  LeadershipServantLeadersAppoint: 'leadership.servant_leaders.appoint',
+  LeadershipServantLeadersConclude: 'leadership.servant_leaders.conclude',
+  LeadershipServantLeadersReplace: 'leadership.servant_leaders.replace',
 } as const;
 
 export type PermissionCode = typeof Permissions[keyof typeof Permissions];

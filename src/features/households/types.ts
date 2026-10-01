@@ -358,3 +358,118 @@ export interface SearchMembersWithoutHouseholdResult {
   limit: number;
   offset: number;
 }
+
+// =============================================================================
+// Phase 6B-5: Servant Leader Appointment Lifecycle & Placement Guidance Types
+// =============================================================================
+
+export type ServantLeaderRoleCode =
+  | 'household_servant_leader'
+  | 'unit_servant_leader'
+  | 'chapter_servant_leader'
+  | 'area_servant_leader';
+
+export interface AppointServantLeaderInput {
+  role_code: ServantLeaderRoleCode;
+  governance_node_id: string;
+  member_id: string;
+  effective_from?: string;
+  reason?: string;
+}
+
+export interface AppointServantLeaderResult {
+  status: 'appointed';
+  organization_id: string;
+  leadership_assignment_id: string;
+  governance_node_id: string;
+  member_id: string;
+  role_code: ServantLeaderRoleCode;
+  role_name: string;
+  effective_from: string;
+}
+
+export interface ConcludeServantLeaderInput {
+  leadership_assignment_id: string;
+  effective_to?: string;
+  reason: string;
+}
+
+export interface ConcludeServantLeaderResult {
+  status: 'concluded';
+  organization_id: string;
+  leadership_assignment_id: string;
+  governance_node_id: string;
+  member_id: string;
+  role_code: ServantLeaderRoleCode;
+  role_name: string;
+  effective_to: string;
+  reason: string;
+}
+
+export interface ReplaceServantLeaderInput {
+  role_code: ServantLeaderRoleCode;
+  governance_node_id: string;
+  new_member_id: string;
+  effective_date?: string;
+  reason: string;
+}
+
+export interface ReplaceServantLeaderSuccessResult {
+  status: 'replaced';
+  organization_id: string;
+  governance_node_id: string;
+  role_code: ServantLeaderRoleCode;
+  role_name: string;
+  outgoing_assignment_id: string;
+  outgoing_member_id: string;
+  incoming_assignment_id: string;
+  incoming_member_id: string;
+  effective_date: string;
+  reason: string;
+}
+
+export interface ReplaceServantLeaderBlockedResult {
+  status: 'blocked';
+  blocker_type: 'no_current_role_holder' | string;
+  governance_node_id: string;
+  role_code: ServantLeaderRoleCode;
+  message: string;
+}
+
+export type ReplaceServantLeaderResult =
+  | ReplaceServantLeaderSuccessResult
+  | ReplaceServantLeaderBlockedResult;
+
+export type PlacementStatus =
+  | 'correct'
+  | 'missing_household'
+  | 'different_level'
+  | 'no_matching_household_available'
+  | 'manual_review_required';
+
+export interface ServantLeaderPlacementGuidanceResult {
+  has_formal_role: boolean;
+  formal_role_code?: ServantLeaderRoleCode;
+  formal_role_name?: string;
+  formal_governance_node_id?: string;
+  formal_governance_node_name?: string;
+  leadership_assignment_id?: string;
+  member_id: string;
+  member_name?: string;
+  recommended_pastoral_level?: PastoralLevel;
+  recommended_scope_node_id?: string | null;
+  recommended_scope_node_name?: string | null;
+  current_primary_household_id?: string | null;
+  current_primary_household_name?: string | null;
+  current_primary_pastoral_level?: PastoralLevel | null;
+  matching_echelon_households_count?: number;
+  placement_status?: PlacementStatus;
+  spouse_context?: {
+    has_spouse: boolean;
+    has_verified_spouse: boolean;
+    spouse_member_id: string | null;
+    spouse_name: string | null;
+    evaluation_rule: string;
+  };
+  message?: string;
+}

@@ -234,3 +234,80 @@ export const endHouseholdMembershipSchema = z.object({
 });
 
 export type EndHouseholdMembershipFormValues = z.infer<typeof endHouseholdMembershipSchema>;
+
+// =============================================================================
+// Phase 6B-5: Servant Leader Appointment Lifecycle Schemas
+// =============================================================================
+
+export const appointServantLeaderSchema = z.object({
+  role_code: z.enum([
+    'household_servant_leader',
+    'unit_servant_leader',
+    'chapter_servant_leader',
+    'area_servant_leader',
+  ]),
+  governance_node_id: z.string().uuid('Please select a valid governance node'),
+  member_id: z.string().uuid('Please select a candidate member'),
+  effective_from: z
+    .string()
+    .min(1, 'Effective date is required')
+    .refine((val) => {
+      const today = new Date().toISOString().split('T')[0];
+      return val <= today;
+    }, {
+      message: 'Future servant-leader changes are not supported yet',
+    }),
+  reason: z
+    .string()
+    .max(500, 'Appointment note must not exceed 500 characters')
+    .optional(),
+});
+
+export type AppointServantLeaderFormValues = z.infer<typeof appointServantLeaderSchema>;
+
+export const concludeServantLeaderSchema = z.object({
+  leadership_assignment_id: z.string().uuid('Invalid leadership assignment'),
+  effective_to: z
+    .string()
+    .min(1, 'Effective end date is required')
+    .refine((val) => {
+      const today = new Date().toISOString().split('T')[0];
+      return val <= today;
+    }, {
+      message: 'Future servant-leader changes are not supported yet',
+    }),
+  reason: z
+    .string()
+    .min(1, 'A reason is required to conclude a servant leader appointment')
+    .max(500, 'Reason must not exceed 500 characters')
+    .refine((v) => v.trim().length > 0, { message: 'Reason cannot be empty' }),
+});
+
+export type ConcludeServantLeaderFormValues = z.infer<typeof concludeServantLeaderSchema>;
+
+export const replaceServantLeaderSchema = z.object({
+  role_code: z.enum([
+    'household_servant_leader',
+    'unit_servant_leader',
+    'chapter_servant_leader',
+    'area_servant_leader',
+  ]),
+  governance_node_id: z.string().uuid('Please select a valid governance node'),
+  new_member_id: z.string().uuid('Please select an incoming leader'),
+  effective_date: z
+    .string()
+    .min(1, 'Effective replacement date is required')
+    .refine((val) => {
+      const today = new Date().toISOString().split('T')[0];
+      return val <= today;
+    }, {
+      message: 'Future servant-leader changes are not supported yet',
+    }),
+  reason: z
+    .string()
+    .min(1, 'A reason is required for leadership replacement')
+    .max(500, 'Reason must not exceed 500 characters')
+    .refine((v) => v.trim().length > 0, { message: 'Reason cannot be empty' }),
+});
+
+export type ReplaceServantLeaderFormValues = z.infer<typeof replaceServantLeaderSchema>;

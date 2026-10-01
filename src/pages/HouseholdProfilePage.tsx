@@ -9,7 +9,10 @@ import { ArchiveHouseholdModal } from '../features/households/components/Archive
 import { AssignHouseholdMemberModal } from '../features/households/components/AssignHouseholdMemberModal';
 import { TransferHouseholdMemberModal } from '../features/households/components/TransferHouseholdMemberModal';
 import { EndHouseholdMembershipModal } from '../features/households/components/EndHouseholdMembershipModal';
-import type { HouseholdMember } from '../features/households/types';
+import { AppointServantLeaderModal } from '../features/households/components/AppointServantLeaderModal';
+import { ReplaceServantLeaderModal } from '../features/households/components/ReplaceServantLeaderModal';
+import { ConcludeServantLeaderModal } from '../features/households/components/ConcludeServantLeaderModal';
+import type { HouseholdMember, HouseholdLeader, ServantLeaderRoleCode } from '../features/households/types';
 
 function formatFrequency(freq: string | null): string {
   if (!freq) return 'Weekly';
@@ -36,6 +39,10 @@ export default function HouseholdProfilePage() {
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
   const [isEndModalOpen, setIsEndModalOpen] = useState(false);
+  const [isAppointLeaderModalOpen, setIsAppointLeaderModalOpen] = useState(false);
+  const [isReplaceLeaderModalOpen, setIsReplaceLeaderModalOpen] = useState(false);
+  const [isConcludeLeaderModalOpen, setIsConcludeLeaderModalOpen] = useState(false);
+  const [selectedLeader, setSelectedLeader] = useState<HouseholdLeader | null>(null);
   const [selectedMember, setSelectedMember] = useState<HouseholdMember | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -47,6 +54,9 @@ export default function HouseholdProfilePage() {
   const canAssignMembers = !isPermLoading && hasPermission(Permissions.HouseholdsMembersAssign);
   const canTransferMembers = !isPermLoading && hasPermission(Permissions.HouseholdsMembersTransfer);
   const canEndMembers = !isPermLoading && hasPermission(Permissions.HouseholdsMembersEnd);
+  const canAppointLeader = !isPermLoading && hasPermission(Permissions.LeadershipServantLeadersAppoint);
+  const canConcludeLeader = !isPermLoading && hasPermission(Permissions.LeadershipServantLeadersConclude);
+  const canReplaceLeader = !isPermLoading && hasPermission(Permissions.LeadershipServantLeadersReplace);
 
   const {
     data,
@@ -353,15 +363,27 @@ export default function HouseholdProfilePage() {
 
               {/* Formal Office Holders */}
               {leaders.length === 0 ? (
-                <p className="text-xs text-slate-500 italic py-2">
-                  No formal leaders currently assigned.
-                </p>
+                <div className="py-2 flex items-center justify-between">
+                  <p className="text-xs text-slate-500 italic">
+                    No formal leaders currently assigned.
+                  </p>
+                  {canAppointLeader && household.pastoral_level === 'member' && isStatusActive && (
+                    <button
+                      type="button"
+                      id="btn-appoint-household-leader"
+                      onClick={() => setIsAppointLeaderModalOpen(true)}
+                      className="inline-flex items-center gap-1 rounded-lg border border-indigo-700/60 bg-indigo-950/40 px-2.5 py-1 text-[11px] font-semibold text-indigo-300 hover:bg-indigo-900/60 transition-colors"
+                    >
+                      + Appoint Leader
+                    </button>
+                  )}
+                </div>
               ) : (
                 <div className="space-y-3">
                   {leaders.map((lead) => (
                     <div
                       key={lead.leadership_assignment_id}
-                      className="rounded-lg border border-slate-700/60 bg-slate-900/40 p-3 flex items-center justify-between text-xs"
+                      className="rounded-lg border border-slate-700/60 bg-slate-900/40 p-3 flex items-center justify-between text-xs flex-wrap gap-2"
                     >
                       <div>
                         <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 block mb-0.5">
@@ -374,9 +396,35 @@ export default function HouseholdProfilePage() {
                           Serving since {lead.effective_from}
                         </p>
                       </div>
-                      <span className="inline-flex items-center rounded-full border border-indigo-700/60 bg-indigo-950/40 px-2 py-0.5 text-[10px] font-medium text-indigo-300">
-                        Formal Office
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center rounded-full border border-indigo-700/60 bg-indigo-950/40 px-2 py-0.5 text-[10px] font-medium text-indigo-300">
+                          Formal Office
+                        </span>
+                        {canReplaceLeader && isStatusActive && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedLeader(lead);
+                              setIsReplaceLeaderModalOpen(true);
+                            }}
+                            className="rounded px-2 py-0.5 text-[11px] font-medium text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 transition-colors"
+                          >
+                            Replace
+                          </button>
+                        )}
+                        {canConcludeLeader && isStatusActive && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedLeader(lead);
+                              setIsConcludeLeaderModalOpen(true);
+                            }}
+                            className="rounded px-2 py-0.5 text-[11px] font-medium text-rose-300 hover:text-rose-100 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/40 transition-colors"
+                          >
+                            Conclude
+                          </button>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -580,6 +628,48 @@ export default function HouseholdProfilePage() {
                 memberName={selectedMember.display_name}
                 currentHouseholdId={household.id}
                 currentHouseholdName={household.name}
+                onSuccessToast={triggerToast}
+              />
+            </>
+          )}
+          <AppointServantLeaderModal
+            isOpen={isAppointLeaderModalOpen}
+            onClose={() => setIsAppointLeaderModalOpen(false)}
+            organizationId={orgId}
+            governanceNodeId={household.id}
+            governanceNodeName={household.name}
+            roleCode="household_servant_leader"
+            onSuccessToast={triggerToast}
+          />
+          {selectedLeader && (
+            <>
+              <ReplaceServantLeaderModal
+                isOpen={isReplaceLeaderModalOpen}
+                onClose={() => {
+                  setIsReplaceLeaderModalOpen(false);
+                  setSelectedLeader(null);
+                }}
+                organizationId={orgId}
+                governanceNodeId={household.id}
+                governanceNodeName={household.name}
+                currentLeaderMemberId={selectedLeader.member_id}
+                currentLeaderDisplayName={selectedLeader.display_name}
+                roleCode={(selectedLeader.leadership_role_code as ServantLeaderRoleCode) || 'household_servant_leader'}
+                roleName={selectedLeader.leadership_role_name}
+                onSuccessToast={triggerToast}
+              />
+              <ConcludeServantLeaderModal
+                isOpen={isConcludeLeaderModalOpen}
+                onClose={() => {
+                  setIsConcludeLeaderModalOpen(false);
+                  setSelectedLeader(null);
+                }}
+                organizationId={orgId}
+                governanceNodeId={household.id}
+                governanceNodeName={household.name}
+                leadershipAssignmentId={selectedLeader.leadership_assignment_id}
+                leaderDisplayName={selectedLeader.display_name}
+                roleName={selectedLeader.leadership_role_name}
                 onSuccessToast={triggerToast}
               />
             </>

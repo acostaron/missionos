@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -1757,6 +1757,7 @@ export type Database = {
           meeting_start_time: string | null
           meeting_timezone_name: string | null
           organization_id: string
+          pastoral_level: string
           target_member_count: number | null
           updated_at: string
           updated_by: string | null
@@ -1778,6 +1779,7 @@ export type Database = {
           meeting_start_time?: string | null
           meeting_timezone_name?: string | null
           organization_id: string
+          pastoral_level?: string
           target_member_count?: number | null
           updated_at?: string
           updated_by?: string | null
@@ -1799,6 +1801,7 @@ export type Database = {
           meeting_start_time?: string | null
           meeting_timezone_name?: string | null
           organization_id?: string
+          pastoral_level?: string
           target_member_count?: number | null
           updated_at?: string
           updated_by?: string | null
@@ -5715,6 +5718,17 @@ export type Database = {
         }
         Returns: string
       }
+      appoint_servant_leader: {
+        Args: {
+          p_effective_from?: string
+          p_governance_node_id: string
+          p_member_id: string
+          p_organization_id: string
+          p_reason?: string
+          p_role_code: string
+        }
+        Returns: Json
+      }
       approve_leadership_assignment: {
         Args: {
           p_actor_profile_id: string
@@ -5841,6 +5855,15 @@ export type Database = {
         }
         Returns: undefined
       }
+      conclude_servant_leader: {
+        Args: {
+          p_effective_to?: string
+          p_leadership_assignment_id: string
+          p_organization_id: string
+          p_reason?: string
+        }
+        Returns: Json
+      }
       create_family: {
         Args: {
           p_confirm_duplicate?: boolean
@@ -5884,6 +5907,7 @@ export type Database = {
           p_name: string
           p_organization_id: string
           p_parent_governance_node_id: string
+          p_pastoral_level?: string
           p_target_member_count?: number
         }
         Returns: Json
@@ -6069,6 +6093,14 @@ export type Database = {
           parent_node_name: string
         }[]
       }
+      get_servant_leader_pastoral_placement_guidance: {
+        Args: {
+          p_leadership_assignment_id?: string
+          p_member_id: string
+          p_organization_id: string
+        }
+        Returns: Json
+      }
       issue_member_qr_token: {
         Args: {
           p_actor_profile_id?: string
@@ -6145,6 +6177,17 @@ export type Database = {
           p_organization_id: string
           p_reason: string
           p_relationship_id: string
+        }
+        Returns: Json
+      }
+      replace_servant_leader: {
+        Args: {
+          p_effective_date?: string
+          p_governance_node_id: string
+          p_new_member_id: string
+          p_organization_id: string
+          p_reason?: string
+          p_role_code: string
         }
         Returns: Json
       }
@@ -6296,6 +6339,7 @@ export type Database = {
           p_meeting_timezone_name?: string
           p_name: string
           p_organization_id: string
+          p_pastoral_level?: string
           p_target_member_count?: number
         }
         Returns: Json
