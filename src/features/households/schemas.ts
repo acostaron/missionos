@@ -18,6 +18,8 @@ export const createHouseholdSchema = z
     parent_governance_node_id: z
       .string()
       .min(1, 'Parent Unit or Chapter placement is required'),
+    pastoral_level: z
+      .enum(['member', 'unit', 'chapter', 'area', 'fraternal']),
     household_category: z
       .enum(['pastoral', 'formation', 'mission', 'temporary', 'welcoming', 'other']),
     meeting_frequency: z
@@ -97,6 +99,9 @@ export const editHouseholdSchema = z
         /^[a-z][a-z0-9_]*$/,
         'Code must start with a lowercase letter and contain only lowercase letters, digits, and underscores'
       ),
+    pastoral_level: z
+      .enum(['member', 'unit', 'chapter', 'area', 'fraternal'])
+      .optional(),
     household_category: z
       .enum(['pastoral', 'formation', 'mission', 'temporary', 'welcoming', 'other']),
     meeting_frequency: z

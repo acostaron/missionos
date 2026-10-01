@@ -22,6 +22,7 @@ export async function updateHousehold(
     p_accepts_new_members: input.accepts_new_members ?? true,
     p_language_code: input.language_code ?? 'en',
     p_is_couple_household: input.is_couple_household ?? false,
+    p_pastoral_level: input.pastoral_level ?? undefined,
   });
 
   if (error) {

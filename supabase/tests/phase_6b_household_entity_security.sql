@@ -165,7 +165,8 @@ BEGIN
     p_organization_id           => v_org_id,
     p_name                      => 'Chapter Pastoral Household',
     p_code                      => 'rvc_chap_hh',
-    p_parent_governance_node_id => v_chapter_node_id
+    p_parent_governance_node_id => v_chapter_node_id,
+    p_pastoral_level            => 'chapter'
   );
   ASSERT v_res_json->>'status' = 'created', 'Test 31.B FAILED: status not created';
   v_hh_chapter_id := (v_res_json->>'household_id')::uuid;

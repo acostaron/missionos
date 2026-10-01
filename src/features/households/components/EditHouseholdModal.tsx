@@ -40,6 +40,7 @@ export function EditHouseholdModal({
     defaultValues: {
       name: household.name,
       code: household.code,
+      pastoral_level: (household.pastoral_level as any) || 'member',
       household_category: (household.household_category as any) || 'pastoral',
       meeting_frequency: (household.meeting_frequency as any) || 'weekly',
       meeting_day_of_week: household.meeting_day_of_week,
@@ -72,6 +73,7 @@ export function EditHouseholdModal({
         household_id: household.id,
         name: data.name,
         code: data.code,
+        pastoral_level: data.pastoral_level,
         household_category: data.household_category,
         meeting_frequency: data.meeting_frequency,
         meeting_day_of_week: data.meeting_day_of_week != null ? Number(data.meeting_day_of_week) : null,
@@ -170,8 +172,31 @@ export function EditHouseholdModal({
           {/* Identity Section */}
           <div className="space-y-4">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Household Identity
+              Household Identity &amp; Pastoral Echelon
             </h3>
+
+            {/* Pastoral Level Selector */}
+            <div>
+              <label className="block text-xs font-medium text-slate-300">
+                Pastoral Level
+              </label>
+              <select
+                {...register('pastoral_level')}
+                disabled={householdData.counts.active_member_count > 0 || householdData.leaders.length > 0}
+                className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-800/80 px-3 py-2 text-sm text-slate-100 disabled:opacity-60 disabled:cursor-not-allowed focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              >
+                <option value="member">Member Household (Servant-led; for regular members)</option>
+                <option value="unit">Unit Household (Unit Servant-led; for Household Leaders)</option>
+                <option value="chapter">Chapter Household (Chapter Servant-led; for Unit Leaders)</option>
+                <option value="area">Area Household (Area Servant-led; for Chapter Leaders)</option>
+                <option value="fraternal">Fraternal Household (Peer-facilitated; for Area Head &amp; senior members)</option>
+              </select>
+              {(householdData.counts.active_member_count > 0 || householdData.leaders.length > 0) && (
+                <p className="mt-1 text-[11px] text-slate-400 italic">
+                  Pastoral level cannot be changed while active members or leaders are assigned.
+                </p>
+              )}
+            </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>

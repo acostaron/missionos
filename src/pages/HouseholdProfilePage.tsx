@@ -156,6 +156,9 @@ export default function HouseholdProfilePage() {
               <span className="font-mono text-xs text-slate-400">
                 {household.code}
               </span>
+              <span className="inline-flex items-center rounded-full border border-indigo-700/60 bg-indigo-950/40 px-2.5 py-0.5 text-xs font-medium text-indigo-300">
+                {household.pastoral_level_label ?? (household.pastoral_level ? `${household.pastoral_level.toUpperCase()} HOUSEHOLD` : 'MEMBER HOUSEHOLD')}
+              </span>
               <span
                 className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${
                   isStatusActive
@@ -304,54 +307,81 @@ export default function HouseholdProfilePage() {
 
         {/* Pastoral Leadership */}
         <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-5 space-y-4">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-400 border-b border-slate-700 pb-2.5">
-            Leadership
-          </h2>
-
-          {/* Derived Pastoral Couple (Couples Section only) */}
-          {data.household_leaders && (
-            <div className="rounded-lg border border-indigo-700/60 bg-indigo-950/30 p-3.5 space-y-1.5">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-indigo-400">
-                HOUSEHOLD LEADERS
+          <div className="flex items-center justify-between border-b border-slate-700 pb-2.5">
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              Leadership &amp; Facilitation
+            </h2>
+            {household.leadership_source && (
+              <span className="text-[10px] font-mono text-slate-500 uppercase">
+                {household.leadership_source.replace(/_/g, ' ')}
               </span>
-              <p className="text-sm font-semibold text-slate-100">
-                {data.household_leaders.formatted_names}
-              </p>
-              <p className="text-[10px] text-slate-400">
-                Pastoral couple designation for Couples Section
-              </p>
-            </div>
-          )}
+            )}
+          </div>
 
-          {/* Formal Office Holders */}
-          {leaders.length === 0 ? (
-            <p className="text-xs text-slate-500 italic py-2">
-              No formal leaders currently assigned.
-            </p>
-          ) : (
-            <div className="space-y-3">
-              {leaders.map((lead) => (
-                <div
-                  key={lead.leadership_assignment_id}
-                  className="rounded-lg border border-slate-700/60 bg-slate-900/40 p-3 flex items-center justify-between text-xs"
-                >
-                  <div>
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 block mb-0.5">
-                      {lead.leadership_role_name}
-                    </span>
-                    <p className="font-medium text-slate-100">
-                      {lead.display_name}
-                    </p>
-                    <p className="text-[10px] text-slate-400 mt-0.5">
-                      Serving since {lead.effective_from}
-                    </p>
-                  </div>
-                  <span className="inline-flex items-center rounded-full border border-indigo-700/60 bg-indigo-950/40 px-2 py-0.5 text-[10px] font-medium text-indigo-300">
-                    Formal Office
-                  </span>
-                </div>
-              ))}
+          {/* Fraternal Household Special Peer Facilitation Notice */}
+          {household.pastoral_level === 'fraternal' ? (
+            <div className="rounded-lg border border-amber-700/50 bg-amber-950/20 p-4 space-y-2 text-xs text-amber-200">
+              <div className="flex items-center gap-2">
+                <svg className="h-4 w-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="font-semibold text-amber-300 uppercase tracking-wider text-[11px]">
+                  Peer Facilitated · No Permanent Servant Leader
+                </span>
+              </div>
+              <p className="text-amber-200/90 text-xs leading-relaxed">
+                The Fraternal Household provides pastoral nourishment to the Area Head/Leader and senior members.
+                Meetings are peer-facilitated with members taking turns leading the prayer meetings. No formal Household Servant Leader is assigned.
+              </p>
             </div>
+          ) : (
+            <>
+              {/* Derived Pastoral Couple (Couples Section only) */}
+              {data.household_leaders && (
+                <div className="rounded-lg border border-indigo-700/60 bg-indigo-950/30 p-3.5 space-y-1.5">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-indigo-400">
+                    {data.household_leaders.pastoral_label || 'HOUSEHOLD LEADERS'}
+                  </span>
+                  <p className="text-sm font-semibold text-slate-100">
+                    {data.household_leaders.formatted_names}
+                  </p>
+                  <p className="text-[10px] text-slate-400">
+                    Pastoral couple designation for Couples Section ({data.household_leaders.pastoral_label || 'Household Leaders'})
+                  </p>
+                </div>
+              )}
+
+              {/* Formal Office Holders */}
+              {leaders.length === 0 ? (
+                <p className="text-xs text-slate-500 italic py-2">
+                  No formal leaders currently assigned.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {leaders.map((lead) => (
+                    <div
+                      key={lead.leadership_assignment_id}
+                      className="rounded-lg border border-slate-700/60 bg-slate-900/40 p-3 flex items-center justify-between text-xs"
+                    >
+                      <div>
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 block mb-0.5">
+                          {lead.leadership_role_name}
+                        </span>
+                        <p className="font-medium text-slate-100">
+                          {lead.display_name}
+                        </p>
+                        <p className="text-[10px] text-slate-400 mt-0.5">
+                          Serving since {lead.effective_from}
+                        </p>
+                      </div>
+                      <span className="inline-flex items-center rounded-full border border-indigo-700/60 bg-indigo-950/40 px-2 py-0.5 text-[10px] font-medium text-indigo-300">
+                        Formal Office
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

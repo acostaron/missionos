@@ -49,6 +49,7 @@ export function CreateHouseholdModal({
       name: '',
       code: '',
       parent_governance_node_id: '',
+      pastoral_level: 'member',
       household_category: 'pastoral',
       meeting_frequency: 'weekly',
       meeting_day_of_week: 5, // Friday
@@ -65,6 +66,7 @@ export function CreateHouseholdModal({
   });
 
   const selectedParentId = watch('parent_governance_node_id');
+  const selectedPastoralLevel = watch('pastoral_level');
 
   if (!isOpen) return null;
 
@@ -83,6 +85,7 @@ export function CreateHouseholdModal({
         name: data.name,
         code: data.code,
         parent_governance_node_id: data.parent_governance_node_id,
+        pastoral_level: data.pastoral_level,
         household_category: data.household_category,
         meeting_frequency: data.meeting_frequency,
         meeting_day_of_week: data.meeting_day_of_week != null ? Number(data.meeting_day_of_week) : null,
@@ -154,8 +157,38 @@ export function CreateHouseholdModal({
           {/* Identity Section */}
           <div className="space-y-4">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Household Identity
+              Household Identity &amp; Pastoral Echelon
             </h3>
+
+            {/* Pastoral Level Selector */}
+            <div>
+              <label className="block text-xs font-medium text-slate-300">
+                Pastoral Level <span className="text-rose-400">*</span>
+              </label>
+              <select
+                {...register('pastoral_level')}
+                onChange={(e) => {
+                  register('pastoral_level').onChange(e);
+                  setValue('parent_governance_node_id', '', { shouldValidate: true });
+                }}
+                className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-800/80 px-3 py-2 text-sm text-slate-100 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              >
+                <option value="member">Member Household (Nourishment for members; led by Household Servant Leader)</option>
+                <option value="unit">Unit Household (Nourishment for Household Leaders; led by Unit Servant Leader)</option>
+                <option value="chapter">Chapter Household (Nourishment for Unit Leaders; led by Chapter Servant Leader)</option>
+                <option value="area">Area Household (Nourishment for Chapter Leaders; led by Area Servant Leader)</option>
+                <option value="fraternal">Fraternal Household (Nourishment for Area Head &amp; senior members; peer-facilitated)</option>
+              </select>
+              {selectedPastoralLevel === 'fraternal' && (
+                <div className="mt-2 rounded-lg border border-amber-700/50 bg-amber-950/20 p-2.5 text-xs text-amber-300">
+                  <p className="font-semibold">Fraternal Household Note:</p>
+                  <p className="mt-0.5 text-amber-200/90">
+                    Provides pastoral nourishment to the Area Head/Leader and senior unplaced members.
+                    This household has <strong>no permanent formal Household Servant Leader</strong>. Members rotate facilitation of prayer meetings.
+                  </p>
+                </div>
+              )}
+            </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
@@ -192,7 +225,14 @@ export function CreateHouseholdModal({
             {/* Parent Governance Placement */}
             <div>
               <label className="block text-xs font-medium text-slate-300">
-                Parent Unit or Chapter <span className="text-rose-400">*</span>
+                Parent Placement Node <span className="text-rose-400">*</span>
+                <span className="text-slate-400 font-normal ml-1">
+                  {selectedPastoralLevel === 'member' && '(Must attach to Unit, or Chapter if no Units exist)'}
+                  {selectedPastoralLevel === 'unit' && '(Must attach to Unit)'}
+                  {selectedPastoralLevel === 'chapter' && '(Must attach to Chapter)'}
+                  {selectedPastoralLevel === 'area' && '(Must attach to Area / State)'}
+                  {selectedPastoralLevel === 'fraternal' && '(Must attach to Area / State)'}
+                </span>
               </label>
 
               {isNodesLoading ? (
@@ -201,31 +241,41 @@ export function CreateHouseholdModal({
                 <p className="mt-1 text-xs text-rose-400">Failed to load placement hierarchy.</p>
               ) : (
                 <div className="mt-1 max-h-48 overflow-y-auto rounded-lg border border-slate-700 bg-slate-950/40 p-2 space-y-1.5">
-                  {nodes?.map((node) => {
-                    const isSelected = selectedParentId === node.governance_node_id;
-                    return (
-                      <div
-                        key={node.governance_node_id}
-                        onClick={() => setValue('parent_governance_node_id', node.governance_node_id, { shouldValidate: true })}
-                        className={`flex items-center justify-between p-2.5 rounded-lg border cursor-pointer transition-colors ${
-                          isSelected
-                            ? 'border-indigo-500 bg-indigo-950/40 text-indigo-200'
-                            : 'border-slate-800 bg-slate-900/40 text-slate-300 hover:border-slate-700 hover:bg-slate-800/40'
-                        }`}
-                      >
-                        <div>
-                          <p className="text-xs font-medium">{node.node_name}</p>
-                          <p className="text-[10px] text-slate-400">
-                            Code: <span className="font-mono text-slate-300">{node.node_code}</span>
-                            {node.parent_node_name && ` · under ${node.parent_node_name}`}
-                          </p>
+                  {nodes
+                    ?.filter((node) => {
+                      if (selectedPastoralLevel === 'unit') return node.node_type_code === 'unit';
+                      if (selectedPastoralLevel === 'chapter') return node.node_type_code === 'chapter';
+                      if (selectedPastoralLevel === 'area' || selectedPastoralLevel === 'fraternal') {
+                        return node.node_type_code === 'area_state';
+                      }
+                      // member level allows unit (or chapter fallback)
+                      return node.node_type_code === 'unit' || node.node_type_code === 'chapter';
+                    })
+                    .map((node) => {
+                      const isSelected = selectedParentId === node.governance_node_id;
+                      return (
+                        <div
+                          key={node.governance_node_id}
+                          onClick={() => setValue('parent_governance_node_id', node.governance_node_id, { shouldValidate: true })}
+                          className={`flex items-center justify-between p-2.5 rounded-lg border cursor-pointer transition-colors ${
+                            isSelected
+                              ? 'border-indigo-500 bg-indigo-950/40 text-indigo-200'
+                              : 'border-slate-800 bg-slate-900/40 text-slate-300 hover:border-slate-700 hover:bg-slate-800/40'
+                          }`}
+                        >
+                          <div>
+                            <p className="text-xs font-medium">{node.node_name}</p>
+                            <p className="text-[10px] text-slate-400">
+                              Code: <span className="font-mono text-slate-300">{node.node_code}</span>
+                              {node.parent_node_name && ` · under ${node.parent_node_name}`}
+                            </p>
+                          </div>
+                          <span className="text-[10px] uppercase font-semibold px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
+                            {node.node_type_code}
+                          </span>
                         </div>
-                        <span className="text-[10px] uppercase font-semibold px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
-                          {node.node_type_code}
-                        </span>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
                 </div>
               )}
               {errors.parent_governance_node_id && (

@@ -228,6 +228,9 @@ export default function HouseholdsPage() {
                       <span className="font-mono text-xs text-slate-400">
                         {hh.code}
                       </span>
+                      <span className="inline-flex items-center rounded-full border border-indigo-700/60 bg-indigo-950/40 px-2 py-0.5 text-[10px] font-medium text-indigo-300">
+                        {hh.pastoral_level_label ?? (hh.pastoral_level ? `${hh.pastoral_level.toUpperCase()} HOUSEHOLD` : 'MEMBER HOUSEHOLD')}
+                      </span>
                       <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium ${
                         hh.lifecycle_status === 'active'
                           ? 'border-emerald-700/60 bg-emerald-950/40 text-emerald-300'

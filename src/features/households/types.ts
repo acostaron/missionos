@@ -6,12 +6,21 @@ export type HouseholdLifecycleStatus =
   | 'merged'
   | 'archived';
 
+export type PastoralLevel =
+  | 'member'
+  | 'unit'
+  | 'chapter'
+  | 'area'
+  | 'fraternal';
+
 export interface HouseholdSummary {
   household_id: string;
   name: string;
   code: string;
   lifecycle_status: HouseholdLifecycleStatus | string;
   household_category: string;
+  pastoral_level: PastoralLevel | string;
+  pastoral_level_label?: string;
   parent_node_id: string | null;
   parent_node_name: string | null;
   parent_node_code: string | null;
@@ -70,6 +79,9 @@ export interface HouseholdProfileIdentity {
   code: string;
   lifecycle_status: HouseholdLifecycleStatus | string;
   household_category: string;
+  pastoral_level: PastoralLevel | string;
+  pastoral_level_label?: string;
+  leadership_source?: string;
   effective_from: string;
   effective_to: string | null;
   meeting_frequency: string;
@@ -137,6 +149,7 @@ export interface CreateHouseholdInput {
   code: string;
   parent_governance_node_id: string;
   household_category?: string;
+  pastoral_level?: PastoralLevel;
   meeting_frequency?: string;
   meeting_day_of_week?: number | null;
   meeting_start_time?: string | null;
@@ -156,6 +169,7 @@ export interface CreateHouseholdResult {
   name: string;
   code: string;
   lifecycle_status: HouseholdLifecycleStatus | string;
+  pastoral_level?: PastoralLevel | string;
   parent_governance_node_id: string;
 }
 
@@ -164,6 +178,7 @@ export interface UpdateHouseholdInput {
   name: string;
   code: string;
   household_category?: string;
+  pastoral_level?: PastoralLevel;
   meeting_frequency?: string;
   meeting_day_of_week?: number | null;
   meeting_start_time?: string | null;
