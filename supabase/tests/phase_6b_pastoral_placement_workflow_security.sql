@@ -777,7 +777,7 @@ BEGIN
   -- PART 9: APP AUTHORIZATION TABLES UNCHANGED
   -- ---------------------------------------------------------------------------
   SELECT count(*) INTO v_count FROM public.app_roles;
-  ASSERT v_count = 13, 'Test 9.1 FAILED: app_roles count changed';
+  ASSERT v_count = 17, 'Test 9.1 FAILED: app_roles count changed';
 
   RAISE NOTICE 'ALL PHASE 6B-6 PASTORAL PLACEMENT TESTS PASSED SUCCESSFULLY.';
 END;

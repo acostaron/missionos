@@ -14,6 +14,7 @@ import { ReplaceServantLeaderModal } from '../features/households/components/Rep
 import { ConcludeServantLeaderModal } from '../features/households/components/ConcludeServantLeaderModal';
 import { PastoralPlacementReviewModal } from '../features/households/components/PastoralPlacementReviewModal';
 import { HouseholdMeetingsCard } from '../features/households/components/HouseholdMeetingsCard';
+import { ServantLeaderAccessModal } from '../features/households/components/ServantLeaderAccessModal';
 import type { HouseholdMember, HouseholdLeader, ServantLeaderRoleCode } from '../features/households/types';
 
 function formatFrequency(freq: string | null): string {
@@ -45,6 +46,7 @@ export default function HouseholdProfilePage() {
   const [isReplaceLeaderModalOpen, setIsReplaceLeaderModalOpen] = useState(false);
   const [isConcludeLeaderModalOpen, setIsConcludeLeaderModalOpen] = useState(false);
   const [isPlacementModalOpen, setIsPlacementModalOpen] = useState(false);
+  const [isAccessModalOpen, setIsAccessModalOpen] = useState(false);
   const [selectedLeader, setSelectedLeader] = useState<HouseholdLeader | null>(null);
   const [selectedMember, setSelectedMember] = useState<HouseholdMember | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -64,6 +66,10 @@ export default function HouseholdProfilePage() {
   const canViewMeetings = !isPermLoading && hasPermission(Permissions.HouseholdsMeetingsView);
   const canManageMeetings = !isPermLoading && hasPermission(Permissions.HouseholdsMeetingsManage);
   const canRecordAttendance = !isPermLoading && hasPermission(Permissions.HouseholdsAttendanceRecord);
+  const canManageDelegatedAccess =
+    !isPermLoading &&
+    (hasPermission(Permissions.LeadershipDelegatedAccessManage) ||
+      hasPermission(Permissions.LeadershipDelegatedAccessView));
 
   const {
     data,
@@ -415,6 +421,18 @@ export default function HouseholdProfilePage() {
                         <span className="inline-flex items-center rounded-full border border-indigo-700/60 bg-indigo-950/40 px-2 py-0.5 text-[10px] font-medium text-indigo-300">
                           Formal Office
                         </span>
+                        {canManageDelegatedAccess && isStatusActive && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedLeader(lead);
+                              setIsAccessModalOpen(true);
+                            }}
+                            className="rounded px-2 py-0.5 text-[11px] font-medium text-indigo-300 hover:text-indigo-100 bg-indigo-950/40 hover:bg-indigo-900/60 border border-indigo-800/40 transition-colors"
+                          >
+                            App Access
+                          </button>
+                        )}
                         {canReviewPlacement && (
                           <button
                             type="button"
@@ -720,6 +738,19 @@ export default function HouseholdProfilePage() {
                 }}
                 organizationId={orgId}
                 leadershipAssignmentId={selectedLeader.leadership_assignment_id}
+                onSuccessToast={triggerToast}
+              />
+              <ServantLeaderAccessModal
+                isOpen={isAccessModalOpen}
+                onClose={() => {
+                  setIsAccessModalOpen(false);
+                  setSelectedLeader(null);
+                }}
+                organizationId={orgId}
+                leadershipAssignmentId={selectedLeader.leadership_assignment_id}
+                leaderDisplayName={selectedLeader.display_name}
+                roleName={selectedLeader.leadership_role_name}
+                governanceNodeName={household.name}
                 onSuccessToast={triggerToast}
               />
             </>

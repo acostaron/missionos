@@ -959,3 +959,65 @@ export interface MeetingOperationsSummary {
 export interface PastoralOperationsDashboardV2 extends PastoralOperationsDashboard {
   meeting_operations_summary: MeetingOperationsSummary;
 }
+
+// =============================================================================
+// Phase 6B-9: Delegated Servant Leader Access
+// =============================================================================
+
+export type ServantLeaderAccessStatusType = 'none' | 'active' | 'revoked' | 'expired';
+
+export type ServantLeaderEligibilityStatus =
+  | 'eligible'
+  | 'no_linked_profile'
+  | 'leadership_not_current'
+  | 'unsupported_role'
+  | 'already_active'
+  | 'future_effective';
+
+export interface ServantLeaderAccessStatus {
+  leadership_assignment_id: string;
+  leader_member_id: string;
+  leader_member_name: string;
+  role_code: string;
+  role_name: string;
+  governance_node_id: string;
+  governance_node_name: string;
+  linked_profile_id: string | null;
+  has_linked_profile: boolean;
+  access_grant_id: string | null;
+  access_status: ServantLeaderAccessStatusType;
+  eligibility_status: ServantLeaderEligibilityStatus;
+  app_role_code: string | null;
+  app_role_name: string | null;
+  granted_at: string | null;
+  granted_by_profile_id: string | null;
+  revoked_at: string | null;
+  revoked_by_profile_id: string | null;
+  revocation_reason: string | null;
+  effective_from: string | null;
+  effective_to: string | null;
+}
+
+export interface GrantServantLeaderAccessResult {
+  grant_id: string;
+  leadership_assignment_id: string;
+  profile_id: string;
+  member_id: string;
+  member_name: string;
+  role_code: string;
+  app_role_code: string;
+  governance_node_id: string;
+  governance_node_name: string;
+  access_status: string;
+  granted_at: string;
+}
+
+export interface RevokeServantLeaderAccessResult {
+  grant_id: string;
+  leadership_assignment_id: string;
+  profile_id: string;
+  member_id: string;
+  access_status: string;
+  revoked_at: string;
+  reason: string;
+}

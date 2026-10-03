@@ -75,6 +75,10 @@ export const Permissions = {
   HouseholdsMeetingsView: 'households.meetings.view',
   HouseholdsMeetingsManage: 'households.meetings.manage',
   HouseholdsAttendanceRecord: 'households.attendance.record',
+
+  // Phase 6B-9: Delegated Servant Leader Access
+  LeadershipDelegatedAccessManage: 'leadership.delegated_access.manage',
+  LeadershipDelegatedAccessView: 'leadership.delegated_access.view',
 } as const;
 
 export type PermissionCode = typeof Permissions[keyof typeof Permissions];

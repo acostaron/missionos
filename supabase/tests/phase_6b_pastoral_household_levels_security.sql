@@ -578,7 +578,7 @@ BEGIN
   -- Verify app_roles, profile_role_assignments, profile_scope_assignments unchanged
   -- ---------------------------------------------------------------------------
   SELECT count(*) INTO v_count FROM public.app_roles;
-  ASSERT v_count = 13, 'Test 6A FAILED: app_roles count changed';
+  ASSERT v_count = 17, 'Test 6A FAILED: app_roles count changed';
 
   SELECT count(*) INTO v_count FROM public.profile_role_assignments;
   ASSERT v_count = 1, 'Test 6B FAILED: profile_role_assignments count changed';

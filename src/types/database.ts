@@ -5563,6 +5563,143 @@ export type Database = {
           },
         ]
       }
+      servant_leader_access_grants: {
+        Row: {
+          access_status: string
+          app_role_id: string
+          created_at: string
+          effective_from: string
+          effective_to: string | null
+          governance_node_id: string
+          granted_at: string
+          granted_by_profile_id: string | null
+          id: string
+          leadership_assignment_id: string
+          member_id: string
+          organization_id: string
+          profile_id: string
+          profile_role_assignment_id: string | null
+          profile_scope_assignment_id: string | null
+          revocation_reason: string | null
+          revoked_at: string | null
+          revoked_by_profile_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_status?: string
+          app_role_id: string
+          created_at?: string
+          effective_from?: string
+          effective_to?: string | null
+          governance_node_id: string
+          granted_at?: string
+          granted_by_profile_id?: string | null
+          id?: string
+          leadership_assignment_id: string
+          member_id: string
+          organization_id: string
+          profile_id: string
+          profile_role_assignment_id?: string | null
+          profile_scope_assignment_id?: string | null
+          revocation_reason?: string | null
+          revoked_at?: string | null
+          revoked_by_profile_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_status?: string
+          app_role_id?: string
+          created_at?: string
+          effective_from?: string
+          effective_to?: string | null
+          governance_node_id?: string
+          granted_at?: string
+          granted_by_profile_id?: string | null
+          id?: string
+          leadership_assignment_id?: string
+          member_id?: string
+          organization_id?: string
+          profile_id?: string
+          profile_role_assignment_id?: string | null
+          profile_scope_assignment_id?: string | null
+          revocation_reason?: string | null
+          revoked_at?: string | null
+          revoked_by_profile_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "servant_leader_access_grants_app_role_id_fkey"
+            columns: ["app_role_id"]
+            isOneToOne: false
+            referencedRelation: "app_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servant_leader_access_grants_governance_node_id_fkey"
+            columns: ["governance_node_id"]
+            isOneToOne: false
+            referencedRelation: "governance_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servant_leader_access_grants_granted_by_profile_id_fkey"
+            columns: ["granted_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servant_leader_access_grants_leadership_assignment_id_fkey"
+            columns: ["leadership_assignment_id"]
+            isOneToOne: false
+            referencedRelation: "leadership_assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servant_leader_access_grants_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servant_leader_access_grants_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servant_leader_access_grants_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servant_leader_access_grants_profile_role_assignment_id_fkey"
+            columns: ["profile_role_assignment_id"]
+            isOneToOne: false
+            referencedRelation: "profile_role_assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servant_leader_access_grants_profile_scope_assignment_id_fkey"
+            columns: ["profile_scope_assignment_id"]
+            isOneToOne: false
+            referencedRelation: "profile_scope_assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servant_leader_access_grants_revoked_by_profile_id_fkey"
+            columns: ["revoked_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       states_provinces: {
         Row: {
           code: string
@@ -6329,11 +6466,23 @@ export type Database = {
           parent_node_name: string
         }[]
       }
+      get_servant_leader_access_status: {
+        Args: { p_leadership_assignment_id: string; p_organization_id: string }
+        Returns: Json
+      }
       get_servant_leader_pastoral_placement_guidance: {
         Args: {
           p_leadership_assignment_id?: string
           p_member_id: string
           p_organization_id: string
+        }
+        Returns: Json
+      }
+      grant_servant_leader_access: {
+        Args: {
+          p_leadership_assignment_id: string
+          p_organization_id: string
+          p_profile_id?: string
         }
         Returns: Json
       }
@@ -6478,6 +6627,15 @@ export type Database = {
         }
         Returns: undefined
       }
+      revoke_servant_leader_access: {
+        Args: {
+          p_grant_id?: string
+          p_leadership_assignment_id?: string
+          p_organization_id: string
+          p_reason?: string
+        }
+        Returns: Json
+      }
       search_households: {
         Args: {
           p_lifecycle_status?: string
@@ -6507,6 +6665,10 @@ export type Database = {
           p_organization_id: string
           p_search?: string
         }
+        Returns: Json
+      }
+      search_servant_leader_access_reconciliation: {
+        Args: { p_organization_id: string }
         Returns: Json
       }
       search_servant_leaders_needing_pastoral_placement: {

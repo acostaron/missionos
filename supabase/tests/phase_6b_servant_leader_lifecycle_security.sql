@@ -650,7 +650,7 @@ BEGIN
   -- PART 6: AUTHORIZATION & SOFTWARE ISOLATION
   -- ---------------------------------------------------------------------------
   SELECT count(*) INTO v_count FROM public.app_roles;
-  ASSERT v_count = 13, 'Test 6.1 FAILED: app_roles count changed';
+  ASSERT v_count = 17, 'Test 6.1 FAILED: app_roles count changed';
 
   SELECT count(*) INTO v_count FROM public.profile_role_assignments;
   ASSERT v_count = 1, 'Test 6.2 FAILED: profile_role_assignments count changed';
@@ -891,7 +891,7 @@ BEGIN
 
   -- S/T: app authorization tables and household memberships unchanged
   SELECT count(*) INTO v_count FROM public.app_roles;
-  ASSERT v_count = 13, 'Test 14.S FAILED: app_roles count changed';
+  ASSERT v_count = 17, 'Test 14.S FAILED: app_roles count changed';
   RAISE NOTICE 'Test 14.S/T PASSED: App authorization tables and zero unintended side-effects verified.';
 
   RAISE NOTICE 'ALL PHASE 6B-5 SERVANT LEADER LIFECYCLE TESTS PASSED SUCCESSFULLY.';
