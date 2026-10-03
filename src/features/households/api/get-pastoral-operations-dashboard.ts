@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase/client';
-import type { PastoralOperationsDashboard } from '../types';
+import type { PastoralOperationsDashboardV2 } from '../types';
 
 
 export const pastoralDashboardKeys = {
@@ -14,7 +14,7 @@ export const pastoralDashboardKeys = {
 export async function getPastoralOperationsDashboard(
   organizationId: string,
   governanceNodeId?: string | null
-): Promise<PastoralOperationsDashboard> {
+): Promise<PastoralOperationsDashboardV2> {
   const { data, error } = await supabase.rpc('get_pastoral_operations_dashboard', {
     p_organization_id: organizationId,
     p_governance_node_id: governanceNodeId ?? undefined,
@@ -24,7 +24,7 @@ export async function getPastoralOperationsDashboard(
     throw error;
   }
 
-  return data as unknown as PastoralOperationsDashboard;
+  return data as unknown as PastoralOperationsDashboardV2;
 }
 
 export function usePastoralOperationsDashboard(

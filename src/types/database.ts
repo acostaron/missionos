@@ -1664,6 +1664,168 @@ export type Database = {
           },
         ]
       }
+      household_meeting_attendance: {
+        Row: {
+          arrival_time: string | null
+          attendance_status: string
+          household_meeting_id: string
+          id: string
+          member_id: string
+          organization_id: string
+          recorded_at: string
+          recorded_by_profile_id: string | null
+          updated_at: string
+          updated_by_profile_id: string | null
+        }
+        Insert: {
+          arrival_time?: string | null
+          attendance_status: string
+          household_meeting_id: string
+          id?: string
+          member_id: string
+          organization_id: string
+          recorded_at?: string
+          recorded_by_profile_id?: string | null
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Update: {
+          arrival_time?: string | null
+          attendance_status?: string
+          household_meeting_id?: string
+          id?: string
+          member_id?: string
+          organization_id?: string
+          recorded_at?: string
+          recorded_by_profile_id?: string | null
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_hma__meeting"
+            columns: ["household_meeting_id"]
+            isOneToOne: false
+            referencedRelation: "household_meetings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_hma__member"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_hma__organization"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      household_meetings: {
+        Row: {
+          actual_end_at: string | null
+          actual_start_at: string | null
+          attendance_recorded_at: string | null
+          attendance_recorded_by_profile_id: string | null
+          created_at: string
+          created_by_profile_id: string | null
+          facilitator_member_id: string | null
+          host_member_id: string | null
+          household_node_id: string
+          id: string
+          location_text: string | null
+          location_type: string | null
+          meeting_date: string
+          meeting_status: string
+          meeting_type: string
+          notes_summary: string | null
+          organization_id: string
+          scheduled_end_at: string | null
+          scheduled_start_at: string | null
+          updated_at: string
+          updated_by_profile_id: string | null
+        }
+        Insert: {
+          actual_end_at?: string | null
+          actual_start_at?: string | null
+          attendance_recorded_at?: string | null
+          attendance_recorded_by_profile_id?: string | null
+          created_at?: string
+          created_by_profile_id?: string | null
+          facilitator_member_id?: string | null
+          host_member_id?: string | null
+          household_node_id: string
+          id?: string
+          location_text?: string | null
+          location_type?: string | null
+          meeting_date: string
+          meeting_status?: string
+          meeting_type?: string
+          notes_summary?: string | null
+          organization_id: string
+          scheduled_end_at?: string | null
+          scheduled_start_at?: string | null
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Update: {
+          actual_end_at?: string | null
+          actual_start_at?: string | null
+          attendance_recorded_at?: string | null
+          attendance_recorded_by_profile_id?: string | null
+          created_at?: string
+          created_by_profile_id?: string | null
+          facilitator_member_id?: string | null
+          host_member_id?: string | null
+          household_node_id?: string
+          id?: string
+          location_text?: string | null
+          location_type?: string | null
+          meeting_date?: string
+          meeting_status?: string
+          meeting_type?: string
+          notes_summary?: string | null
+          organization_id?: string
+          scheduled_end_at?: string | null
+          scheduled_start_at?: string | null
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_household_meetings__facilitator"
+            columns: ["facilitator_member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_household_meetings__host"
+            columns: ["host_member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_household_meetings__household_node"
+            columns: ["household_node_id"]
+            isOneToOne: false
+            referencedRelation: "governance_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_household_meetings__organization"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       household_memberships: {
         Row: {
           approved_at: string | null
@@ -1751,7 +1913,7 @@ export type Database = {
           maximum_member_count: number | null
           meeting_address_id: string | null
           meeting_day_of_week: number | null
-          meeting_frequency: string
+          meeting_frequency: string | null
           meeting_location_text: string | null
           meeting_location_type: string | null
           meeting_start_time: string | null
@@ -1773,7 +1935,7 @@ export type Database = {
           maximum_member_count?: number | null
           meeting_address_id?: string | null
           meeting_day_of_week?: number | null
-          meeting_frequency?: string
+          meeting_frequency?: string | null
           meeting_location_text?: string | null
           meeting_location_type?: string | null
           meeting_start_time?: string | null
@@ -1795,7 +1957,7 @@ export type Database = {
           maximum_member_count?: number | null
           meeting_address_id?: string | null
           meeting_day_of_week?: number | null
-          meeting_frequency?: string
+          meeting_frequency?: string | null
           meeting_location_text?: string | null
           meeting_location_type?: string | null
           meeting_start_time?: string | null
@@ -5825,6 +5987,14 @@ export type Database = {
         }
         Returns: string
       }
+      cancel_household_meeting: {
+        Args: {
+          p_meeting_id: string
+          p_organization_id: string
+          p_reason?: string
+        }
+        Returns: Json
+      }
       change_member_governance_assignment: {
         Args: {
           p_effective_from?: string
@@ -5854,6 +6024,16 @@ export type Database = {
           p_reason?: string
         }
         Returns: undefined
+      }
+      complete_household_meeting: {
+        Args: {
+          p_actual_end_at?: string
+          p_actual_start_at?: string
+          p_meeting_id: string
+          p_notes_summary?: string
+          p_organization_id: string
+        }
+        Returns: Json
       }
       conclude_servant_leader: {
         Args: {
@@ -5909,6 +6089,22 @@ export type Database = {
           p_parent_governance_node_id: string
           p_pastoral_level?: string
           p_target_member_count?: number
+        }
+        Returns: Json
+      }
+      create_household_meeting: {
+        Args: {
+          p_facilitator_member_id?: string
+          p_host_member_id?: string
+          p_household_id: string
+          p_location_text?: string
+          p_location_type?: string
+          p_meeting_date: string
+          p_meeting_type?: string
+          p_notes_summary?: string
+          p_organization_id: string
+          p_scheduled_end_at?: string
+          p_scheduled_start_at?: string
         }
         Returns: Json
       }
@@ -6030,6 +6226,23 @@ export type Database = {
           requires_same_family: boolean
           type_id: string
         }[]
+      }
+      get_household_meeting_cadence: {
+        Args: { p_household_id: string; p_organization_id: string }
+        Returns: Json
+      }
+      get_household_meeting_detail: {
+        Args: { p_meeting_id: string; p_organization_id: string }
+        Returns: Json
+      }
+      get_household_meeting_history: {
+        Args: {
+          p_household_id: string
+          p_limit?: number
+          p_offset?: number
+          p_organization_id: string
+        }
+        Returns: Json
       }
       get_household_profile: {
         Args: { p_household_id: string; p_organization_id: string }
@@ -6172,6 +6385,14 @@ export type Database = {
           p_subject_type: string
         }
         Returns: string
+      }
+      record_household_meeting_attendance: {
+        Args: {
+          p_attendance: Json
+          p_meeting_id: string
+          p_organization_id: string
+        }
+        Returns: Json
       }
       record_member_deceased: {
         Args: {

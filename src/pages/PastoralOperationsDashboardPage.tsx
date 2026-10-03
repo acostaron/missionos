@@ -139,7 +139,17 @@ export default function PastoralOperationsDashboardPage() {
     operational_summary,
     placement_review_summary,
     unassigned_members_count,
+    meeting_operations_summary,
   } = data;
+
+  const meetingOps = meeting_operations_summary ?? {
+    upcoming_meetings: 0,
+    meetings_this_month: 0,
+    attendance_pending: 0,
+    households_without_meeting_history: 0,
+    households_overdue: 0,
+    member_follow_up_signals: 0,
+  };
 
   const filteredHouseholds = household_summary.filter((hh: PastoralHouseholdSummary) => {
     if (levelFilter !== 'all' && hh.pastoral_level !== levelFilter) return false;
@@ -372,6 +382,74 @@ export default function PastoralOperationsDashboardPage() {
           <p className="text-[11px] text-slate-500">
             {capacity_summary.available} open for placement
           </p>
+        </div>
+      </div>
+
+      {/* Meeting Operations Summary */}
+      <div className="space-y-3">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+          Meeting Operations
+        </h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 space-y-1">
+            <p className="text-xs text-slate-400">Upcoming</p>
+            <p className="text-2xl font-bold text-indigo-300">{meetingOps.upcoming_meetings}</p>
+            <p className="text-[11px] text-slate-500">Scheduled meetings</p>
+          </div>
+
+          <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 space-y-1">
+            <p className="text-xs text-slate-400">This Month</p>
+            <p className="text-2xl font-bold text-emerald-400">{meetingOps.meetings_this_month}</p>
+            <p className="text-[11px] text-slate-500">Completed meetings</p>
+          </div>
+
+          <div className={`rounded-xl border p-4 space-y-1 ${
+            meetingOps.attendance_pending > 0
+              ? 'border-amber-800/60 bg-amber-950/20'
+              : 'border-slate-800 bg-slate-900/60'
+          }`}>
+            <p className="text-xs text-slate-400">Attendance Pending</p>
+            <p className={`text-2xl font-bold ${
+              meetingOps.attendance_pending > 0 ? 'text-amber-300' : 'text-slate-100'
+            }`}>{meetingOps.attendance_pending}</p>
+            <p className="text-[11px] text-slate-500">Completed, not recorded</p>
+          </div>
+
+          <div className={`rounded-xl border p-4 space-y-1 ${
+            meetingOps.households_without_meeting_history > 0
+              ? 'border-slate-700 bg-slate-900/60'
+              : 'border-slate-800 bg-slate-900/60'
+          }`}>
+            <p className="text-xs text-slate-400">No Meeting History</p>
+            <p className={`text-2xl font-bold ${
+              meetingOps.households_without_meeting_history > 0 ? 'text-slate-300' : 'text-slate-100'
+            }`}>{meetingOps.households_without_meeting_history}</p>
+            <p className="text-[11px] text-slate-500">Households never met</p>
+          </div>
+
+          <div className={`rounded-xl border p-4 space-y-1 ${
+            meetingOps.households_overdue > 0
+              ? 'border-rose-900/50 bg-rose-950/20'
+              : 'border-slate-800 bg-slate-900/60'
+          }`}>
+            <p className="text-xs text-slate-400">Overdue</p>
+            <p className={`text-2xl font-bold ${
+              meetingOps.households_overdue > 0 ? 'text-rose-400' : 'text-slate-100'
+            }`}>{meetingOps.households_overdue}</p>
+            <p className="text-[11px] text-slate-500">Past scheduled frequency</p>
+          </div>
+
+          <div className={`rounded-xl border p-4 space-y-1 ${
+            meetingOps.member_follow_up_signals > 0
+              ? 'border-amber-800/60 bg-amber-950/20'
+              : 'border-slate-800 bg-slate-900/60'
+          }`}>
+            <p className="text-xs text-slate-400">Follow-Up Signals</p>
+            <p className={`text-2xl font-bold ${
+              meetingOps.member_follow_up_signals > 0 ? 'text-amber-300' : 'text-slate-100'
+            }`}>{meetingOps.member_follow_up_signals}</p>
+            <p className="text-[11px] text-slate-500">Members with 2+ absences</p>
+          </div>
         </div>
       </div>
 

@@ -1,4 +1,4 @@
-﻿export const Permissions = {
+export const Permissions = {
   GovernanceStructureView: 'governance.structure.view',
   GovernanceStructureManage: 'governance.structure.manage',
 
@@ -70,6 +70,11 @@
   LeadershipPastoralPlacementExecute: 'leadership.pastoral_placement.execute',
 
   LeadershipPastoralDashboardView: 'leadership.pastoral_dashboard.view',
+
+  // Phase 6B-8: Household Meetings & Attendance
+  HouseholdsMeetingsView: 'households.meetings.view',
+  HouseholdsMeetingsManage: 'households.meetings.manage',
+  HouseholdsAttendanceRecord: 'households.attendance.record',
 } as const;
 
 export type PermissionCode = typeof Permissions[keyof typeof Permissions];

@@ -13,6 +13,7 @@ import { AppointServantLeaderModal } from '../features/households/components/App
 import { ReplaceServantLeaderModal } from '../features/households/components/ReplaceServantLeaderModal';
 import { ConcludeServantLeaderModal } from '../features/households/components/ConcludeServantLeaderModal';
 import { PastoralPlacementReviewModal } from '../features/households/components/PastoralPlacementReviewModal';
+import { HouseholdMeetingsCard } from '../features/households/components/HouseholdMeetingsCard';
 import type { HouseholdMember, HouseholdLeader, ServantLeaderRoleCode } from '../features/households/types';
 
 function formatFrequency(freq: string | null): string {
@@ -60,6 +61,9 @@ export default function HouseholdProfilePage() {
   const canConcludeLeader = !isPermLoading && hasPermission(Permissions.LeadershipServantLeadersConclude);
   const canReplaceLeader = !isPermLoading && hasPermission(Permissions.LeadershipServantLeadersReplace);
   const canReviewPlacement = !isPermLoading && hasPermission(Permissions.LeadershipPastoralPlacementReview);
+  const canViewMeetings = !isPermLoading && hasPermission(Permissions.HouseholdsMeetingsView);
+  const canManageMeetings = !isPermLoading && hasPermission(Permissions.HouseholdsMeetingsManage);
+  const canRecordAttendance = !isPermLoading && hasPermission(Permissions.HouseholdsAttendanceRecord);
 
   const {
     data,
@@ -599,6 +603,19 @@ export default function HouseholdProfilePage() {
           </div>
         )}
       </div>
+
+      {/* Meeting History */}
+      {orgId && householdId && (
+        <HouseholdMeetingsCard
+          organizationId={orgId}
+          householdId={householdId}
+          householdName={household.name}
+          canView={canViewMeetings}
+          canManage={canManageMeetings}
+          canRecordAttendance={canRecordAttendance}
+          onSuccessToast={triggerToast}
+        />
+      )}
 
       {orgId && (
         <>

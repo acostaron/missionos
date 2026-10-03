@@ -1,4 +1,4 @@
-﻿export type HouseholdLifecycleStatus =
+export type HouseholdLifecycleStatus =
   | 'planned'
   | 'active'
   | 'temporarily_inactive'
@@ -733,6 +733,11 @@ export interface PastoralHouseholdSummary {
   meeting_frequency: string;
   meeting_day_of_week: number | null;
   meeting_start_time: string | null;
+  meeting_operational_status?: MeetingOperationalStatus;
+  last_completed_meeting_date?: string | null;
+  next_scheduled_meeting_date?: string | null;
+  expected_next_meeting_date?: string | null;
+  days_since_last_completed_meeting?: number | null;
 }
 
 export interface PastoralLeadershipVacancy {
@@ -817,4 +822,140 @@ export interface PastoralHouseholdRoster {
   is_fraternal: boolean;
   members_count: number;
   members: PastoralHouseholdRosterMember[];
+}
+
+// =============================================================================
+// Phase 6B-8: Household Meetings, Attendance & Pastoral Follow-up
+// =============================================================================
+
+export type HouseholdMeetingStatus = 'scheduled' | 'completed' | 'cancelled';
+
+export type HouseholdMeetingType =
+  | 'regular_household'
+  | 'special_household'
+  | 'fellowship'
+  | 'formation'
+  | 'prayer'
+  | 'other';
+
+export type HouseholdLocationTypeMeeting = 'in_person' | 'virtual' | 'hybrid';
+
+export type AttendanceStatusValue = 'present' | 'absent' | 'excused';
+
+export interface AttendanceSummary {
+  expected_member_count: number;
+  recorded_attendance_count: number;
+  present_count: number;
+  absent_count: number;
+  excused_count: number;
+  attendance_complete: boolean;
+}
+
+/** A single meeting row in get_household_meeting_history */
+export interface HouseholdMeetingRow {
+  household_meeting_id: string;
+  meeting_date: string;
+  meeting_status: HouseholdMeetingStatus;
+  meeting_type: HouseholdMeetingType;
+  location_type: HouseholdLocationTypeMeeting | null;
+  location_text: string | null;
+  facilitator_member_id: string | null;
+  facilitator_display_name: string | null;
+  host_member_id: string | null;
+  host_display_name: string | null;
+  attendance_recorded_at: string | null;
+  attendance_summary: AttendanceSummary;
+  scheduled_start_at: string | null;
+  scheduled_end_at: string | null;
+  created_at: string;
+}
+
+export type MeetingOperationalStatus =
+  | 'attendance_pending'
+  | 'scheduled'
+  | 'no_meeting_history'
+  | 'overdue'
+  | 'current'
+  | 'not_configured';
+
+export interface HouseholdMeetingCadence {
+  last_completed_meeting_date: string | null;
+  next_scheduled_meeting_date: string | null;
+  expected_next_meeting_date: string | null;
+  days_since_last_completed_meeting: number | null;
+  meeting_frequency: string | null;
+  meeting_operational_status: MeetingOperationalStatus;
+}
+
+/** Return shape of get_household_meeting_history */
+export interface HouseholdMeetingHistory {
+  household_id: string;
+  household_name: string;
+  total_count: number;
+  limit: number;
+  offset: number;
+  meetings: HouseholdMeetingRow[];
+  cadence?: HouseholdMeetingCadence;
+  last_completed_meeting_date?: string | null;
+  next_scheduled_meeting_date?: string | null;
+  expected_next_meeting_date?: string | null;
+  days_since_last_completed_meeting?: number | null;
+  meeting_frequency?: string | null;
+  meeting_operational_status?: MeetingOperationalStatus;
+}
+
+/** An attendance record within a meeting detail */
+export interface HouseholdMeetingAttendanceRecord {
+  member_id: string;
+  display_name: string | null;
+  attendance_status: AttendanceStatusValue;
+  arrival_time: string | null;
+  recorded_at: string;
+}
+
+/** An expected roster member */
+export interface HouseholdMeetingRosterMember {
+  member_id: string;
+  display_name: string;
+  membership_role: string;
+}
+
+/** Return shape of get_household_meeting_detail (Phase 6B-8: notes_summary absent) */
+export interface HouseholdMeetingDetail {
+  household_meeting_id: string;
+  household_node_id: string;
+  household_name: string;
+  meeting_date: string;
+  meeting_status: HouseholdMeetingStatus;
+  meeting_type: HouseholdMeetingType;
+  location_type: HouseholdLocationTypeMeeting | null;
+  location_text: string | null;
+  scheduled_start_at: string | null;
+  scheduled_end_at: string | null;
+  actual_start_at: string | null;
+  actual_end_at: string | null;
+  facilitator_member_id: string | null;
+  facilitator_display_name: string | null;
+  host_member_id: string | null;
+  host_display_name: string | null;
+  attendance_recorded_at: string | null;
+  attendance_summary: AttendanceSummary;
+  expected_roster: HouseholdMeetingRosterMember[];
+  recorded_attendance: HouseholdMeetingAttendanceRecord[];
+  created_at: string;
+}
+
+/** Dashboard meeting_operations_summary block (Phase 6B-8) */
+export interface MeetingOperationsSummary {
+  upcoming_meetings: number;
+  meetings_this_month: number;
+  attendance_pending: number;
+  households_without_meeting_history: number;
+  households_overdue: number;
+  member_follow_up_signals: number;
+}
+
+/** Extended PastoralOperationsDashboard (Phase 6B-8 addition) */
+export interface PastoralOperationsDashboardV2 extends PastoralOperationsDashboard {
+  meeting_operations_summary: MeetingOperationsSummary;
 }
