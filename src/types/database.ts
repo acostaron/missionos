@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -1256,6 +1256,94 @@ export type Database = {
           },
         ]
       }
+      formation_topics: {
+        Row: {
+          created_at: string
+          created_by_profile_id: string | null
+          description: string | null
+          effective_from: string | null
+          effective_to: string | null
+          id: string
+          is_active: boolean
+          objectives: string | null
+          organization_id: string | null
+          recommended_duration_minutes: number | null
+          recommended_pastoral_level: string | null
+          scripture_reference: string | null
+          short_title: string | null
+          sort_order: number | null
+          source_type: string
+          title: string
+          topic_code: string | null
+          updated_at: string
+          updated_by_profile_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by_profile_id?: string | null
+          description?: string | null
+          effective_from?: string | null
+          effective_to?: string | null
+          id?: string
+          is_active?: boolean
+          objectives?: string | null
+          organization_id?: string | null
+          recommended_duration_minutes?: number | null
+          recommended_pastoral_level?: string | null
+          scripture_reference?: string | null
+          short_title?: string | null
+          sort_order?: number | null
+          source_type?: string
+          title: string
+          topic_code?: string | null
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by_profile_id?: string | null
+          description?: string | null
+          effective_from?: string | null
+          effective_to?: string | null
+          id?: string
+          is_active?: boolean
+          objectives?: string | null
+          organization_id?: string | null
+          recommended_duration_minutes?: number | null
+          recommended_pastoral_level?: string | null
+          scripture_reference?: string | null
+          short_title?: string | null
+          sort_order?: number | null
+          source_type?: string
+          title?: string
+          topic_code?: string | null
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "formation_topics_created_by_profile_id_fkey"
+            columns: ["created_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "formation_topics_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "formation_topics_updated_by_profile_id_fkey"
+            columns: ["updated_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       governance_node_history: {
         Row: {
           actor_profile_id: string | null
@@ -1898,6 +1986,165 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "members"
             referencedColumns: ["organization_id", "id"]
+          },
+        ]
+      }
+      household_topic_assignments: {
+        Row: {
+          assigned_at: string
+          assigned_by_profile_id: string
+          assignment_status: string
+          cancelled_at: string | null
+          cancelled_by_profile_id: string | null
+          completed_at: string | null
+          completed_by_profile_id: string | null
+          completed_household_meeting_id: string | null
+          created_at: string
+          created_by_profile_id: string | null
+          due_date: string | null
+          household_node_id: string
+          id: string
+          organization_id: string
+          planned_for_date: string | null
+          rescheduled_at: string | null
+          rescheduled_by_profile_id: string | null
+          resolution_reason_code: string | null
+          sequence_number: number | null
+          skipped_at: string | null
+          skipped_by_profile_id: string | null
+          topic_id: string
+          updated_at: string
+          updated_by_profile_id: string | null
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by_profile_id: string
+          assignment_status?: string
+          cancelled_at?: string | null
+          cancelled_by_profile_id?: string | null
+          completed_at?: string | null
+          completed_by_profile_id?: string | null
+          completed_household_meeting_id?: string | null
+          created_at?: string
+          created_by_profile_id?: string | null
+          due_date?: string | null
+          household_node_id: string
+          id?: string
+          organization_id: string
+          planned_for_date?: string | null
+          rescheduled_at?: string | null
+          rescheduled_by_profile_id?: string | null
+          resolution_reason_code?: string | null
+          sequence_number?: number | null
+          skipped_at?: string | null
+          skipped_by_profile_id?: string | null
+          topic_id: string
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by_profile_id?: string
+          assignment_status?: string
+          cancelled_at?: string | null
+          cancelled_by_profile_id?: string | null
+          completed_at?: string | null
+          completed_by_profile_id?: string | null
+          completed_household_meeting_id?: string | null
+          created_at?: string
+          created_by_profile_id?: string | null
+          due_date?: string | null
+          household_node_id?: string
+          id?: string
+          organization_id?: string
+          planned_for_date?: string | null
+          rescheduled_at?: string | null
+          rescheduled_by_profile_id?: string | null
+          resolution_reason_code?: string | null
+          sequence_number?: number | null
+          skipped_at?: string | null
+          skipped_by_profile_id?: string | null
+          topic_id?: string
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "household_topic_assignments_assigned_by_profile_id_fkey"
+            columns: ["assigned_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "household_topic_assignments_cancelled_by_profile_id_fkey"
+            columns: ["cancelled_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "household_topic_assignments_completed_by_profile_id_fkey"
+            columns: ["completed_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "household_topic_assignments_completed_household_meeting_id_fkey"
+            columns: ["completed_household_meeting_id"]
+            isOneToOne: false
+            referencedRelation: "household_meetings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "household_topic_assignments_created_by_profile_id_fkey"
+            columns: ["created_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "household_topic_assignments_household_node_id_fkey"
+            columns: ["household_node_id"]
+            isOneToOne: false
+            referencedRelation: "governance_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "household_topic_assignments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "household_topic_assignments_rescheduled_by_profile_id_fkey"
+            columns: ["rescheduled_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "household_topic_assignments_skipped_by_profile_id_fkey"
+            columns: ["skipped_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "household_topic_assignments_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "formation_topics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "household_topic_assignments_updated_by_profile_id_fkey"
+            columns: ["updated_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -6065,6 +6312,16 @@ export type Database = {
         }
         Returns: Json
       }
+      assign_household_topic: {
+        Args: {
+          p_household_node_id: string
+          p_organization_id: string
+          p_planned_for_date?: string
+          p_sequence_number?: number
+          p_topic_id: string
+        }
+        Returns: Json
+      }
       assign_member_to_household: {
         Args: {
           p_confirm_governance_mismatch?: boolean
@@ -6132,6 +6389,14 @@ export type Database = {
         }
         Returns: Json
       }
+      cancel_household_topic_assignment: {
+        Args: {
+          p_household_topic_assignment_id: string
+          p_organization_id: string
+          p_reason_code?: string
+        }
+        Returns: Json
+      }
       change_member_governance_assignment: {
         Args: {
           p_effective_from?: string
@@ -6172,6 +6437,14 @@ export type Database = {
         }
         Returns: Json
       }
+      complete_household_topic: {
+        Args: {
+          p_household_meeting_id: string
+          p_household_topic_assignment_id: string
+          p_organization_id: string
+        }
+        Returns: Json
+      }
       conclude_servant_leader: {
         Args: {
           p_effective_to?: string
@@ -6189,6 +6462,22 @@ export type Database = {
           p_family_type?: string
           p_formed_on?: string
           p_organization_id: string
+        }
+        Returns: Json
+      }
+      create_formation_topic: {
+        Args: {
+          p_description?: string
+          p_objectives?: string
+          p_organization_id: string
+          p_recommended_duration_minutes?: number
+          p_recommended_pastoral_level?: string
+          p_scripture_reference?: string
+          p_short_title?: string
+          p_sort_order?: number
+          p_source_type?: string
+          p_title: string
+          p_topic_code?: string
         }
         Returns: Json
       }
@@ -6364,6 +6653,10 @@ export type Database = {
           type_id: string
         }[]
       }
+      get_household_formation_plan: {
+        Args: { p_household_node_id: string; p_organization_id: string }
+        Returns: Json
+      }
       get_household_meeting_cadence: {
         Args: { p_household_id: string; p_organization_id: string }
         Returns: Json
@@ -6383,6 +6676,15 @@ export type Database = {
       }
       get_household_profile: {
         Args: { p_household_id: string; p_organization_id: string }
+        Returns: Json
+      }
+      get_household_topic_history: {
+        Args: {
+          p_household_node_id: string
+          p_limit?: number
+          p_offset?: number
+          p_organization_id: string
+        }
         Returns: Json
       }
       get_member_families: {
@@ -6584,6 +6886,14 @@ export type Database = {
         }
         Returns: Json
       }
+      reschedule_household_topic: {
+        Args: {
+          p_household_topic_assignment_id: string
+          p_organization_id: string
+          p_planned_for_date: string
+        }
+        Returns: Json
+      }
       restore_member_record: {
         Args: {
           p_member_id: string
@@ -6633,6 +6943,17 @@ export type Database = {
           p_leadership_assignment_id?: string
           p_organization_id: string
           p_reason?: string
+        }
+        Returns: Json
+      }
+      search_formation_topics: {
+        Args: {
+          p_limit?: number
+          p_offset?: number
+          p_organization_id: string
+          p_pastoral_level?: string
+          p_search?: string
+          p_source_type?: string
         }
         Returns: Json
       }
@@ -6697,6 +7018,14 @@ export type Database = {
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      skip_household_topic: {
+        Args: {
+          p_household_topic_assignment_id: string
+          p_organization_id: string
+          p_reason_code?: string
+        }
+        Returns: Json
+      }
       suspend_profile_role_assignment: {
         Args: {
           p_actor_profile_id: string

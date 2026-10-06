@@ -14,6 +14,7 @@ import { ReplaceServantLeaderModal } from '../features/households/components/Rep
 import { ConcludeServantLeaderModal } from '../features/households/components/ConcludeServantLeaderModal';
 import { PastoralPlacementReviewModal } from '../features/households/components/PastoralPlacementReviewModal';
 import { HouseholdMeetingsCard } from '../features/households/components/HouseholdMeetingsCard';
+import { HouseholdFormationCard } from '../features/households/components/HouseholdFormationCard';
 import { ServantLeaderAccessModal } from '../features/households/components/ServantLeaderAccessModal';
 import type { HouseholdMember, HouseholdLeader, ServantLeaderRoleCode } from '../features/households/types';
 
@@ -66,6 +67,11 @@ export default function HouseholdProfilePage() {
   const canViewMeetings = !isPermLoading && hasPermission(Permissions.HouseholdsMeetingsView);
   const canManageMeetings = !isPermLoading && hasPermission(Permissions.HouseholdsMeetingsManage);
   const canRecordAttendance = !isPermLoading && hasPermission(Permissions.HouseholdsAttendanceRecord);
+  const canViewFormation =
+    !isPermLoading &&
+    (hasPermission(Permissions.HouseholdsFormationView) ||
+      hasPermission(Permissions.HouseholdsFormationManage));
+  const canManageFormation = !isPermLoading && hasPermission(Permissions.HouseholdsFormationManage);
   const canManageDelegatedAccess =
     !isPermLoading &&
     (hasPermission(Permissions.LeadershipDelegatedAccessManage) ||
@@ -621,6 +627,21 @@ export default function HouseholdProfilePage() {
           </div>
         )}
       </div>
+
+      {/* Household Formation */}
+      {orgId && householdId && (
+        <HouseholdFormationCard
+          organizationId={orgId}
+          householdId={householdId}
+          householdName={household.name}
+          pastoralLevel={household.pastoral_level}
+          isHouseholdActive={isStatusActive}
+          canView={canViewFormation}
+          canManage={canManageFormation}
+          summary={data.formation_summary ?? null}
+          onSuccessToast={triggerToast}
+        />
+      )}
 
       {/* Meeting History */}
       {orgId && householdId && (

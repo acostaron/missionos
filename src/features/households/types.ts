@@ -125,6 +125,7 @@ export interface HouseholdProfileData {
     maximum_member_count: number | null;
     accepts_new_members: boolean;
   };
+  formation_summary?: HouseholdFormationSummary;
 }
 
 export interface MemberHouseholdAssignment {
@@ -958,6 +959,7 @@ export interface MeetingOperationsSummary {
 /** Extended PastoralOperationsDashboard (Phase 6B-8 addition) */
 export interface PastoralOperationsDashboardV2 extends PastoralOperationsDashboard {
   meeting_operations_summary: MeetingOperationsSummary;
+  formation_operations_summary?: FormationOperationsSummary;
 }
 
 // =============================================================================
@@ -1020,4 +1022,120 @@ export interface RevokeServantLeaderAccessResult {
   access_status: string;
   revoked_at: string;
   reason: string;
+}
+
+// =============================================================================
+// Phase 6B-10: Household Formation
+// =============================================================================
+
+export type HouseholdFormationStatus =
+  | 'no_plan'
+  | 'planned'
+  | 'topic_due'
+  | 'topic_overdue'
+  | 'up_to_date';
+
+export type HouseholdTopicAssignmentStatus = 'planned' | 'completed' | 'skipped' | 'cancelled';
+
+export type HouseholdTopicReasonCode =
+  | 'schedule_change'
+  | 'topic_replaced'
+  | 'not_applicable'
+  | 'other';
+
+export interface FormationTopic {
+  id: string;
+  organization_id: string | null;
+  title: string;
+  short_title: string | null;
+  topic_code: string | null;
+  description: string | null;
+  objectives: string | null;
+  source_type: string;
+  scripture_reference: string | null;
+  recommended_duration_minutes: number | null;
+  recommended_pastoral_level: string | null;
+  sort_order: number | null;
+  is_active: boolean;
+}
+
+export interface FormationTopicSearchResult {
+  total_count: number;
+  limit: number;
+  offset: number;
+  topics: FormationTopic[];
+}
+
+/** Compact topic reference embedded in the profile formation_summary. */
+export interface HouseholdFormationTopicRef {
+  assignment_id: string;
+  topic_id: string;
+  title: string;
+  planned_for_date?: string | null;
+  sequence_number?: number | null;
+  completed_at?: string | null;
+  meeting_date?: string | null;
+}
+
+/** Topic reference returned by get_household_formation_plan. */
+export interface HouseholdFormationPlanTopic extends HouseholdFormationTopicRef {
+  short_title?: string | null;
+  topic_code?: string | null;
+  source_type?: string | null;
+  scripture_reference?: string | null;
+  recommended_duration_minutes?: number | null;
+  completed_household_meeting_id?: string | null;
+}
+
+export interface HouseholdFormationSummary {
+  formation_status: HouseholdFormationStatus;
+  next_topic: HouseholdFormationTopicRef | null;
+  last_completed_topic: HouseholdFormationTopicRef | null;
+  planned_topics_count: number;
+  completed_topics_count: number;
+}
+
+export interface HouseholdFormationPlan {
+  household_id: string;
+  formation_status: HouseholdFormationStatus;
+  next_topic: HouseholdFormationPlanTopic | null;
+  upcoming_topics: HouseholdFormationPlanTopic[];
+  last_completed_topic: HouseholdFormationPlanTopic | null;
+  last_completed_date: string | null;
+  planned_count: number;
+  completed_count: number;
+}
+
+export interface HouseholdTopicHistoryRow {
+  assignment_id: string;
+  topic_id: string;
+  topic_title: string;
+  topic_code: string | null;
+  source_type: string;
+  scripture_reference: string | null;
+  sequence_number: number | null;
+  planned_for_date: string | null;
+  assignment_status: HouseholdTopicAssignmentStatus;
+  assigned_at: string;
+  completed_at: string | null;
+  completed_household_meeting_id: string | null;
+  meeting_date: string | null;
+  meeting_type: string | null;
+  resolution_reason_code: HouseholdTopicReasonCode | null;
+}
+
+export interface HouseholdTopicHistory {
+  total_count: number;
+  limit: number;
+  offset: number;
+  history: HouseholdTopicHistoryRow[];
+}
+
+/** Dashboard formation_operations_summary block (Phase 6B-10) */
+export interface FormationOperationsSummary {
+  households_with_no_plan: number;
+  topics_planned: number;
+  topics_completed_this_month: number;
+  topics_due: number;
+  topics_overdue: number;
 }

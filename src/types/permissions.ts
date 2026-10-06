@@ -76,6 +76,10 @@ export const Permissions = {
   HouseholdsMeetingsManage: 'households.meetings.manage',
   HouseholdsAttendanceRecord: 'households.attendance.record',
 
+  // Phase 6B-10: Household Formation
+  HouseholdsFormationView: 'households.formation.view',
+  HouseholdsFormationManage: 'households.formation.manage',
+
   // Phase 6B-9: Delegated Servant Leader Access
   LeadershipDelegatedAccessManage: 'leadership.delegated_access.manage',
   LeadershipDelegatedAccessView: 'leadership.delegated_access.view',

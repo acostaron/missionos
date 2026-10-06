@@ -140,6 +140,7 @@ export default function PastoralOperationsDashboardPage() {
     placement_review_summary,
     unassigned_members_count,
     meeting_operations_summary,
+    formation_operations_summary,
   } = data;
 
   const meetingOps = meeting_operations_summary ?? {
@@ -149,6 +150,14 @@ export default function PastoralOperationsDashboardPage() {
     households_without_meeting_history: 0,
     households_overdue: 0,
     member_follow_up_signals: 0,
+  };
+
+  const formationOps = formation_operations_summary ?? {
+    households_with_no_plan: 0,
+    topics_planned: 0,
+    topics_completed_this_month: 0,
+    topics_due: 0,
+    topics_overdue: 0,
   };
 
   const filteredHouseholds = household_summary.filter((hh: PastoralHouseholdSummary) => {
@@ -453,6 +462,46 @@ export default function PastoralOperationsDashboardPage() {
         </div>
       </div>
 
+      {/* Formation Operations Summary */}
+      <div className="space-y-3">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+          Formation Operations
+        </h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 space-y-1">
+            <p className="text-xs text-slate-400">Households With No Plan</p>
+            <p className="text-2xl font-bold text-slate-100">{formationOps.households_with_no_plan}</p>
+          </div>
+          <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 space-y-1">
+            <p className="text-xs text-slate-400">Topics Planned</p>
+            <p className="text-2xl font-bold text-indigo-300">{formationOps.topics_planned}</p>
+          </div>
+          <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 space-y-1">
+            <p className="text-xs text-slate-400">Completed This Month</p>
+            <p className="text-2xl font-bold text-emerald-400">{formationOps.topics_completed_this_month}</p>
+          </div>
+          <div className={`rounded-xl border p-4 space-y-1 ${
+            formationOps.topics_due > 0
+              ? 'border-amber-800/60 bg-amber-950/20'
+              : 'border-slate-800 bg-slate-900/60'
+          }`}>
+            <p className="text-xs text-slate-400">Topics Due</p>
+            <p className={`text-2xl font-bold ${
+              formationOps.topics_due > 0 ? 'text-amber-300' : 'text-slate-100'
+            }`}>{formationOps.topics_due}</p>
+          </div>
+          <div className={`rounded-xl border p-4 space-y-1 ${
+            formationOps.topics_overdue > 0
+              ? 'border-rose-900/50 bg-rose-950/20'
+              : 'border-slate-800 bg-slate-900/60'
+          }`}>
+            <p className="text-xs text-slate-400">Topics Overdue</p>
+            <p className={`text-2xl font-bold ${
+              formationOps.topics_overdue > 0 ? 'text-rose-400' : 'text-slate-100'
+            }`}>{formationOps.topics_overdue}</p>
+          </div>
+        </div>
+      </div>
       {/* Leadership Vacancies List (if any) */}
       {leadership_vacancies.length > 0 && (
         <div className="rounded-xl border border-amber-900/50 bg-amber-950/20 p-5 space-y-3">
