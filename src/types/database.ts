@@ -6687,6 +6687,17 @@ export type Database = {
         }
         Returns: Json
       }
+      get_member_account_link_drift: {
+        Args: { p_organization_id: string }
+        Returns: {
+          detail: string
+          drift_type: string
+          link_id: string
+          member_id: string
+          profile_id: string
+          role_assignment_id: string
+        }[]
+      }
       get_member_families: {
         Args: { p_member_id: string; p_organization_id: string }
         Returns: {
@@ -6808,6 +6819,16 @@ export type Database = {
           token_id: string
           token_public_id: string
         }[]
+      }
+      link_member_account: {
+        Args: {
+          p_member_id: string
+          p_organization_id: string
+          p_profile_id: string
+          p_verification_method: string
+          p_verification_summary?: string
+        }
+        Returns: Json
       }
       move_governance_node: {
         Args: {
@@ -7050,6 +7071,14 @@ export type Database = {
           p_member_id: string
           p_organization_id: string
           p_reason?: string
+        }
+        Returns: Json
+      }
+      unlink_member_account: {
+        Args: {
+          p_organization_id: string
+          p_profile_id: string
+          p_reason: string
         }
         Returns: Json
       }
