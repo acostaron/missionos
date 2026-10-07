@@ -6310,6 +6310,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_member_account_invitation: {
+        Args: { p_invitation_id?: string }
+        Returns: Json
+      }
       activate_leadership_assignment: {
         Args: {
           p_accepted_at?: string
@@ -6792,6 +6796,10 @@ export type Database = {
           p_offset?: number
           p_organization_id: string
         }
+        Returns: Json
+      }
+      get_member_account_invitation_details: {
+        Args: { p_invitation_id?: string }
         Returns: Json
       }
       get_member_account_link_drift: {

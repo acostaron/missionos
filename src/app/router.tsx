@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import LoginPage from '../pages/LoginPage';
+import InviteAcceptPage from '../pages/InviteAcceptPage';
 import DashboardPage from '../pages/DashboardPage';
 import AppLayout from '../components/layout/AppLayout';
 import { ProtectedRoute } from '../components/auth/ProtectedRoute';
@@ -74,6 +75,10 @@ export const router = createBrowserRouter([
   {
     path: '/login',
     element: <LoginPage />,
+  },
+  {
+    path: '/invite/accept',
+    element: <InviteAcceptPage />,
   },
   {
     path: '/app',
