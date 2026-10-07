@@ -39,25 +39,25 @@ function HouseholdItem({
   const roleLabel = formatRole(assignment.membership_role);
 
   return (
-    <div className="rounded-lg border border-slate-700 bg-slate-900/40 p-3.5 space-y-2.5">
+    <div className="rounded-lg border border-line bg-surface p-3.5 space-y-2.5">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h3 className="text-sm font-semibold text-slate-100">
+          <h3 className="text-sm font-semibold text-ink">
             <Link
               to={`/app/households/${assignment.household_id}`}
-              className="hover:text-indigo-300 hover:underline transition-colors"
+              className="hover:text-primary-blue hover:underline transition-colors"
             >
               {assignment.household_name}
             </Link>
           </h3>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Code: <span className="font-mono text-slate-300">{assignment.household_code}</span>
+          <p className="text-xs text-ink-muted mt-0.5">
+            Code: <span className="font-mono text-ink-secondary">{assignment.household_code}</span>
             {assignment.parent_node_name && (
               <>
-                <span className="mx-1.5 text-slate-600">•</span>
+                <span className="mx-1.5 text-ink-muted">•</span>
                 <span>{assignment.parent_node_name}</span>
                 {assignment.parent_node_type && (
-                  <span className="ml-1 text-[10px] uppercase text-slate-500">
+                  <span className="ml-1 text-[10px] uppercase text-ink-muted">
                     ({assignment.parent_node_type})
                   </span>
                 )}
@@ -69,45 +69,45 @@ function HouseholdItem({
           <span
             className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium ${
               isStatusActive
-                ? 'border-emerald-700/60 bg-emerald-950/40 text-emerald-300'
-                : 'border-slate-600 bg-slate-800 text-slate-400'
+                ? 'border-success-600/30 bg-success-50 text-success-700'
+                : 'border-line-strong bg-surface-muted text-ink-muted'
             }`}
           >
             {assignment.household_status}
           </span>
           {assignment.is_primary && (
-            <span className="inline-flex items-center rounded-full border border-indigo-700/60 bg-indigo-950/40 px-2 py-0.5 text-[10px] font-medium text-indigo-300">
+            <span className="inline-flex items-center rounded-full border border-navy-100 bg-navy-50 px-2 py-0.5 text-[10px] font-medium text-primary-blue">
               Primary
             </span>
           )}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 border-t border-slate-800/80 text-xs">
-        <div className="flex items-center justify-between text-slate-400 pr-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 border-t border-line text-xs">
+        <div className="flex items-center justify-between text-ink-muted pr-2">
           <span>Household role</span>
-          <span className="font-medium text-slate-200">{roleLabel}</span>
+          <span className="font-medium text-ink">{roleLabel}</span>
         </div>
-        <div className="flex items-center justify-between text-slate-400">
+        <div className="flex items-center justify-between text-ink-muted">
           <span>Effective date</span>
-          <span className="font-medium text-slate-200">{assignment.effective_from}</span>
+          <span className="font-medium text-ink">{assignment.effective_from}</span>
         </div>
         {assignment.household_servant_name && (
-          <div className="flex items-center justify-between text-slate-400 sm:col-span-2 pt-1 border-t border-slate-800/50">
+          <div className="flex items-center justify-between text-ink-muted sm:col-span-2 pt-1 border-t border-line">
             <span>Household Servant</span>
-            <span className="font-medium text-slate-200">{assignment.household_servant_name}</span>
+            <span className="font-medium text-ink">{assignment.household_servant_name}</span>
           </div>
         )}
       </div>
 
       {/* Pastoral Actions for current assignment */}
       {(canTransfer || canEnd) && (
-        <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800/60">
+        <div className="flex items-center justify-end gap-2 pt-2 border-t border-line">
           {canTransfer && (
             <button
               type="button"
               onClick={() => onOpenTransfer(assignment)}
-              className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium text-indigo-300 hover:bg-indigo-950/40 hover:text-indigo-200 transition-colors"
+              className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium text-primary-blue hover:bg-navy-100 hover:text-primary-blue transition-colors"
             >
               Transfer Household
             </button>
@@ -116,7 +116,7 @@ function HouseholdItem({
             <button
               type="button"
               onClick={() => onOpenEnd(assignment)}
-              className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium text-rose-400 hover:bg-rose-950/30 hover:text-rose-300 transition-colors"
+              className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium text-danger-700 hover:bg-danger-100 hover:text-danger-700 transition-colors"
             >
               End Assignment
             </button>
@@ -169,11 +169,11 @@ export function MemberHouseholdCard({
   const hasAssignment = Boolean(households && households.length > 0);
 
   return (
-    <div className="rounded-xl border border-slate-700 bg-slate-800/60 overflow-hidden">
-      <div className="flex items-center justify-between border-b border-slate-700 px-5 py-3.5">
+    <div className="rounded-xl border border-line bg-surface-muted overflow-hidden">
+      <div className="flex items-center justify-between border-b border-line px-5 py-3.5">
         <div className="flex items-center gap-3">
-          <span className="text-slate-400">{icon}</span>
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-300">
+          <span className="text-ink-muted">{icon}</span>
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-ink-secondary">
             Household Assignment
           </h2>
         </div>
@@ -181,7 +181,7 @@ export function MemberHouseholdCard({
         {!hasAssignment && canAssignHousehold && (
           <Link
             to="/app/households/unassigned"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-700/60 bg-indigo-950/40 px-2.5 py-1 text-xs font-semibold text-indigo-300 hover:bg-indigo-900/60 transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-navy-100 bg-navy-50 px-2.5 py-1 text-xs font-semibold text-primary-blue hover:bg-navy-100 transition-colors"
           >
             Assign Household
           </Link>
@@ -190,7 +190,7 @@ export function MemberHouseholdCard({
 
       <div className="px-5 py-4">
         {!canViewHouseholds ? (
-          <p className="flex items-center gap-2 text-xs text-slate-500 italic">
+          <p className="flex items-center gap-2 text-xs text-ink-muted italic">
             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round"
                 d="M12 15v2m-6 4h12a2 2 0 002-2v-5a2 2 0 00-2-2H6a2 2 0 00-2 2v5a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -199,17 +199,17 @@ export function MemberHouseholdCard({
           </p>
         ) : isLoading ? (
           <div className="space-y-3 py-1">
-            <div className="h-16 animate-pulse rounded-lg bg-slate-900/40 border border-slate-700/60" />
+            <div className="h-16 animate-pulse rounded-lg bg-surface border border-line" />
           </div>
         ) : error ? (
-          <div className="rounded-lg border border-red-900/40 bg-red-950/20 p-3 text-xs text-red-300">
+          <div className="rounded-lg border border-danger-600/30 bg-danger-50 p-3 text-xs text-danger-700">
             Failed to load household assignment.
           </div>
         ) : !households || households.length === 0 ? (
           <div className="flex items-center justify-between py-1">
-            <p className="text-xs text-slate-500 italic">No household assigned.</p>
+            <p className="text-xs text-ink-muted italic">No household assigned.</p>
             {canAssignHousehold && (
-              <span className="text-[11px] text-slate-400">
+              <span className="text-[11px] text-ink-muted">
                 Use the Unassigned Members directory to place this member.
               </span>
             )}

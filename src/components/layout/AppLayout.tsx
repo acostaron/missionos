@@ -1,123 +1,72 @@
-import { Outlet, NavLink } from 'react-router-dom';
+import { useState } from 'react';
+import { Outlet } from 'react-router-dom';
 import { useAuth } from '../../hooks/use-auth';
 import { usePermissions } from '../../hooks/use-permissions';
-import { Permissions } from '../../types/permissions';
+import { useOrganizationContext } from '../../hooks/use-organization-context';
+import { NAV_ITEMS } from './navigation';
+import AppSidebar from './AppSidebar';
+import AppHeader from './AppHeader';
+import MobileNavigation from './MobileNavigation';
+
+const COLLAPSE_KEY = 'missionos.sidebar.collapsed';
+
+function readCollapsed(): boolean {
+  try {
+    return localStorage.getItem(COLLAPSE_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
 
 /**
- * Main application shell.
+ * Main application shell: sidebar (desktop), header, workspace and
+ * bottom navigation (mobile).
  *
- * Navigation links are permission-gated:
- *   - "Members" is only shown when the authenticated user holds
- *     members.records.view for the active organization.
- *   - Additional nav items should follow the same pattern.
+ * Navigation items are gated by the same permissions as before; the
+ * server remains authoritative.
  */
 export default function AppLayout() {
   const { user, signOut } = useAuth();
   const { hasPermission, isLoading: isPermLoading } = usePermissions();
+  const { activeOrganization } = useOrganizationContext();
+  const [collapsed, setCollapsed] = useState<boolean>(readCollapsed);
 
-  const canViewMembers = !isPermLoading && hasPermission(Permissions.MembersRecordsView);
-  const canViewHouseholds = !isPermLoading && hasPermission(Permissions.HouseholdsRecordsView);
-  const canViewPastoralDashboard = !isPermLoading && hasPermission(Permissions.LeadershipPastoralDashboardView);
+  const items = NAV_ITEMS.filter(
+    (item) => !item.permission || (!isPermLoading && hasPermission(item.permission)),
+  );
+
+  const toggle = () => {
+    setCollapsed((c) => {
+      try {
+        localStorage.setItem(COLLAPSE_KEY, c ? '0' : '1');
+      } catch {
+        /* ignore */
+      }
+      return !c;
+    });
+  };
+
+  const orgName = activeOrganization?.name ?? null;
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-950 text-slate-100">
-      {/* Top navigation bar */}
-      <header className="sticky top-0 z-30 border-b border-slate-800 bg-slate-900/80 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-          {/* Brand */}
-          <div className="flex items-center gap-6">
-            <span className="text-base font-bold tracking-tight text-slate-100">
-              Mission<span className="text-indigo-400">OS</span>
-            </span>
-
-            {/* Primary navigation */}
-            <nav className="flex items-center gap-1" aria-label="Primary navigation">
-              <NavLink
-                to="/app/dashboard"
-                id="nav-dashboard"
-                className={({ isActive }) =>
-                  `rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'bg-slate-800 text-slate-100'
-                      : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200'
-                  }`
-                }
-              >
-                Dashboard
-              </NavLink>
-
-              {/* Members — only rendered when members.records.view is held */}
-              {canViewMembers && (
-                <NavLink
-                  to="/app/members"
-                  id="nav-members"
-                  className={({ isActive }) =>
-                    `rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                      isActive
-                        ? 'bg-slate-800 text-slate-100'
-                        : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200'
-                    }`
-                  }
-                >
-                  Members
-                </NavLink>
-              )}
-
-              {/* Households — only rendered when households.records.view is held */}
-              {canViewHouseholds && (
-                <NavLink
-                  to="/app/households"
-                  id="nav-households"
-                  className={({ isActive }) =>
-                    `rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                      isActive
-                        ? 'bg-slate-800 text-slate-100'
-                        : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200'
-                    }`
-                  }
-                >
-                  Households
-                </NavLink>
-              )}
-
-              {/* Pastoral Operations — only rendered when leadership.pastoral_dashboard.view is held */}
-              {canViewPastoralDashboard && (
-                <NavLink
-                  to="/app/pastoral-operations"
-                  id="nav-pastoral-operations"
-                  className={({ isActive }) =>
-                    `rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                      isActive
-                        ? 'bg-slate-800 text-slate-100'
-                        : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200'
-                    }`
-                  }
-                >
-                  Pastoral Operations
-                </NavLink>
-              )}
-            </nav>
+    <div className="flex min-h-screen bg-canvas text-ink">
+      <AppSidebar
+        items={items}
+        collapsed={collapsed}
+        onToggle={toggle}
+        email={user?.email}
+        organizationName={orgName}
+        onSignOut={signOut}
+      />
+      <div className="flex min-w-0 flex-1 flex-col">
+        <AppHeader email={user?.email} organizationName={orgName} onSignOut={signOut} />
+        <main className="w-full flex-1 px-4 py-6 pb-24 sm:px-6 sm:py-8 md:pb-8 lg:px-8">
+          <div className="mx-auto w-full max-w-7xl">
+            <Outlet />
           </div>
-
-
-          {/* User controls */}
-          <div className="flex items-center gap-4">
-            <span className="hidden text-xs text-slate-500 sm:block">{user?.email}</span>
-            <button
-              id="nav-sign-out"
-              onClick={signOut}
-              className="rounded-md px-3 py-1.5 text-sm font-medium text-slate-400 transition-colors hover:bg-red-900/30 hover:text-red-300"
-            >
-              Sign out
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Page content */}
-      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
-        <Outlet />
-      </main>
+        </main>
+      </div>
+      <MobileNavigation items={items} />
     </div>
   );
 }

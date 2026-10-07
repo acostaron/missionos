@@ -140,15 +140,15 @@ export function FamilyRelationshipList({
     canAddRelationship && isFamilyOperational && members.length >= 2 && !!onAddRelationship;
 
   return (
-    <div className="rounded-xl border border-slate-700 bg-slate-800/60 overflow-hidden">
-      <div className="flex items-center justify-between border-b border-slate-700 px-5 py-3.5">
+    <div className="rounded-xl border border-line bg-surface-muted overflow-hidden">
+      <div className="flex items-center justify-between border-b border-line px-5 py-3.5">
         <div className="flex items-center gap-3">
-          <span className="text-slate-400">{icon}</span>
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-300">
+          <span className="text-ink-muted">{icon}</span>
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-ink-secondary">
             Family Relationships
           </h2>
           {canViewRelationships && relationships && (
-            <span className="text-xs text-slate-400">
+            <span className="text-xs text-ink-muted">
               ({displayItems.length})
             </span>
           )}
@@ -158,7 +158,7 @@ export function FamilyRelationshipList({
             type="button"
             id="add-family-relationship-button"
             onClick={onAddRelationship}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-700/60 bg-indigo-950/40 px-3 py-1.5 text-xs font-medium text-indigo-300 shadow-sm hover:bg-indigo-900/60 hover:text-indigo-200 transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-navy-100 bg-navy-50 px-3 py-1.5 text-xs font-medium text-primary-blue shadow-sm hover:bg-navy-100 hover:text-primary-blue transition-colors"
           >
             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -170,7 +170,7 @@ export function FamilyRelationshipList({
 
       <div className="px-5 py-4">
         {!canViewRelationships || relationships === null ? (
-          <p className="flex items-center gap-2 text-xs text-slate-500 italic py-1">
+          <p className="flex items-center gap-2 text-xs text-ink-muted italic py-1">
             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round"
                 d="M12 15v2m-6 4h12a2 2 0 002-2v-5a2 2 0 00-2-2H6a2 2 0 00-2 2v5a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -178,7 +178,7 @@ export function FamilyRelationshipList({
             Family relationships — access restricted for this role
           </p>
         ) : displayItems.length === 0 ? (
-          <p className="text-xs text-slate-500 italic py-1">
+          <p className="text-xs text-ink-muted italic py-1">
             No family relationships are recorded.
           </p>
         ) : (
@@ -192,18 +192,18 @@ export function FamilyRelationshipList({
               return (
                 <div
                   key={item.id}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-slate-700 bg-slate-900/40 px-4 py-3"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-line bg-surface px-4 py-3"
                 >
                   <div className="flex items-center gap-2.5 flex-wrap text-sm">
-                    <span className="font-semibold text-slate-100">{fromName}</span>
-                    <span className="inline-flex items-center rounded-full border border-indigo-700/60 bg-indigo-950/40 px-2.5 py-0.5 text-xs font-medium text-indigo-300">
+                    <span className="font-semibold text-ink">{fromName}</span>
+                    <span className="inline-flex items-center rounded-full border border-navy-100 bg-navy-50 px-2.5 py-0.5 text-xs font-medium text-primary-blue">
                       {item.typeName}
                     </span>
-                    <span className="font-semibold text-slate-100">{toName}</span>
+                    <span className="font-semibold text-ink">{toName}</span>
 
                     {item.isReciprocalMissing && canCorrectRelationship && (
-                      <span className="inline-flex items-center gap-1 rounded-md border border-amber-800/60 bg-amber-950/40 px-2 py-0.5 text-[11px] font-medium text-amber-300">
-                        <svg className="h-3 w-3 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <span className="inline-flex items-center gap-1 rounded-md border border-warning-600/30 bg-warning-50 px-2 py-0.5 text-[11px] font-medium text-warning-700">
+                        <svg className="h-3 w-3 text-warning-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                         </svg>
                         Reciprocal relationship missing
@@ -213,7 +213,7 @@ export function FamilyRelationshipList({
 
                   <div className="flex items-center gap-3 self-end sm:self-center">
                     {item.verificationStatus && item.verificationStatus !== 'unverified' && (
-                      <span className="capitalize text-xs text-slate-500">
+                      <span className="capitalize text-xs text-ink-muted">
                         {item.verificationStatus.replace(/_/g, ' ')}
                       </span>
                     )}
@@ -223,9 +223,9 @@ export function FamilyRelationshipList({
                         type="button"
                         id={`repair-relationship-btn-${item.id}`}
                         onClick={() => onRepairRelationship(item.rawRelationship)}
-                        className="inline-flex items-center gap-1 rounded border border-amber-700/60 bg-amber-950/40 px-2.5 py-1 text-xs font-medium text-amber-300 hover:bg-amber-900/60 hover:text-amber-200 transition-colors"
+                        className="inline-flex items-center gap-1 rounded border border-warning-600/30 bg-warning-50 px-2.5 py-1 text-xs font-medium text-warning-700 hover:bg-warning-100 hover:text-warning-700 transition-colors"
                       >
-                        <svg className="h-3.5 w-3.5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <svg className="h-3.5 w-3.5 text-warning-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
                         Repair relationship
@@ -237,9 +237,9 @@ export function FamilyRelationshipList({
                         type="button"
                         id={`end-relationship-btn-${item.id}`}
                         onClick={() => onEndRelationship(item.rawRelationship)}
-                        className="inline-flex items-center gap-1 rounded px-2.5 py-1 text-xs font-medium text-rose-400 hover:bg-rose-950/40 hover:text-rose-300 transition-colors"
+                        className="inline-flex items-center gap-1 rounded px-2.5 py-1 text-xs font-medium text-danger-700 hover:bg-danger-100 hover:text-danger-700 transition-colors"
                       >
-                        <svg className="h-3.5 w-3.5 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <svg className="h-3.5 w-3.5 text-danger-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                         </svg>
                         End

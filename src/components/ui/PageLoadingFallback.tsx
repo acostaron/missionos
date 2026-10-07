@@ -1,3 +1,5 @@
+import { Loader2 } from 'lucide-react';
+
 /**
  * Lightweight Suspense fallback for lazily loaded app pages.
  *
@@ -8,8 +10,13 @@
  */
 export default function PageLoadingFallback() {
   return (
-    <div className="flex min-h-[40vh] items-center justify-center">
-      <div className="text-sm text-slate-400">Loading…</div>
+    <div
+      role="status"
+      aria-live="polite"
+      className="flex min-h-[40vh] items-center justify-center gap-2 text-small text-ink-muted"
+    >
+      <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+      <span>Loading…</span>
     </div>
   );
 }

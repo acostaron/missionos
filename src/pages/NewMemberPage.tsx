@@ -23,7 +23,7 @@ export default function NewMemberPage() {
       <div className="space-y-6">
         <Link
           to="/app/members"
-          className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-200"
+          className="inline-flex items-center gap-1.5 text-sm text-ink-muted hover:text-ink"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -31,9 +31,9 @@ export default function NewMemberPage() {
           Member Directory
         </Link>
 
-        <div className="rounded-xl border border-red-700 bg-red-900/20 p-6">
-          <h2 className="mb-2 text-base font-semibold text-red-300">Access Denied</h2>
-          <p className="text-sm text-red-400">
+        <div className="rounded-xl border border-danger-600 bg-danger-50 p-6">
+          <h2 className="mb-2 text-base font-semibold text-danger-700">Access Denied</h2>
+          <p className="text-sm text-danger-700">
             You do not have permission to create member records in this organization.
           </p>
         </div>
@@ -43,7 +43,7 @@ export default function NewMemberPage() {
 
   if (!activeOrganization) {
     return (
-      <div className="rounded-xl border border-red-700 bg-red-900/20 p-6 text-red-300">
+      <div className="rounded-xl border border-danger-600 bg-danger-50 p-6 text-danger-700">
         No active organization selected.
       </div>
     );
@@ -63,7 +63,7 @@ export default function NewMemberPage() {
         <Link
           to="/app/members"
           id="back-to-directory"
-          className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-200 transition-colors mb-3"
+          className="inline-flex items-center gap-1.5 text-sm text-ink-muted hover:text-ink transition-colors mb-3"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -71,16 +71,16 @@ export default function NewMemberPage() {
           Member Directory
         </Link>
 
-        <h1 className="text-2xl font-bold tracking-tight text-slate-100">
+        <h1 className="text-2xl font-bold tracking-tight text-ink">
           Onboard New Member
         </h1>
-        <p className="mt-1 text-sm text-slate-400">
+        <p className="mt-1 text-sm text-ink-muted">
           {activeOrganization.name} · Fill in member information below to create a canonical profile.
         </p>
       </div>
 
       {/* Main Form Wizard Container */}
-      <div className="rounded-2xl border border-slate-700 bg-slate-900/60 p-6 sm:p-8">
+      <div className="rounded-2xl border border-line bg-surface p-6 sm:p-8">
         <MemberOnboardingWizard
           organizationId={activeOrganization.id}
           canManageIdentifiers={canManageIdentifiers}

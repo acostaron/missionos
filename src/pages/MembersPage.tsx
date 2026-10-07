@@ -25,7 +25,7 @@ function SearchBar({
       <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
         {isLoading ? (
           <svg
-            className="h-4 w-4 animate-spin text-indigo-400"
+            className="h-4 w-4 animate-spin text-primary-blue"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -46,7 +46,7 @@ function SearchBar({
           </svg>
         ) : (
           <svg
-            className="h-4 w-4 text-slate-400"
+            className="h-4 w-4 text-ink-muted"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -67,7 +67,7 @@ function SearchBar({
         onChange={(e) => onChange(e.target.value)}
         placeholder="Search by name…"
         maxLength={200}
-        className="block w-full rounded-lg border border-slate-700 bg-slate-800 py-2 pl-9 pr-4 text-sm text-slate-100 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+        className="block w-full rounded-lg border border-line bg-surface-muted py-2 pl-9 pr-4 text-sm text-ink placeholder-slate-400 focus:border-focus focus:outline-none focus:ring-1 focus:ring-focus"
       />
     </div>
   );
@@ -78,8 +78,8 @@ function StatusBadge({ status }: { status: MemberListItem['membership_status'] }
 
   const isActive = status.is_active_membership;
   const bg = isActive
-    ? 'bg-emerald-900/50 text-emerald-300 border-emerald-700'
-    : 'bg-slate-800 text-slate-400 border-slate-600';
+    ? 'bg-success-50 text-success-700 border-success-600'
+    : 'bg-surface-muted text-ink-muted border-line-strong';
 
   return (
     <span
@@ -102,20 +102,20 @@ function MemberRow({ member }: { member: MemberListItem }) {
     <Link
       to={`/app/members/${member.id}`}
       id={`member-row-${member.id}`}
-      className="group flex items-center gap-4 rounded-lg border border-slate-700 bg-slate-800/60 px-4 py-3 transition-all hover:border-indigo-600 hover:bg-slate-800"
+      className="group flex items-center gap-4 rounded-lg border border-line bg-surface-muted px-4 py-3 transition-all hover:border-primary-blue hover:bg-surface-muted"
     >
       {/* Avatar */}
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-900 text-sm font-semibold text-indigo-200">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-navy-50 text-sm font-semibold text-primary-blue">
         {initials}
       </div>
 
       {/* Name + status */}
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-slate-100 group-hover:text-white">
+        <p className="truncate text-sm font-medium text-ink group-hover:text-white">
           {member.display_name}
         </p>
         {member.preferred_name && member.preferred_name !== member.display_name && (
-          <p className="truncate text-xs text-slate-400">
+          <p className="truncate text-xs text-ink-muted">
             Preferred: {member.preferred_name}
           </p>
         )}
@@ -124,7 +124,7 @@ function MemberRow({ member }: { member: MemberListItem }) {
       {/* Member number — only when permission allows */}
       <div className="w-28 shrink-0 text-right">
         {member.member_number !== null ? (
-          <span className="font-mono text-xs text-slate-300">{member.member_number}</span>
+          <span className="font-mono text-xs text-ink-secondary">{member.member_number}</span>
         ) : null}
       </div>
 
@@ -135,7 +135,7 @@ function MemberRow({ member }: { member: MemberListItem }) {
 
       {/* Chevron */}
       <svg
-        className="h-4 w-4 shrink-0 text-slate-500 transition-colors group-hover:text-indigo-400"
+        className="h-4 w-4 shrink-0 text-ink-muted transition-colors group-hover:text-primary-blue"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
@@ -165,13 +165,13 @@ function Pagination({
   const end = Math.min(page * pageSize, totalCount);
 
   return (
-    <div className="flex items-center justify-between text-sm text-slate-400">
+    <div className="flex items-center justify-between text-sm text-ink-muted">
       <span>
         {totalCount === 0
           ? 'No members'
           : `${start}–${end} of ${totalCount.toLocaleString()} member${totalCount !== 1 ? 's' : ''}`}
         {isFetching && (
-          <span className="ml-2 inline-block animate-pulse text-indigo-400">
+          <span className="ml-2 inline-block animate-pulse text-primary-blue">
             updating…
           </span>
         )}
@@ -182,7 +182,7 @@ function Pagination({
           id="members-prev-page"
           onClick={() => onPage(page - 1)}
           disabled={page <= 1}
-          className="rounded border border-slate-700 px-3 py-1 text-xs font-medium text-slate-300 transition-colors hover:border-indigo-500 hover:text-indigo-300 disabled:cursor-not-allowed disabled:opacity-40"
+          className="rounded border border-line px-3 py-1 text-xs font-medium text-ink-secondary transition-colors hover:border-primary-blue hover:text-primary-blue disabled:cursor-not-allowed disabled:opacity-40"
         >
           ← Prev
         </button>
@@ -193,7 +193,7 @@ function Pagination({
           id="members-next-page"
           onClick={() => onPage(page + 1)}
           disabled={page >= totalPages}
-          className="rounded border border-slate-700 px-3 py-1 text-xs font-medium text-slate-300 transition-colors hover:border-indigo-500 hover:text-indigo-300 disabled:cursor-not-allowed disabled:opacity-40"
+          className="rounded border border-line px-3 py-1 text-xs font-medium text-ink-secondary transition-colors hover:border-primary-blue hover:text-primary-blue disabled:cursor-not-allowed disabled:opacity-40"
         >
           Next →
         </button>
@@ -246,14 +246,14 @@ export default function MembersPage() {
   if (isOrgLoading) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
-        <div className="text-sm text-slate-400">Loading organization…</div>
+        <div className="text-sm text-ink-muted">Loading organization…</div>
       </div>
     );
   }
 
   if (!orgId) {
     return (
-      <div className="rounded-lg border border-red-700 bg-red-900/20 p-6 text-red-300">
+      <div className="rounded-lg border border-danger-600 bg-danger-50 p-6 text-danger-700">
         No active organization. Cannot load member directory.
       </div>
     );
@@ -267,10 +267,10 @@ export default function MembersPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-100">
+          <h1 className="text-2xl font-bold tracking-tight text-ink">
             Member Directory
           </h1>
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-ink-muted">
             {activeOrganization?.name ?? 'Your organization'} ·{' '}
             {data ? `${data.total_count.toLocaleString()} active member${data.total_count !== 1 ? 's' : ''}` : '…'}
           </p>
@@ -282,10 +282,10 @@ export default function MembersPage() {
               type="button"
               onClick={() => setIsCreateFamilyOpen(true)}
               id="create-family-button"
-              className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-medium text-slate-200 shadow-sm hover:bg-slate-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-900 transition-colors"
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-line bg-surface-muted px-4 py-2 text-sm font-medium text-ink shadow-sm hover:bg-line hover:text-white focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 focus:ring-offset-slate-900 transition-colors"
             >
               <svg
-                className="h-4 w-4 text-slate-400"
+                className="h-4 w-4 text-ink-muted"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -301,7 +301,7 @@ export default function MembersPage() {
             <Link
               to="/app/members/new"
               id="add-member-button"
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-900 transition-colors"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 focus:ring-offset-slate-900 transition-colors"
             >
               <svg
                 className="h-4 w-4"
@@ -327,8 +327,8 @@ export default function MembersPage() {
 
       {/* Error */}
       {error && (
-        <div className="rounded-lg border border-red-700 bg-red-900/20 p-4">
-          <p className="text-sm font-medium text-red-300">
+        <div className="rounded-lg border border-danger-600 bg-danger-50 p-4">
+          <p className="text-sm font-medium text-danger-700">
             Failed to load members:{' '}
             {(error as { message?: string }).message ?? 'Unknown error'}
           </p>
@@ -341,7 +341,7 @@ export default function MembersPage() {
           {Array.from({ length: 8 }).map((_, i) => (
             <div
               key={i}
-              className="h-14 animate-pulse rounded-lg bg-slate-800"
+              className="h-14 animate-pulse rounded-lg bg-surface-muted"
             />
           ))}
         </div>
@@ -351,7 +351,7 @@ export default function MembersPage() {
       {!isLoading && !error && data && data.members.length === 0 && (
         <div className="flex min-h-[20vh] flex-col items-center justify-center gap-3 text-center">
           <svg
-            className="h-12 w-12 text-slate-600"
+            className="h-12 w-12 text-ink-muted"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -363,7 +363,7 @@ export default function MembersPage() {
               d="M17 20h5v-1a7 7 0 00-10.29-6.18M9 11a4 4 0 100-8 4 4 0 000 8zm-7 9v-1a7 7 0 0110.29-6.18"
             />
           </svg>
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-ink-muted">
             {debouncedSearch
               ? `No members matching "${debouncedSearch}"`
               : 'No active members in this organization.'}
@@ -374,7 +374,7 @@ export default function MembersPage() {
                 setSearch('');
                 setDebouncedSearch('');
               }}
-              className="text-xs text-indigo-400 underline hover:text-indigo-300"
+              className="text-xs text-primary-blue underline hover:text-primary-blue"
             >
               Clear search
             </button>
@@ -386,7 +386,7 @@ export default function MembersPage() {
       {data && data.members.length > 0 && (
         <>
           {/* Column headers */}
-          <div className="flex items-center gap-4 px-4 text-xs font-medium uppercase tracking-wider text-slate-500">
+          <div className="flex items-center gap-4 px-4 text-xs font-medium uppercase tracking-wider text-ink-muted">
             <div className="w-10 shrink-0" aria-hidden />
             <div className="flex-1">Name</div>
             <div className="w-28 shrink-0 text-right">Member #</div>

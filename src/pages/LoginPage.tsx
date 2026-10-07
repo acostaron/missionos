@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase/client';
 import { normalizeError } from '../lib/supabase/errors';
 import { useAuth } from '../hooks/use-auth';
+import { Alert, Button, Card, FormField, Input } from '../components/ui';
 
 export default function LoginPage() {
   const { user, isLoading: authLoading } = useAuth();
@@ -42,48 +43,44 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full p-8 bg-white shadow rounded">
-        <h1 className="text-2xl font-bold mb-6 text-center">MissionOS Login</h1>
-        
+    <div className="flex min-h-screen items-center justify-center bg-canvas px-4 py-10">
+      <Card className="w-full max-w-md" padding="comfortable">
+        <div className="mb-6 text-center">
+          <p className="text-small font-semibold tracking-wide text-secondary uppercase">MissionOS</p>
+          <h1 className="mt-1 text-page-title font-semibold text-ink">Sign in</h1>
+          <p className="mt-1 text-small text-ink-secondary">Welcome back. Sign in to continue.</p>
+        </div>
+
         {errorMsg && (
-          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded text-sm">
+          <Alert variant="danger" className="mb-4">
             {errorMsg}
-          </div>
+          </Alert>
         )}
 
         <form onSubmit={handleLogin} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Email</label>
-            <input 
-              type="email" 
-              required
-              className="w-full border rounded p-2"
+          <FormField label="Email" required>
+            <Input
+              type="email"
+              autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={isSubmitting}
             />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Password</label>
-            <input 
-              type="password" 
-              required
-              className="w-full border rounded p-2"
+          </FormField>
+          <FormField label="Password" required>
+            <Input
+              type="password"
+              autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={isSubmitting}
             />
-          </div>
-          <button 
-            type="submit" 
-            className="w-full bg-blue-600 text-white rounded p-2 font-medium disabled:opacity-50"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Signing in...' : 'Sign In'}
-          </button>
+          </FormField>
+          <Button type="submit" size="lg" className="w-full" loading={isSubmitting}>
+            {isSubmitting ? 'Signing in…' : 'Sign In'}
+          </Button>
         </form>
-      </div>
+      </Card>
     </div>
   );
 }

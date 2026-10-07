@@ -1,111 +1,127 @@
-:root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+@import 'tailwindcss';
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+/*
+ * MissionOS design system foundation (Stage 2A).
+ *
+ * Light, warm, ministry-oriented workspace. Tokens are exposed as Tailwind v4
+ * theme variables so they generate utilities (bg-primary, text-ink-muted,
+ * rounded-card, shadow-card, ...). Existing slate/indigo/emerald utilities
+ * continue to work from Tailwind's default palette.
+ *
+ * Dark mode is opt-in only (add the `dark` class to <html>); the system
+ * color-scheme preference does NOT switch themes.
+ */
+@custom-variant dark (&:where(.dark, .dark *));
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@theme {
+  /* ---- Brand colors ------------------------------------------------- */
+  --color-navy-950: #0a1b3d;
+  --color-navy-900: #10285a; /* MFC navy: primary */
+  --color-navy-800: #17357a;
+  --color-navy-700: #1f4496; /* primary hover */
+  --color-navy-600: #2a57b5; /* primary blue */
+  --color-navy-100: #e1e9f7;
+  --color-navy-50: #f0f4fb;
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
+  --color-gold-600: #b8870b;
+  --color-gold-500: #d9a31a; /* secondary gold */
+  --color-gold-400: #e8bb45;
+  --color-gold-100: #fbf0cf;
+  --color-gold-50: #fdf8e7;
+
+  --color-success-700: #166a3b;
+  --color-success-600: #1e8a4c;
+  --color-success-100: #dcf3e5;
+  --color-success-50: #eefaf2;
+
+  --color-warning-700: #8f5a0a;
+  --color-warning-600: #c47d12;
+  --color-warning-100: #fbebcc;
+  --color-warning-50: #fef7e6;
+
+  --color-danger-700: #a12a2a;
+  --color-danger-600: #c13a3a;
+  --color-danger-100: #f9dcdc;
+  --color-danger-50: #fdf0f0;
+
+  /* ---- Semantic tokens --------------------------------------------- */
+  --color-primary: var(--color-navy-900);
+  --color-primary-blue: var(--color-navy-600);
+  --color-primary-hover: var(--color-navy-700);
+  --color-secondary: var(--color-gold-500);
+  --color-canvas: #f7f6f2; /* page background (warm off-white) */
+  --color-surface: #ffffff;
+  --color-surface-elevated: #ffffff;
+  --color-surface-muted: #f1efe9;
+  --color-ink: #1b2430; /* primary text */
+  --color-ink-secondary: #465264;
+  --color-ink-muted: #697586; /* AA on white and canvas */
+  --color-line: #e3e0d8; /* borders */
+  --color-line-strong: #cfcbc0;
+  --color-focus: #2a57b5;
+
+  /* ---- Typography --------------------------------------------------- */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Consolas, monospace;
+
+  --text-page-title: 1.75rem; /* 28px */
+  --text-page-title--line-height: 2.25rem;
+  --text-section-title: 1.25rem; /* 20px */
+  --text-section-title--line-height: 1.75rem;
+  --text-card-title: 1rem; /* 16px */
+  --text-card-title--line-height: 1.5rem;
+  --text-body: 0.9375rem; /* 15px */
+  --text-body--line-height: 1.5rem;
+  --text-small: 0.8125rem; /* 13px */
+  --text-small--line-height: 1.25rem;
+  --text-label: 0.8125rem;
+  --text-label--line-height: 1.25rem;
+  --text-caption: 0.75rem; /* 12px */
+  --text-caption--line-height: 1rem;
+
+  /* ---- Radii -------------------------------------------------------- */
+  --radius-control: 0.5rem; /* inputs, buttons */
+  --radius-card: 0.75rem;
+  --radius-modal: 1rem;
+
+  /* ---- Shadows (subtle) -------------------------------------------- */
+  --shadow-card: 0 1px 2px rgb(16 40 90 / 0.05);
+  --shadow-raised: 0 4px 12px rgb(16 40 90 / 0.08);
+  --shadow-modal: 0 16px 40px rgb(10 27 61 / 0.18);
+
+  /* ---- Spacing expectations (use via spacing utilities) -------------
+   * page margins:   px-4 sm:px-6 lg:px-8, py-6 sm:py-8
+   * card padding:   p-4 sm:p-5 (compact) / p-6 (comfortable)
+   * section gaps:   space-y-6 (sections), space-y-3 (within a card)
+   * form spacing:   space-y-4 between fields, gap-1.5 label to control
+   * table spacing:  px-4 py-3 cells, sticky-free, no heavy borders
+   */
+}
+
+@layer base {
+  html {
+    color-scheme: light;
   }
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+  body {
+    margin: 0;
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.5;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  #social .button-icon {
-    filter: invert(1) brightness(2);
+  #root {
+    min-height: 100svh;
   }
-}
 
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-}
-
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
   }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
-}
-
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
 }

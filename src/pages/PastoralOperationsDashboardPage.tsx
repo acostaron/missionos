@@ -20,38 +20,38 @@ function formatOperationalStatus(status: PastoralOperationalStatus): {
     case 'ready':
       return {
         label: 'Ready',
-        className: 'bg-emerald-950/40 text-emerald-300 border-emerald-800/40',
+        className: 'bg-success-50 text-success-700 border-success-600/30',
       };
     case 'needs_leader':
       return {
         label: 'Needs Leader',
-        className: 'bg-amber-950/40 text-amber-300 border-amber-800/40',
+        className: 'bg-warning-50 text-warning-700 border-warning-600/30',
       };
     case 'needs_members':
       return {
         label: 'Needs Members',
-        className: 'bg-sky-950/40 text-sky-300 border-sky-800/40',
+        className: 'bg-navy-50 text-primary-blue border-navy-100',
       };
     case 'at_capacity':
       return {
         label: 'At Capacity',
-        className: 'bg-indigo-950/40 text-indigo-300 border-indigo-800/40',
+        className: 'bg-navy-50 text-primary-blue border-navy-100',
       };
     case 'not_accepting':
       return {
         label: 'Not Accepting',
-        className: 'bg-slate-800 text-slate-300 border-slate-700',
+        className: 'bg-surface-muted text-ink-secondary border-line',
       };
     case 'placement_review_required':
       return {
         label: 'Review Required',
-        className: 'bg-rose-950/40 text-rose-300 border-rose-800/40',
+        className: 'bg-danger-50 text-danger-700 border-danger-600/30',
       };
     case 'inactive':
     default:
       return {
         label: 'Inactive',
-        className: 'bg-slate-900 text-slate-500 border-slate-800',
+        className: 'bg-surface text-ink-muted border-line',
       };
   }
 }
@@ -62,13 +62,13 @@ function formatCapacityStatus(status: PastoralCapacityStatus): {
 } {
   switch (status) {
     case 'available':
-      return { label: 'Available', className: 'text-emerald-400' };
+      return { label: 'Available', className: 'text-success-700' };
     case 'at_target':
-      return { label: 'At Target', className: 'text-indigo-300' };
+      return { label: 'At Target', className: 'text-primary-blue' };
     case 'full':
-      return { label: 'Full', className: 'text-amber-400' };
+      return { label: 'Full', className: 'text-warning-700' };
     case 'not_accepting':
-      return { label: 'Closed', className: 'text-slate-400' };
+      return { label: 'Closed', className: 'text-ink-muted' };
   }
 }
 
@@ -95,8 +95,8 @@ export default function PastoralOperationsDashboardPage() {
   if (!canViewDashboard && !isPermLoading) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-6 text-center">
-          <p className="text-sm text-slate-400">
+        <div className="rounded-xl border border-line bg-surface p-6 text-center">
+          <p className="text-sm text-ink-muted">
             You do not have permission to view the pastoral operations dashboard.
           </p>
         </div>
@@ -107,13 +107,13 @@ export default function PastoralOperationsDashboardPage() {
   if (isLoading) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-6">
-        <div className="h-10 w-64 animate-pulse rounded-lg bg-slate-800/60" />
+        <div className="h-10 w-64 animate-pulse rounded-lg bg-surface-muted" />
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-28 animate-pulse rounded-xl bg-slate-800/40 border border-slate-700/60" />
+            <div key={i} className="h-28 animate-pulse rounded-xl bg-surface-muted border border-line" />
           ))}
         </div>
-        <div className="h-64 animate-pulse rounded-xl bg-slate-800/40 border border-slate-700/60" />
+        <div className="h-64 animate-pulse rounded-xl bg-surface-muted border border-line" />
       </div>
     );
   }
@@ -121,8 +121,8 @@ export default function PastoralOperationsDashboardPage() {
   if (error || !data) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="rounded-xl border border-rose-900/50 bg-rose-950/20 p-6 text-center">
-          <p className="text-sm text-rose-300">
+        <div className="rounded-xl border border-danger-600/30 bg-danger-50 p-6 text-center">
+          <p className="text-sm text-danger-700">
             Failed to load pastoral operations dashboard: {error instanceof Error ? error.message : 'Unknown error'}
           </p>
         </div>
@@ -169,12 +169,12 @@ export default function PastoralOperationsDashboardPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-800 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-line pb-5">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-100">
+          <h1 className="text-2xl font-bold tracking-tight text-ink">
             Pastoral Operations
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-ink-muted mt-1">
             Operational visibility, leader nourishment structure, and echelon care responsibilities.
           </p>
         </div>
@@ -182,10 +182,10 @@ export default function PastoralOperationsDashboardPage() {
         <div className="flex items-center gap-3">
           <Link
             to="/app/households/unassigned"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-700 transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-surface-muted px-3 py-2 text-xs font-semibold text-ink hover:bg-line transition-colors"
           >
             <span>Unassigned Members</span>
-            <span className="rounded-full bg-slate-900 px-2 py-0.5 text-[11px] font-bold text-amber-300 border border-slate-700">
+            <span className="rounded-full bg-surface px-2 py-0.5 text-[11px] font-bold text-warning-700 border border-line">
               {unassigned_members_count}
             </span>
           </Link>
@@ -194,7 +194,7 @@ export default function PastoralOperationsDashboardPage() {
             <button
               type="button"
               onClick={() => setIsCreateHouseholdOpen(true)}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3.5 py-2 text-xs font-semibold text-white hover:bg-indigo-500 transition-colors shadow-sm"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-xs font-semibold text-white hover:bg-primary-hover transition-colors shadow-sm"
             >
               + Create Household
             </button>
@@ -205,22 +205,22 @@ export default function PastoralOperationsDashboardPage() {
       {/* Leader Personalized Cards (Where I Serve / Where I Receive Pastoral Care) */}
       {identity.has_linked_member && (
         <div className="space-y-4">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-ink-muted">
             Leader Perspective · {identity.display_name}
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Where I Serve Card */}
-            <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-5 space-y-3">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                <span className="text-xs font-semibold uppercase tracking-wider text-indigo-400">
+            <div className="rounded-xl border border-line bg-surface p-5 space-y-3">
+              <div className="flex items-center justify-between border-b border-line pb-2">
+                <span className="text-xs font-semibold uppercase tracking-wider text-primary-blue">
                   Where I Serve
                 </span>
-                <span className="text-[10px] text-slate-500">Formal Office</span>
+                <span className="text-[10px] text-ink-muted">Formal Office</span>
               </div>
 
               {identity.serving_assignments.length === 0 ? (
-                <p className="text-xs text-slate-500 italic py-2">
+                <p className="text-xs text-ink-muted italic py-2">
                   No active formal servant leader appointments assigned to this profile.
                 </p>
               ) : (
@@ -228,16 +228,16 @@ export default function PastoralOperationsDashboardPage() {
                   {identity.serving_assignments.map((asg) => (
                     <div
                       key={asg.leadership_assignment_id}
-                      className="rounded-lg border border-slate-700/60 bg-slate-800/40 p-3 text-xs flex justify-between items-center"
+                      className="rounded-lg border border-line bg-surface-muted p-3 text-xs flex justify-between items-center"
                     >
                       <div>
-                        <p className="font-semibold text-slate-200">{asg.role_name}</p>
-                        <p className="text-[11px] text-slate-400">
+                        <p className="font-semibold text-ink">{asg.role_name}</p>
+                        <p className="text-[11px] text-ink-muted">
                           Scope: {asg.governance_node_name}{' '}
                           {asg.pastoral_level && `(${asg.pastoral_level})`}
                         </p>
                       </div>
-                      <span className="text-[10px] font-mono text-slate-400">
+                      <span className="text-[10px] font-mono text-ink-muted">
                         Since {asg.effective_from}
                       </span>
                     </div>
@@ -247,30 +247,30 @@ export default function PastoralOperationsDashboardPage() {
             </div>
 
             {/* Where I Receive Pastoral Care Card */}
-            <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-5 space-y-3">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                <span className="text-xs font-semibold uppercase tracking-wider text-emerald-400">
+            <div className="rounded-xl border border-line bg-surface p-5 space-y-3">
+              <div className="flex items-center justify-between border-b border-line pb-2">
+                <span className="text-xs font-semibold uppercase tracking-wider text-success-700">
                   Where I Receive Pastoral Care
                 </span>
-                <span className="text-[10px] text-slate-500">Nourishment Household</span>
+                <span className="text-[10px] text-ink-muted">Nourishment Household</span>
               </div>
 
               {identity.pastoral_membership ? (
                 <div className="space-y-2 text-xs">
                   <div className="flex justify-between items-center">
-                    <span className="font-semibold text-slate-200">
+                    <span className="font-semibold text-ink">
                       {identity.pastoral_membership.household_name}
                     </span>
-                    <span className="rounded bg-slate-800 px-2 py-0.5 text-[10px] font-medium uppercase text-slate-300">
+                    <span className="rounded bg-surface-muted px-2 py-0.5 text-[10px] font-medium uppercase text-ink-secondary">
                       Level: {identity.pastoral_membership.pastoral_level}
                     </span>
                   </div>
 
-                  <p className="text-[11px] text-slate-400">
+                  <p className="text-[11px] text-ink-muted">
                     Scope: {identity.pastoral_membership.scope_node_name ?? 'Root Area'}
                   </p>
 
-                  <div className="text-[11px] text-slate-400 pt-1 border-t border-slate-800">
+                  <div className="text-[11px] text-ink-muted pt-1 border-t border-line">
                     <span>Meeting: {identity.pastoral_membership.meeting_frequency}</span>
                     {identity.pastoral_membership.meeting_start_time && (
                       <span className="ml-2">at {identity.pastoral_membership.meeting_start_time.slice(0, 5)}</span>
@@ -279,17 +279,17 @@ export default function PastoralOperationsDashboardPage() {
                 </div>
               ) : (
                 <div className="py-2 space-y-2">
-                  <p className="text-xs text-amber-300/90 font-medium">
+                  <p className="text-xs text-warning-700 font-medium">
                     Pastoral household placement has not yet been established.
                   </p>
-                  <p className="text-[11px] text-slate-400">
+                  <p className="text-[11px] text-ink-muted">
                     Every servant leader receives pastoral nourishment in a higher-echelon household.
                   </p>
                   {identity.pastoral_household_placement_needed && canReviewPlacement && identity.serving_assignments[0] && (
                     <button
                       type="button"
                       onClick={() => setActivePlacementAssignmentId(identity.serving_assignments[0]?.leadership_assignment_id ?? null)}
-                      className="mt-1 rounded bg-amber-950/60 border border-amber-700/60 px-2.5 py-1 text-[11px] font-semibold text-amber-200 hover:bg-amber-900/60 transition-colors"
+                      className="mt-1 rounded bg-warning-50 border border-warning-600/30 px-2.5 py-1 text-[11px] font-semibold text-warning-700 hover:bg-warning-100 transition-colors"
                     >
                       Review Placement Guidance
                     </button>
@@ -301,28 +301,28 @@ export default function PastoralOperationsDashboardPage() {
 
           {/* People I Care For Section */}
           {care_responsibilities.length > 0 && (
-            <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-5 space-y-4">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 border-b border-slate-800 pb-2">
+            <div className="rounded-xl border border-line bg-surface p-5 space-y-4">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-ink-muted border-b border-line pb-2">
                 People I Am Pastorally Responsible For
               </h3>
 
               <div className="space-y-4">
                 {care_responsibilities.map((resp, idx) => (
                   <div key={idx} className="space-y-2">
-                    <p className="text-xs font-medium text-slate-300">
+                    <p className="text-xs font-medium text-ink-secondary">
                       Scope: <span className="font-semibold text-white">{resp.scope_name}</span> ({resp.responsibility_level})
                     </p>
 
                     {resp.details.type === 'household_members' && (
                       <div className="text-xs space-y-2">
-                        <p className="text-[11px] text-slate-400">
+                        <p className="text-[11px] text-ink-muted">
                           {resp.details.member_count ?? 0} active members in this household:
                         </p>
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
                           {(resp.details.members ?? []).map((m) => (
-                            <div key={m.member_id} className="rounded border border-slate-800 bg-slate-800/30 p-2 text-xs">
-                              <p className="font-medium text-slate-200">{m.display_name}</p>
-                              <p className="text-[10px] text-slate-500 uppercase">{m.membership_role}</p>
+                            <div key={m.member_id} className="rounded border border-line bg-surface-muted p-2 text-xs">
+                              <p className="font-medium text-ink">{m.display_name}</p>
+                              <p className="text-[10px] text-ink-muted uppercase">{m.membership_role}</p>
                             </div>
                           ))}
                         </div>
@@ -334,15 +334,15 @@ export default function PastoralOperationsDashboardPage() {
                       resp.details.type === 'chapter_leaders') && (
                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 text-xs">
                         {(resp.details.leaders ?? []).map((l, lIdx) => (
-                          <div key={lIdx} className="rounded border border-slate-800 bg-slate-800/30 p-2.5 space-y-1">
-                            <span className="text-[10px] font-semibold uppercase text-indigo-400 block">
+                          <div key={lIdx} className="rounded border border-line bg-surface-muted p-2.5 space-y-1">
+                            <span className="text-[10px] font-semibold uppercase text-primary-blue block">
                               {l.derived_pastoral_title}
                             </span>
-                            <p className="font-semibold text-slate-200">
+                            <p className="font-semibold text-ink">
                               {l.leader_name}
                               {l.derived_spouse_name && ` & ${l.derived_spouse_name}`}
                             </p>
-                            <p className="text-[10px] text-slate-500">
+                            <p className="text-[10px] text-ink-muted">
                               {l.household_name ?? l.unit_name ?? l.chapter_name}
                             </p>
                           </div>
@@ -359,36 +359,36 @@ export default function PastoralOperationsDashboardPage() {
 
       {/* Operational Metrics Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 space-y-1">
-          <p className="text-xs text-slate-400">Households Ready</p>
-          <p className="text-2xl font-bold text-emerald-400">{operational_summary.ready}</p>
-          <p className="text-[11px] text-slate-500">{operational_summary.total} total active/configured</p>
+        <div className="rounded-xl border border-line bg-surface p-4 space-y-1">
+          <p className="text-xs text-ink-muted">Households Ready</p>
+          <p className="text-2xl font-bold text-success-700">{operational_summary.ready}</p>
+          <p className="text-[11px] text-ink-muted">{operational_summary.total} total active/configured</p>
         </div>
 
-        <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 space-y-1">
-          <p className="text-xs text-slate-400">Leadership Vacancies</p>
-          <p className={`text-2xl font-bold ${leadership_vacancies.length > 0 ? 'text-amber-400' : 'text-slate-100'}`}>
+        <div className="rounded-xl border border-line bg-surface p-4 space-y-1">
+          <p className="text-xs text-ink-muted">Leadership Vacancies</p>
+          <p className={`text-2xl font-bold ${leadership_vacancies.length > 0 ? 'text-warning-700' : 'text-ink'}`}>
             {leadership_vacancies.length}
           </p>
-          <p className="text-[11px] text-slate-500">Member HH, Unit, Chapter, Area</p>
+          <p className="text-[11px] text-ink-muted">Member HH, Unit, Chapter, Area</p>
         </div>
 
-        <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 space-y-1">
-          <p className="text-xs text-slate-400">Placement Reviews</p>
-          <p className={`text-2xl font-bold ${placement_review_summary.total > 0 ? 'text-rose-400' : 'text-slate-100'}`}>
+        <div className="rounded-xl border border-line bg-surface p-4 space-y-1">
+          <p className="text-xs text-ink-muted">Placement Reviews</p>
+          <p className={`text-2xl font-bold ${placement_review_summary.total > 0 ? 'text-danger-700' : 'text-ink'}`}>
             {placement_review_summary.total}
           </p>
-          <p className="text-[11px] text-slate-500">
+          <p className="text-[11px] text-ink-muted">
             {placement_review_summary.manual_review_required} require manual review
           </p>
         </div>
 
-        <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 space-y-1">
-          <p className="text-xs text-slate-400">Capacity Alerts</p>
-          <p className={`text-2xl font-bold ${capacity_summary.full > 0 ? 'text-amber-400' : 'text-slate-100'}`}>
+        <div className="rounded-xl border border-line bg-surface p-4 space-y-1">
+          <p className="text-xs text-ink-muted">Capacity Alerts</p>
+          <p className={`text-2xl font-bold ${capacity_summary.full > 0 ? 'text-warning-700' : 'text-ink'}`}>
             {capacity_summary.full} Full
           </p>
-          <p className="text-[11px] text-slate-500">
+          <p className="text-[11px] text-ink-muted">
             {capacity_summary.available} open for placement
           </p>
         </div>
@@ -396,141 +396,141 @@ export default function PastoralOperationsDashboardPage() {
 
       {/* Meeting Operations Summary */}
       <div className="space-y-3">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-ink-muted">
           Meeting Operations
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 space-y-1">
-            <p className="text-xs text-slate-400">Upcoming</p>
-            <p className="text-2xl font-bold text-indigo-300">{meetingOps.upcoming_meetings}</p>
-            <p className="text-[11px] text-slate-500">Scheduled meetings</p>
+          <div className="rounded-xl border border-line bg-surface p-4 space-y-1">
+            <p className="text-xs text-ink-muted">Upcoming</p>
+            <p className="text-2xl font-bold text-primary-blue">{meetingOps.upcoming_meetings}</p>
+            <p className="text-[11px] text-ink-muted">Scheduled meetings</p>
           </div>
 
-          <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 space-y-1">
-            <p className="text-xs text-slate-400">This Month</p>
-            <p className="text-2xl font-bold text-emerald-400">{meetingOps.meetings_this_month}</p>
-            <p className="text-[11px] text-slate-500">Completed meetings</p>
+          <div className="rounded-xl border border-line bg-surface p-4 space-y-1">
+            <p className="text-xs text-ink-muted">This Month</p>
+            <p className="text-2xl font-bold text-success-700">{meetingOps.meetings_this_month}</p>
+            <p className="text-[11px] text-ink-muted">Completed meetings</p>
           </div>
 
           <div className={`rounded-xl border p-4 space-y-1 ${
             meetingOps.attendance_pending > 0
-              ? 'border-amber-800/60 bg-amber-950/20'
-              : 'border-slate-800 bg-slate-900/60'
+              ? 'border-warning-600/30 bg-warning-50'
+              : 'border-line bg-surface'
           }`}>
-            <p className="text-xs text-slate-400">Attendance Pending</p>
+            <p className="text-xs text-ink-muted">Attendance Pending</p>
             <p className={`text-2xl font-bold ${
-              meetingOps.attendance_pending > 0 ? 'text-amber-300' : 'text-slate-100'
+              meetingOps.attendance_pending > 0 ? 'text-warning-700' : 'text-ink'
             }`}>{meetingOps.attendance_pending}</p>
-            <p className="text-[11px] text-slate-500">Completed, not recorded</p>
+            <p className="text-[11px] text-ink-muted">Completed, not recorded</p>
           </div>
 
           <div className={`rounded-xl border p-4 space-y-1 ${
             meetingOps.households_without_meeting_history > 0
-              ? 'border-slate-700 bg-slate-900/60'
-              : 'border-slate-800 bg-slate-900/60'
+              ? 'border-line bg-surface'
+              : 'border-line bg-surface'
           }`}>
-            <p className="text-xs text-slate-400">No Meeting History</p>
+            <p className="text-xs text-ink-muted">No Meeting History</p>
             <p className={`text-2xl font-bold ${
-              meetingOps.households_without_meeting_history > 0 ? 'text-slate-300' : 'text-slate-100'
+              meetingOps.households_without_meeting_history > 0 ? 'text-ink-secondary' : 'text-ink'
             }`}>{meetingOps.households_without_meeting_history}</p>
-            <p className="text-[11px] text-slate-500">Households never met</p>
+            <p className="text-[11px] text-ink-muted">Households never met</p>
           </div>
 
           <div className={`rounded-xl border p-4 space-y-1 ${
             meetingOps.households_overdue > 0
-              ? 'border-rose-900/50 bg-rose-950/20'
-              : 'border-slate-800 bg-slate-900/60'
+              ? 'border-danger-600/30 bg-danger-50'
+              : 'border-line bg-surface'
           }`}>
-            <p className="text-xs text-slate-400">Overdue</p>
+            <p className="text-xs text-ink-muted">Overdue</p>
             <p className={`text-2xl font-bold ${
-              meetingOps.households_overdue > 0 ? 'text-rose-400' : 'text-slate-100'
+              meetingOps.households_overdue > 0 ? 'text-danger-700' : 'text-ink'
             }`}>{meetingOps.households_overdue}</p>
-            <p className="text-[11px] text-slate-500">Past scheduled frequency</p>
+            <p className="text-[11px] text-ink-muted">Past scheduled frequency</p>
           </div>
 
           <div className={`rounded-xl border p-4 space-y-1 ${
             meetingOps.member_follow_up_signals > 0
-              ? 'border-amber-800/60 bg-amber-950/20'
-              : 'border-slate-800 bg-slate-900/60'
+              ? 'border-warning-600/30 bg-warning-50'
+              : 'border-line bg-surface'
           }`}>
-            <p className="text-xs text-slate-400">Follow-Up Signals</p>
+            <p className="text-xs text-ink-muted">Follow-Up Signals</p>
             <p className={`text-2xl font-bold ${
-              meetingOps.member_follow_up_signals > 0 ? 'text-amber-300' : 'text-slate-100'
+              meetingOps.member_follow_up_signals > 0 ? 'text-warning-700' : 'text-ink'
             }`}>{meetingOps.member_follow_up_signals}</p>
-            <p className="text-[11px] text-slate-500">Members with 2+ absences</p>
+            <p className="text-[11px] text-ink-muted">Members with 2+ absences</p>
           </div>
         </div>
       </div>
 
       {/* Formation Operations Summary */}
       <div className="space-y-3">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-ink-muted">
           Formation Operations
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-          <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 space-y-1">
-            <p className="text-xs text-slate-400">Households With No Plan</p>
-            <p className="text-2xl font-bold text-slate-100">{formationOps.households_with_no_plan}</p>
+          <div className="rounded-xl border border-line bg-surface p-4 space-y-1">
+            <p className="text-xs text-ink-muted">Households With No Plan</p>
+            <p className="text-2xl font-bold text-ink">{formationOps.households_with_no_plan}</p>
           </div>
-          <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 space-y-1">
-            <p className="text-xs text-slate-400">Topics Planned</p>
-            <p className="text-2xl font-bold text-indigo-300">{formationOps.topics_planned}</p>
+          <div className="rounded-xl border border-line bg-surface p-4 space-y-1">
+            <p className="text-xs text-ink-muted">Topics Planned</p>
+            <p className="text-2xl font-bold text-primary-blue">{formationOps.topics_planned}</p>
           </div>
-          <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 space-y-1">
-            <p className="text-xs text-slate-400">Completed This Month</p>
-            <p className="text-2xl font-bold text-emerald-400">{formationOps.topics_completed_this_month}</p>
+          <div className="rounded-xl border border-line bg-surface p-4 space-y-1">
+            <p className="text-xs text-ink-muted">Completed This Month</p>
+            <p className="text-2xl font-bold text-success-700">{formationOps.topics_completed_this_month}</p>
           </div>
           <div className={`rounded-xl border p-4 space-y-1 ${
             formationOps.topics_due > 0
-              ? 'border-amber-800/60 bg-amber-950/20'
-              : 'border-slate-800 bg-slate-900/60'
+              ? 'border-warning-600/30 bg-warning-50'
+              : 'border-line bg-surface'
           }`}>
-            <p className="text-xs text-slate-400">Topics Due</p>
+            <p className="text-xs text-ink-muted">Topics Due</p>
             <p className={`text-2xl font-bold ${
-              formationOps.topics_due > 0 ? 'text-amber-300' : 'text-slate-100'
+              formationOps.topics_due > 0 ? 'text-warning-700' : 'text-ink'
             }`}>{formationOps.topics_due}</p>
           </div>
           <div className={`rounded-xl border p-4 space-y-1 ${
             formationOps.topics_overdue > 0
-              ? 'border-rose-900/50 bg-rose-950/20'
-              : 'border-slate-800 bg-slate-900/60'
+              ? 'border-danger-600/30 bg-danger-50'
+              : 'border-line bg-surface'
           }`}>
-            <p className="text-xs text-slate-400">Topics Overdue</p>
+            <p className="text-xs text-ink-muted">Topics Overdue</p>
             <p className={`text-2xl font-bold ${
-              formationOps.topics_overdue > 0 ? 'text-rose-400' : 'text-slate-100'
+              formationOps.topics_overdue > 0 ? 'text-danger-700' : 'text-ink'
             }`}>{formationOps.topics_overdue}</p>
           </div>
         </div>
       </div>
       {/* Leadership Vacancies List (if any) */}
       {leadership_vacancies.length > 0 && (
-        <div className="rounded-xl border border-amber-900/50 bg-amber-950/20 p-5 space-y-3">
-          <div className="flex items-center justify-between border-b border-amber-800/40 pb-2">
+        <div className="rounded-xl border border-warning-600/30 bg-warning-50 p-5 space-y-3">
+          <div className="flex items-center justify-between border-b border-warning-600/30 pb-2">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-amber-300">
+              <span className="text-xs font-semibold uppercase tracking-wider text-warning-700">
                 Action Required · Leadership Vacancies ({leadership_vacancies.length})
               </span>
             </div>
-            <span className="text-[10px] text-amber-400/80">Servant leader appointment needed</span>
+            <span className="text-[10px] text-warning-700">Servant leader appointment needed</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-xs">
             {leadership_vacancies.map((vac) => (
               <div
                 key={vac.governance_node_id}
-                className="rounded-lg border border-amber-800/40 bg-slate-900/60 p-3 space-y-1"
+                className="rounded-lg border border-warning-600/30 bg-surface p-3 space-y-1"
               >
                 <div className="flex justify-between items-center">
-                  <span className="font-semibold text-slate-200">{vac.governance_node_name}</span>
-                  <span className="rounded bg-amber-950/60 px-1.5 py-0.5 text-[10px] font-medium text-amber-300 border border-amber-800/40">
+                  <span className="font-semibold text-ink">{vac.governance_node_name}</span>
+                  <span className="rounded bg-warning-50 px-1.5 py-0.5 text-[10px] font-medium text-warning-700 border border-warning-600/30">
                     Vacant
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-400">Office: {vac.role_name}</p>
+                <p className="text-[11px] text-ink-muted">Office: {vac.role_name}</p>
                 {vac.pastoral_level === 'member' && (
                   <Link
                     to={`/app/households/${vac.governance_node_id}`}
-                    className="inline-block text-[11px] text-indigo-400 hover:underline pt-1"
+                    className="inline-block text-[11px] text-primary-blue hover:underline pt-1"
                   >
                     View Household Profile &rarr;
                   </Link>
@@ -543,30 +543,30 @@ export default function PastoralOperationsDashboardPage() {
 
       {/* Placement Reviews Actionable Queue (if any) */}
       {placement_review_summary.total > 0 && canReviewPlacement && (
-        <div className="rounded-xl border border-rose-900/50 bg-rose-950/20 p-5 space-y-3">
-          <div className="flex items-center justify-between border-b border-rose-800/40 pb-2">
-            <span className="text-xs font-semibold uppercase tracking-wider text-rose-300">
+        <div className="rounded-xl border border-danger-600/30 bg-danger-50 p-5 space-y-3">
+          <div className="flex items-center justify-between border-b border-danger-600/30 pb-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-danger-700">
               Servant Leaders Needing Placement Review ({placement_review_summary.total})
             </span>
-            <span className="text-[10px] text-rose-400/80">Couples context &amp; echelon alignment</span>
+            <span className="text-[10px] text-danger-700">Couples context &amp; echelon alignment</span>
           </div>
 
           <div className="space-y-2">
             {placement_review_summary.actionable_items.map((item) => (
               <div
                 key={item.leadership_assignment_id}
-                className="rounded-lg border border-rose-800/30 bg-slate-900/60 p-3 text-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+                className="rounded-lg border border-danger-600/30 bg-surface p-3 text-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
               >
                 <div>
-                  <p className="font-semibold text-slate-200">
+                  <p className="font-semibold text-ink">
                     {item.leader_name}{' '}
-                    <span className="text-[11px] font-normal text-slate-400">({item.role_name})</span>
+                    <span className="text-[11px] font-normal text-ink-muted">({item.role_name})</span>
                   </p>
-                  <p className="text-[11px] text-slate-400">
+                  <p className="text-[11px] text-ink-muted">
                     Recommended: {item.recommended_pastoral_level} Household under {item.recommended_scope_name}
                   </p>
                   {item.couples_context_status === 'ambiguous' && (
-                    <p className="text-[10px] text-amber-400 mt-0.5">
+                    <p className="text-[10px] text-warning-700 mt-0.5">
                       ⚠️ Couples ministry context requires review before placement.
                     </p>
                   )}
@@ -575,7 +575,7 @@ export default function PastoralOperationsDashboardPage() {
                 <button
                   type="button"
                   onClick={() => setActivePlacementAssignmentId(item.leadership_assignment_id)}
-                  className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-500 transition-colors self-start sm:self-auto"
+                  className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary-hover transition-colors self-start sm:self-auto"
                 >
                   Review Placement
                 </button>
@@ -588,7 +588,7 @@ export default function PastoralOperationsDashboardPage() {
       {/* Household Operations Table Section */}
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <h2 className="text-sm font-bold tracking-tight text-slate-100">
+          <h2 className="text-sm font-bold tracking-tight text-ink">
             Household Operations Table ({filteredHouseholds.length})
           </h2>
 
@@ -597,7 +597,7 @@ export default function PastoralOperationsDashboardPage() {
             <select
               value={levelFilter}
               onChange={(e) => setLevelFilter(e.target.value)}
-              className="rounded-lg border border-slate-700 bg-slate-800 px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              className="rounded-lg border border-line bg-surface-muted px-2.5 py-1.5 text-xs text-ink focus:outline-none focus:ring-1 focus:ring-focus"
             >
               <option value="all">All Pastoral Levels</option>
               <option value="member">Member</option>
@@ -611,7 +611,7 @@ export default function PastoralOperationsDashboardPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="rounded-lg border border-slate-700 bg-slate-800 px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              className="rounded-lg border border-line bg-surface-muted px-2.5 py-1.5 text-xs text-ink focus:outline-none focus:ring-1 focus:ring-focus"
             >
               <option value="all">All Operational Statuses</option>
               <option value="ready">Ready</option>
@@ -625,17 +625,17 @@ export default function PastoralOperationsDashboardPage() {
 
         {/* Empty State: Zero Households */}
         {household_summary.length === 0 ? (
-          <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-12 text-center space-y-4">
-            <div className="mx-auto w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-slate-400">
+          <div className="rounded-xl border border-line bg-surface p-12 text-center space-y-4">
+            <div className="mx-auto w-12 h-12 rounded-full bg-surface-muted flex items-center justify-center text-ink-muted">
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
               </svg>
             </div>
             <div className="space-y-1">
-              <h3 className="text-base font-semibold text-slate-200">
+              <h3 className="text-base font-semibold text-ink">
                 No pastoral households have been created yet.
               </h3>
-              <p className="text-xs text-slate-400 max-w-md mx-auto">
+              <p className="text-xs text-ink-muted max-w-md mx-auto">
                 Begin by creating Member Households under Units, or higher-echelon households (Unit, Chapter, Area, Fraternal) for servant leader nourishment.
               </p>
             </div>
@@ -643,20 +643,20 @@ export default function PastoralOperationsDashboardPage() {
               <button
                 type="button"
                 onClick={() => setIsCreateHouseholdOpen(true)}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-500 transition-colors"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white hover:bg-primary-hover transition-colors"
               >
                 + Create First Household
               </button>
             )}
           </div>
         ) : filteredHouseholds.length === 0 ? (
-          <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-8 text-center">
-            <p className="text-xs text-slate-400">No households match the selected filters.</p>
+          <div className="rounded-xl border border-line bg-surface p-8 text-center">
+            <p className="text-xs text-ink-muted">No households match the selected filters.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/60">
+          <div className="overflow-x-auto rounded-xl border border-line bg-surface">
             <table className="w-full text-left text-xs">
-              <thead className="border-b border-slate-800 bg-slate-900/80 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+              <thead className="border-b border-line bg-surface text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
                 <tr>
                   <th className="px-4 py-3">Household</th>
                   <th className="px-4 py-3">Level</th>
@@ -668,45 +668,45 @@ export default function PastoralOperationsDashboardPage() {
                   <th className="px-4 py-3 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800 text-slate-300">
+              <tbody className="divide-y divide-line text-ink-secondary">
                 {filteredHouseholds.map((hh) => {
                   const opStatus = formatOperationalStatus(hh.operational_status);
                   const capStatus = formatCapacityStatus(hh.capacity_status);
 
                   return (
-                    <tr key={hh.household_id} className="hover:bg-slate-800/40 transition-colors">
+                    <tr key={hh.household_id} className="hover:bg-surface-muted transition-colors">
                       <td className="px-4 py-3">
                         <Link
                           to={`/app/households/${hh.household_id}`}
-                          className="font-medium text-slate-200 hover:text-indigo-400 transition-colors"
+                          className="font-medium text-ink hover:text-primary-blue transition-colors"
                         >
                           {hh.household_name}
                         </Link>
                         {hh.is_couple_household && (
-                          <span className="block text-[10px] text-indigo-400">Couples</span>
+                          <span className="block text-[10px] text-primary-blue">Couples</span>
                         )}
                       </td>
 
                       <td className="px-4 py-3">
-                        <span className="rounded bg-slate-800 px-2 py-0.5 text-[10px] font-medium uppercase text-slate-300">
+                        <span className="rounded bg-surface-muted px-2 py-0.5 text-[10px] font-medium uppercase text-ink-secondary">
                           {hh.pastoral_level}
                         </span>
                       </td>
 
-                      <td className="px-4 py-3 text-slate-400 text-[11px]">
+                      <td className="px-4 py-3 text-ink-muted text-[11px]">
                         {hh.scope_node_name ?? '—'}
                       </td>
 
                       <td className="px-4 py-3 text-[11px]">
-                        <span className={hh.leadership_status === 'vacant' ? 'text-amber-400' : 'text-slate-200'}>
+                        <span className={hh.leadership_status === 'vacant' ? 'text-warning-700' : 'text-ink'}>
                           {hh.leader_display_label}
                         </span>
                       </td>
 
                       <td className="px-4 py-3 text-[11px]">
-                        <span className="font-semibold text-slate-100">{hh.member_count}</span>
+                        <span className="font-semibold text-ink">{hh.member_count}</span>
                         {hh.target_member_count && (
-                          <span className="text-slate-500"> / {hh.target_member_count}</span>
+                          <span className="text-ink-muted"> / {hh.target_member_count}</span>
                         )}
                       </td>
 
@@ -725,7 +725,7 @@ export default function PastoralOperationsDashboardPage() {
                       <td className="px-4 py-3 text-right">
                         <Link
                           to={`/app/households/${hh.household_id}`}
-                          className="rounded px-2.5 py-1 text-[11px] font-medium text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 transition-colors"
+                          className="rounded px-2.5 py-1 text-[11px] font-medium text-ink-secondary hover:text-white bg-surface-muted hover:bg-line transition-colors"
                         >
                           View &rarr;
                         </Link>

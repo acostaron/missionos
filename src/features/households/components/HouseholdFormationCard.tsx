@@ -23,11 +23,11 @@ import type {
 const HISTORY_PAGE_SIZE = 10;
 
 const STATUS_STYLES: Record<HouseholdFormationStatus, string> = {
-  no_plan: 'border-slate-600 bg-slate-800/60 text-slate-300',
-  planned: 'border-indigo-700/60 bg-indigo-950/40 text-indigo-300',
-  topic_due: 'border-amber-700/60 bg-amber-950/40 text-amber-300',
-  topic_overdue: 'border-rose-700/60 bg-rose-950/40 text-rose-300',
-  up_to_date: 'border-emerald-700/60 bg-emerald-950/40 text-emerald-300',
+  no_plan: 'border-line-strong bg-surface-muted text-ink-secondary',
+  planned: 'border-navy-100 bg-navy-50 text-primary-blue',
+  topic_due: 'border-warning-600/30 bg-warning-50 text-warning-700',
+  topic_overdue: 'border-danger-600/30 bg-danger-50 text-danger-700',
+  up_to_date: 'border-success-600/30 bg-success-50 text-success-700',
 };
 
 interface HouseholdFormationCardProps {
@@ -78,8 +78,8 @@ export function HouseholdFormationCard({
 
   if (!canView) {
     return (
-      <div className="rounded-xl border border-slate-700/60 bg-slate-800/40 p-6">
-        <p className="text-xs text-slate-400">
+      <div className="rounded-xl border border-line bg-surface-muted p-6">
+        <p className="text-xs text-ink-muted">
           You do not have permission to view formation for this household.
         </p>
       </div>
@@ -106,7 +106,7 @@ export function HouseholdFormationCard({
   const renderRowActions = (topic: HouseholdFormationPlanTopic) => {
     if (!canWrite) return null;
     const btn =
-      'rounded-md border border-slate-600 px-2 py-1 text-[10px] font-medium text-slate-300 hover:bg-slate-700/60 transition-colors';
+      'rounded-md border border-line-strong px-2 py-1 text-[10px] font-medium text-ink-secondary hover:bg-line transition-colors';
     return (
       <div className="flex flex-wrap gap-1.5">
         {isHouseholdActive && (
@@ -137,10 +137,10 @@ export function HouseholdFormationCard({
 
   return (
     <>
-      <div className="rounded-xl border border-slate-700/60 bg-slate-800/40">
-        <div className="flex items-center justify-between border-b border-slate-700/40 px-5 py-4">
+      <div className="rounded-xl border border-line bg-surface-muted">
+        <div className="flex items-center justify-between border-b border-line px-5 py-4">
           <div className="flex items-center gap-3">
-            <h3 className="text-sm font-semibold text-slate-200">Household Formation</h3>
+            <h3 className="text-sm font-semibold text-ink">Household Formation</h3>
             {status && (
               <span
                 className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium ${STATUS_STYLES[status] ?? STATUS_STYLES.no_plan}`}
@@ -153,7 +153,7 @@ export function HouseholdFormationCard({
             <button
               type="button"
               onClick={() => setIsAssignOpen(true)}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-700/60 bg-indigo-950/40 px-3 py-1.5 text-xs font-medium text-indigo-300 hover:bg-indigo-950/70 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-navy-100 bg-navy-50 px-3 py-1.5 text-xs font-medium text-primary-blue hover:bg-navy-100 transition-colors"
             >
               Assign Topic
             </button>
@@ -164,25 +164,25 @@ export function HouseholdFormationCard({
           {isLoading && !summary && (
             <div className="space-y-2">
               {[1, 2].map((i) => (
-                <div key={i} className="h-10 animate-pulse rounded-lg bg-slate-700/40" />
+                <div key={i} className="h-10 animate-pulse rounded-lg bg-surface-muted" />
               ))}
             </div>
           )}
 
-          {error && <p className="text-xs text-red-400">Failed to load household formation.</p>}
+          {error && <p className="text-xs text-danger-700">Failed to load household formation.</p>}
 
           {!error && noPlan && (
-            <p className="text-xs text-slate-400">No formation topics have been planned yet.</p>
+            <p className="text-xs text-ink-muted">No formation topics have been planned yet.</p>
           )}
 
           {!error && !noPlan && (status || summary) && (
             <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <div className="rounded-lg border border-slate-700/40 bg-slate-800/40 p-3">
-                <dt className="text-[10px] uppercase tracking-wider text-slate-500">Next Topic</dt>
-                <dd className="mt-1 text-xs text-slate-200">
+              <div className="rounded-lg border border-line bg-surface-muted p-3">
+                <dt className="text-[10px] uppercase tracking-wider text-ink-muted">Next Topic</dt>
+                <dd className="mt-1 text-xs text-ink">
                   {nextTopic ? nextTopic.title : 'No upcoming household topic.'}
                 </dd>
-                <dd className="mt-0.5 text-[11px] text-slate-500">
+                <dd className="mt-0.5 text-[11px] text-ink-muted">
                   {nextTopic
                     ? `Planned: ${nextTopic.planned_for_date ?? 'No date set'}`
                     : ''}
@@ -190,15 +190,15 @@ export function HouseholdFormationCard({
                 {nextAsPlanTopic && <div className="mt-2">{renderRowActions(nextAsPlanTopic)}</div>}
               </div>
 
-              <div className="rounded-lg border border-slate-700/40 bg-slate-800/40 p-3">
-                <dt className="text-[10px] uppercase tracking-wider text-slate-500">
+              <div className="rounded-lg border border-line bg-surface-muted p-3">
+                <dt className="text-[10px] uppercase tracking-wider text-ink-muted">
                   Last Completed Topic
                 </dt>
-                <dd className="mt-1 text-xs text-slate-200">
+                <dd className="mt-1 text-xs text-ink">
                   {lastCompleted ? lastCompleted.title : 'No completed topics yet.'}
                 </dd>
                 {lastCompleted && (
-                  <dd className="mt-0.5 text-[11px] text-slate-500">
+                  <dd className="mt-0.5 text-[11px] text-ink-muted">
                     {lastCompleted.meeting_date
                       ? `Meeting: ${lastCompleted.meeting_date}`
                       : lastCompleted.completed_at
@@ -208,29 +208,29 @@ export function HouseholdFormationCard({
                 )}
               </div>
 
-              <div className="rounded-lg border border-slate-700/40 bg-slate-800/40 p-3">
-                <dt className="text-[10px] uppercase tracking-wider text-slate-500">Planned Topics</dt>
-                <dd className="mt-1 text-lg font-semibold text-slate-100">{plannedCount}</dd>
+              <div className="rounded-lg border border-line bg-surface-muted p-3">
+                <dt className="text-[10px] uppercase tracking-wider text-ink-muted">Planned Topics</dt>
+                <dd className="mt-1 text-lg font-semibold text-ink">{plannedCount}</dd>
               </div>
 
-              <div className="rounded-lg border border-slate-700/40 bg-slate-800/40 p-3">
-                <dt className="text-[10px] uppercase tracking-wider text-slate-500">Completed Topics</dt>
-                <dd className="mt-1 text-lg font-semibold text-slate-100">{completedCount}</dd>
+              <div className="rounded-lg border border-line bg-surface-muted p-3">
+                <dt className="text-[10px] uppercase tracking-wider text-ink-muted">Completed Topics</dt>
+                <dd className="mt-1 text-lg font-semibold text-ink">{completedCount}</dd>
               </div>
             </dl>
           )}
 
           {otherUpcoming.length > 0 && (
             <div className="space-y-1.5">
-              <p className="text-[10px] uppercase tracking-wider text-slate-500">Upcoming</p>
+              <p className="text-[10px] uppercase tracking-wider text-ink-muted">Upcoming</p>
               {otherUpcoming.map((t) => (
                 <div
                   key={t.assignment_id}
-                  className="rounded-lg border border-slate-700/40 bg-slate-800/40 px-3 py-2"
+                  className="rounded-lg border border-line bg-surface-muted px-3 py-2"
                 >
                   <div className="flex items-center justify-between gap-3">
-                    <span className="text-xs text-slate-200">{t.title}</span>
-                    <span className="text-[11px] text-slate-500 tabular-nums">
+                    <span className="text-xs text-ink">{t.title}</span>
+                    <span className="text-[11px] text-ink-muted tabular-nums">
                       {t.planned_for_date ?? 'No date set'}
                     </span>
                   </div>
@@ -244,7 +244,7 @@ export function HouseholdFormationCard({
             <button
               type="button"
               onClick={() => setShowHistory((v) => !v)}
-              className="text-xs text-indigo-400 hover:text-indigo-300 underline underline-offset-2"
+              className="text-xs text-primary-blue hover:text-primary-blue underline underline-offset-2"
             >
               {showHistory ? 'Hide topic history' : 'View topic history'}
             </button>
@@ -252,23 +252,23 @@ export function HouseholdFormationCard({
 
           {showHistory && (
             <div className="space-y-2">
-              {isHistoryLoading && <div className="h-10 animate-pulse rounded-lg bg-slate-700/40" />}
-              {historyError && <p className="text-xs text-red-400">Failed to load topic history.</p>}
+              {isHistoryLoading && <div className="h-10 animate-pulse rounded-lg bg-surface-muted" />}
+              {historyError && <p className="text-xs text-danger-700">Failed to load topic history.</p>}
               {!isHistoryLoading && !historyError && history && history.history.length === 0 && (
-                <p className="text-xs text-slate-400">No formation topics have been planned yet.</p>
+                <p className="text-xs text-ink-muted">No formation topics have been planned yet.</p>
               )}
               {history?.history.map((row: HouseholdTopicHistoryRow) => (
                 <div
                   key={row.assignment_id}
-                  className="rounded-lg border border-slate-700/40 bg-slate-800/40 px-3 py-2"
+                  className="rounded-lg border border-line bg-surface-muted px-3 py-2"
                 >
                   <div className="flex items-center justify-between gap-3">
-                    <span className="text-xs font-medium text-slate-200">{row.topic_title}</span>
-                    <span className="text-[10px] text-slate-400">
+                    <span className="text-xs font-medium text-ink">{row.topic_title}</span>
+                    <span className="text-[10px] text-ink-muted">
                       {formatFormationLabel(ASSIGNMENT_STATUS_LABELS, row.assignment_status)}
                     </span>
                   </div>
-                  <div className="mt-1 flex flex-wrap gap-x-4 gap-y-0.5 text-[11px] text-slate-500">
+                  <div className="mt-1 flex flex-wrap gap-x-4 gap-y-0.5 text-[11px] text-ink-muted">
                     <span>Planned: {row.planned_for_date ?? '—'}</span>
                     <span>Completed: {row.completed_at ? row.completed_at.slice(0, 10) : '—'}</span>
                     <span>Meeting: {row.meeting_date ?? '—'}</span>
@@ -286,18 +286,18 @@ export function HouseholdFormationCard({
                     type="button"
                     onClick={() => setPage((p) => Math.max(0, p - 1))}
                     disabled={page === 0}
-                    className="rounded-lg border border-slate-600 px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="rounded-lg border border-line-strong px-3 py-1.5 text-xs text-ink-secondary hover:bg-surface-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     ← Previous
                   </button>
-                  <span className="text-[10px] text-slate-500">
+                  <span className="text-[10px] text-ink-muted">
                     Page {page + 1} of {totalPages}
                   </span>
                   <button
                     type="button"
                     onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                     disabled={page >= totalPages - 1}
-                    className="rounded-lg border border-slate-600 px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="rounded-lg border border-line-strong px-3 py-1.5 text-xs text-ink-secondary hover:bg-surface-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     Next →
                   </button>

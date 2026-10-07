@@ -1,4 +1,5 @@
 import { Navigate, Outlet } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
 import { useAuth } from '../../hooks/use-auth';
 
 export function ProtectedRoute() {
@@ -6,8 +7,9 @@ export function ProtectedRoute() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div role="status" aria-live="polite" className="flex min-h-screen items-center justify-center bg-canvas">
+        <Loader2 className="h-8 w-8 animate-spin text-primary-blue" aria-hidden="true" />
+        <span className="sr-only">Loading…</span>
       </div>
     );
   }

@@ -50,8 +50,8 @@ export default function HouseholdsPage() {
   if (!canViewHouseholds && !isPermLoading) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-6 text-center">
-          <p className="text-sm text-slate-400">
+        <div className="rounded-xl border border-line bg-surface p-6 text-center">
+          <p className="text-sm text-ink-muted">
             You do not have permission to view household records.
           </p>
         </div>
@@ -66,16 +66,16 @@ export default function HouseholdsPage() {
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-6">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="flex items-center justify-between rounded-xl border border-emerald-600/40 bg-emerald-950/40 px-4 py-3 text-sm text-emerald-200 shadow-lg">
+        <div className="flex items-center justify-between rounded-xl border border-success-600/30 bg-success-50 px-4 py-3 text-sm text-success-700 shadow-lg">
           <div className="flex items-center gap-2">
-            <svg className="h-5 w-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="h-5 w-5 text-success-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
             <span>{toastMessage}</span>
           </div>
           <button
             onClick={() => setToastMessage(null)}
-            className="text-xs text-emerald-400 hover:text-emerald-200"
+            className="text-xs text-success-700 hover:text-success-700"
           >
             Dismiss
           </button>
@@ -85,10 +85,10 @@ export default function HouseholdsPage() {
       {/* Header */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-100">
+          <h1 className="text-2xl font-bold tracking-tight text-ink">
             Pastoral Households
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-sm text-ink-muted mt-1">
             Browse pastoral household groupings and placements across units and chapters.
           </p>
         </div>
@@ -97,9 +97,9 @@ export default function HouseholdsPage() {
           <Link
             to="/app/households/unassigned"
             id="btn-unassigned-household-members"
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800/80 px-3.5 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-700 hover:text-white transition-colors"
+            className="inline-flex items-center gap-2 rounded-lg border border-line bg-surface-muted px-3.5 py-2 text-xs font-semibold text-ink hover:bg-line hover:text-white transition-colors"
           >
-            <svg className="h-4 w-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="h-4 w-4 text-primary-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
             Unassigned Members
@@ -110,7 +110,7 @@ export default function HouseholdsPage() {
               type="button"
               id="btn-create-household"
               onClick={() => setIsCreateModalOpen(true)}
-              className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 transition-colors"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-primary-hover transition-colors"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -125,7 +125,7 @@ export default function HouseholdsPage() {
       <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
         <div className="relative flex-1 max-w-md">
           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-            <svg className="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="h-4 w-4 text-ink-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
@@ -135,19 +135,19 @@ export default function HouseholdsPage() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search by household name or code…"
-            className="w-full rounded-lg border border-slate-700 bg-slate-900/60 py-2 pl-9 pr-4 text-sm text-slate-100 placeholder-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            className="w-full rounded-lg border border-line bg-surface py-2 pl-9 pr-4 text-sm text-ink placeholder-slate-500 focus:border-focus focus:outline-none focus:ring-1 focus:ring-focus"
           />
         </div>
 
         <div className="flex items-center gap-2">
-          <label htmlFor="status-filter" className="text-xs text-slate-400">
+          <label htmlFor="status-filter" className="text-xs text-ink-muted">
             Status:
           </label>
           <select
             id="status-filter"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2 text-xs text-slate-100 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            className="rounded-lg border border-line bg-surface px-3 py-2 text-xs text-ink focus:border-focus focus:outline-none focus:ring-1 focus:ring-focus"
           >
             <option value="active">Active</option>
             <option value="planned">Planned</option>
@@ -164,24 +164,24 @@ export default function HouseholdsPage() {
       {isLoading ? (
         <div className="space-y-3">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-20 animate-pulse rounded-xl bg-slate-800/40 border border-slate-700/60" />
+            <div key={i} className="h-20 animate-pulse rounded-xl bg-surface-muted border border-line" />
           ))}
         </div>
       ) : error ? (
-        <div className="rounded-xl border border-red-900/40 bg-red-950/20 p-6 text-center text-sm text-red-300">
+        <div className="rounded-xl border border-danger-600/30 bg-danger-50 p-6 text-center text-sm text-danger-700">
           Failed to load households. Please try again.
         </div>
       ) : households.length === 0 ? (
-        <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-12 text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-800 text-slate-400">
+        <div className="rounded-xl border border-line bg-surface p-12 text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-surface-muted text-ink-muted">
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
           </div>
-          <h2 className="mt-4 text-base font-semibold text-slate-200">
+          <h2 className="mt-4 text-base font-semibold text-ink">
             No households have been created yet
           </h2>
-          <p className="mt-1.5 text-xs text-slate-400 max-w-sm mx-auto">
+          <p className="mt-1.5 text-xs text-ink-muted max-w-sm mx-auto">
             {searchTerm
               ? 'No households matched your search query. Try clearing filters.'
               : 'Pastoral households are formed under Chapters and Units to shepherd and group members into prayer and pastoral communities.'}
@@ -192,7 +192,7 @@ export default function HouseholdsPage() {
                 type="button"
                 id="btn-create-first-household"
                 onClick={() => setIsCreateModalOpen(true)}
-                className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 transition-colors"
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-primary-hover transition-colors"
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -203,11 +203,11 @@ export default function HouseholdsPage() {
           )}
         </div>
       ) : (
-        <div className="rounded-xl border border-slate-700 bg-slate-800/60 overflow-hidden">
-          <div className="border-b border-slate-700 px-5 py-3 text-xs text-slate-400">
+        <div className="rounded-xl border border-line bg-surface-muted overflow-hidden">
+          <div className="border-b border-line px-5 py-3 text-xs text-ink-muted">
             Showing {households.length} of {totalCount} {totalCount === 1 ? 'household' : 'households'}
           </div>
-          <div className="divide-y divide-slate-700/60">
+          <div className="divide-y divide-line">
             {households.map((hh) => {
               const day = formatDayOfWeek(hh.meeting_day_of_week);
               const freq = formatFrequency(hh.meeting_frequency);
@@ -216,36 +216,36 @@ export default function HouseholdsPage() {
                 .join(' • ');
 
               return (
-                <div key={hh.household_id} className="p-4 sm:px-6 hover:bg-slate-800/40 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div key={hh.household_id} className="p-4 sm:px-6 hover:bg-surface-muted transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <Link
                         to={`/app/households/${hh.household_id}`}
-                        className="text-base font-semibold text-slate-100 hover:text-indigo-400 transition-colors"
+                        className="text-base font-semibold text-ink hover:text-primary-blue transition-colors"
                       >
                         {hh.name}
                       </Link>
-                      <span className="font-mono text-xs text-slate-400">
+                      <span className="font-mono text-xs text-ink-muted">
                         {hh.code}
                       </span>
-                      <span className="inline-flex items-center rounded-full border border-indigo-700/60 bg-indigo-950/40 px-2 py-0.5 text-[10px] font-medium text-indigo-300">
+                      <span className="inline-flex items-center rounded-full border border-navy-100 bg-navy-50 px-2 py-0.5 text-[10px] font-medium text-primary-blue">
                         {hh.pastoral_level_label ?? (hh.pastoral_level ? `${hh.pastoral_level.toUpperCase()} HOUSEHOLD` : 'MEMBER HOUSEHOLD')}
                       </span>
                       <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium ${
                         hh.lifecycle_status === 'active'
-                          ? 'border-emerald-700/60 bg-emerald-950/40 text-emerald-300'
-                          : 'border-slate-600 bg-slate-800 text-slate-400'
+                          ? 'border-success-600/30 bg-success-50 text-success-700'
+                          : 'border-line-strong bg-surface-muted text-ink-muted'
                       }`}>
                         {hh.lifecycle_status}
                       </span>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-400">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-muted">
                       {hh.parent_node_name && (
                         <span>
-                          Parent: <span className="text-slate-200">{hh.parent_node_name}</span>
+                          Parent: <span className="text-ink">{hh.parent_node_name}</span>
                           {hh.parent_node_type && (
-                            <span className="ml-1 text-[10px] uppercase text-slate-500">
+                            <span className="ml-1 text-[10px] uppercase text-ink-muted">
                               ({hh.parent_node_type})
                             </span>
                           )}
@@ -253,34 +253,34 @@ export default function HouseholdsPage() {
                       )}
                       {schedule && (
                         <>
-                          <span className="text-slate-600">•</span>
+                          <span className="text-ink-muted">•</span>
                           <span>{schedule}</span>
                         </>
                       )}
                       {hh.meeting_location_type && (
                         <>
-                          <span className="text-slate-600">•</span>
+                          <span className="text-ink-muted">•</span>
                           <span className="capitalize">{hh.meeting_location_type}</span>
                         </>
                       )}
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-4 text-xs sm:text-right text-slate-400">
+                  <div className="flex items-center gap-4 text-xs sm:text-right text-ink-muted">
                     <div>
-                      <p className="text-slate-200 font-medium">
+                      <p className="text-ink font-medium">
                         {hh.active_member_count}{' '}
-                        <span className="text-slate-500 font-normal">
+                        <span className="text-ink-muted font-normal">
                           {hh.target_member_count ? `/ ${hh.target_member_count}` : ''} members
                         </span>
                       </p>
-                      <p className="text-[10px] text-slate-500">
+                      <p className="text-[10px] text-ink-muted">
                         {hh.accepts_new_members ? 'Accepting members' : 'Capacity full'}
                       </p>
                     </div>
                     <Link
                       to={`/app/households/${hh.household_id}`}
-                      className="rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-1.5 text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+                      className="rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-ink-secondary hover:bg-surface-muted hover:text-white transition-colors"
                     >
                       View
                     </Link>

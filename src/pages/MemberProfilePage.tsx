@@ -49,11 +49,11 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-slate-700 bg-slate-800/60 overflow-hidden">
-      <div className="flex items-center justify-between border-b border-slate-700 px-5 py-3.5">
+    <div className="rounded-xl border border-line bg-surface-muted overflow-hidden">
+      <div className="flex items-center justify-between border-b border-line px-5 py-3.5">
         <div className="flex items-center gap-3">
-          <span className="text-slate-400">{icon}</span>
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-300">
+          <span className="text-ink-muted">{icon}</span>
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-ink-secondary">
             {title}
           </h2>
         </div>
@@ -67,7 +67,7 @@ function Section({
 
 function RestrictedSection({ label }: { label: string }) {
   return (
-    <p className="flex items-center gap-2 text-xs text-slate-500 italic">
+    <p className="flex items-center gap-2 text-xs text-ink-muted italic">
       <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round"
           d="M12 15v2m-6 4h12a2 2 0 002-2v-5a2 2 0 00-2-2H6a2 2 0 00-2 2v5a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -80,8 +80,8 @@ function RestrictedSection({ label }: { label: string }) {
 function DataRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex items-start justify-between gap-4 py-1.5">
-      <dt className="shrink-0 text-xs font-medium text-slate-400 w-32">{label}</dt>
-      <dd className="text-sm text-slate-200 text-right flex-1">{value ?? <span className="text-slate-500 italic">—</span>}</dd>
+      <dt className="shrink-0 text-xs font-medium text-ink-muted w-32">{label}</dt>
+      <dd className="text-sm text-ink text-right flex-1">{value ?? <span className="text-ink-muted italic">—</span>}</dd>
     </div>
   );
 }
@@ -91,8 +91,8 @@ function StatusBadge({ name, isActive }: { name: string; isActive: boolean }) {
     <span
       className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${
         isActive
-          ? 'border-emerald-700 bg-emerald-900/50 text-emerald-300'
-          : 'border-slate-600 bg-slate-800 text-slate-400'
+          ? 'border-success-600 bg-success-50 text-success-700'
+          : 'border-line-strong bg-surface-muted text-ink-muted'
       }`}
     >
       {name}
@@ -115,7 +115,7 @@ function OverviewSection({ profile }: { profile: MemberProfile }) {
         </svg>
       }
     >
-      <dl className="divide-y divide-slate-700/50">
+      <dl className="divide-y divide-line">
         <DataRow label="Display name" value={profile.display_name} />
         {profile.preferred_name && profile.preferred_name !== profile.display_name && (
           <DataRow label="Preferred name" value={profile.preferred_name} />
@@ -141,7 +141,7 @@ function OverviewSection({ profile }: { profile: MemberProfile }) {
             profile.member_number !== null ? (
               <span className="font-mono">{profile.member_number}</span>
             ) : (
-              <span className="text-slate-500 italic text-xs">restricted</span>
+              <span className="text-ink-muted italic text-xs">restricted</span>
             )
           }
         />
@@ -149,10 +149,10 @@ function OverviewSection({ profile }: { profile: MemberProfile }) {
           <DataRow
             label="Date of death"
             value={
-              <div className="flex items-center justify-end gap-2 text-slate-200">
+              <div className="flex items-center justify-end gap-2 text-ink">
                 <span>{profile.deceased_on ?? 'Unknown'}</span>
                 {profile.deceased_on_precision && (
-                  <span className="text-[10px] text-slate-400 bg-slate-800/80 px-1.5 py-0.5 rounded border border-slate-700">
+                  <span className="text-[10px] text-ink-muted bg-surface-muted px-1.5 py-0.5 rounded border border-line">
                     {profile.deceased_on_precision.replace(/_/g, ' ')}
                   </span>
                 )}
@@ -208,7 +208,7 @@ function IdentifiersSection({ identifiers }: { identifiers: MemberIdentifier[] |
           </svg>
         }
       >
-        <p className="text-xs text-slate-500 italic">No identifiers on record.</p>
+        <p className="text-xs text-ink-muted italic">No identifiers on record.</p>
       </Section>
     );
   }
@@ -227,21 +227,21 @@ function IdentifiersSection({ identifiers }: { identifiers: MemberIdentifier[] |
         {identifiers.map((id) => (
           <div
             key={id.id}
-            className="flex items-center justify-between rounded-md border border-slate-700 bg-slate-900/40 px-3 py-2"
+            className="flex items-center justify-between rounded-md border border-line bg-surface px-3 py-2"
           >
             <div>
-              <p className="text-xs font-medium text-slate-400 capitalize">
+              <p className="text-xs font-medium text-ink-muted capitalize">
                 {id.identifier_type.replace(/_/g, ' ')}
                 {id.is_primary && (
-                  <span className="ml-2 text-[10px] uppercase tracking-wider text-indigo-400">
+                  <span className="ml-2 text-[10px] uppercase tracking-wider text-primary-blue">
                     primary
                   </span>
                 )}
               </p>
-              <p className="font-mono text-sm text-slate-100">{id.identifier_value}</p>
+              <p className="font-mono text-sm text-ink">{id.identifier_value}</p>
             </div>
             {id.verification_status && (
-              <span className="text-xs text-slate-500 capitalize">
+              <span className="text-xs text-ink-muted capitalize">
                 {id.verification_status}
               </span>
             )}
@@ -290,7 +290,7 @@ function ContactsSection({
         type="button"
         id="add-email-button"
         onClick={onAddEmail}
-        className="inline-flex items-center gap-1 rounded-md border border-slate-700 bg-slate-800/80 px-2.5 py-1 text-xs font-medium text-slate-200 hover:border-indigo-500 hover:text-indigo-300 transition-colors"
+        className="inline-flex items-center gap-1 rounded-md border border-line bg-surface-muted px-2.5 py-1 text-xs font-medium text-ink hover:border-primary-blue hover:text-primary-blue transition-colors"
       >
         <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -301,7 +301,7 @@ function ContactsSection({
         type="button"
         id="add-phone-button"
         onClick={onAddPhone}
-        className="inline-flex items-center gap-1 rounded-md border border-slate-700 bg-slate-800/80 px-2.5 py-1 text-xs font-medium text-slate-200 hover:border-indigo-500 hover:text-indigo-300 transition-colors"
+        className="inline-flex items-center gap-1 rounded-md border border-line bg-surface-muted px-2.5 py-1 text-xs font-medium text-ink hover:border-primary-blue hover:text-primary-blue transition-colors"
       >
         <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -315,7 +315,7 @@ function ContactsSection({
   if (!hasAny) {
     return (
       <Section title="Contact Information" icon={icon} action={headerActions}>
-        <p className="text-xs text-slate-500 italic">No contact information on record.</p>
+        <p className="text-xs text-ink-muted italic">No contact information on record.</p>
       </Section>
     );
   }
@@ -325,36 +325,36 @@ function ContactsSection({
       <div className="space-y-4">
         {/* Emails Sub-group */}
         <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+          <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted">
             Email Addresses
           </p>
           {contacts.emails.length === 0 ? (
-            <p className="text-xs text-slate-500 italic">No email addresses on record.</p>
+            <p className="text-xs text-ink-muted italic">No email addresses on record.</p>
           ) : (
             contacts.emails.map((e: MemberEmail) => (
               <div
                 key={e.id}
-                className="flex items-center justify-between rounded-lg border border-slate-700/60 bg-slate-900/30 px-3.5 py-2.5"
+                className="flex items-center justify-between rounded-lg border border-line bg-surface px-3.5 py-2.5"
               >
                 <div>
                   <div className="flex items-center gap-2">
                     <a
                       href={`mailto:${e.email_address}`}
-                      className="text-sm font-medium text-indigo-300 hover:text-indigo-200"
+                      className="text-sm font-medium text-primary-blue hover:text-primary-blue"
                     >
                       {e.email_address}
                     </a>
                     {e.is_primary && (
-                      <span className="rounded-full bg-indigo-950/80 border border-indigo-700/60 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-indigo-300">
+                      <span className="rounded-full bg-navy-50 border border-navy-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary-blue">
                         primary
                       </span>
                     )}
                     {e.email_type && (
-                      <span className="text-xs text-slate-400">({e.email_type})</span>
+                      <span className="text-xs text-ink-muted">({e.email_type})</span>
                     )}
                   </div>
                   {e.verification_status && (
-                    <span className="text-xs text-slate-500 capitalize">{e.verification_status}</span>
+                    <span className="text-xs text-ink-muted capitalize">{e.verification_status}</span>
                   )}
                 </div>
 
@@ -364,7 +364,7 @@ function ContactsSection({
                       <button
                         type="button"
                         onClick={() => onReplaceEmail(e)}
-                        className="rounded px-2 py-1 text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-indigo-300 transition-colors"
+                        className="rounded px-2 py-1 text-xs font-medium text-ink-secondary hover:bg-surface-muted hover:text-primary-blue transition-colors"
                       >
                         Replace
                       </button>
@@ -372,7 +372,7 @@ function ContactsSection({
                     <button
                       type="button"
                       onClick={() => onRemoveEmail(e)}
-                      className="rounded px-2 py-1 text-xs font-medium text-rose-400 hover:bg-rose-950/40 hover:text-rose-300 transition-colors"
+                      className="rounded px-2 py-1 text-xs font-medium text-danger-700 hover:bg-danger-100 hover:text-danger-700 transition-colors"
                     >
                       Remove
                     </button>
@@ -384,37 +384,37 @@ function ContactsSection({
         </div>
 
         {/* Phones Sub-group */}
-        <div className="space-y-2 pt-2 border-t border-slate-700/50">
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+        <div className="space-y-2 pt-2 border-t border-line">
+          <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted">
             Phone Numbers
           </p>
           {contacts.phones.length === 0 ? (
-            <p className="text-xs text-slate-500 italic">No phone numbers on record.</p>
+            <p className="text-xs text-ink-muted italic">No phone numbers on record.</p>
           ) : (
             contacts.phones.map((p: MemberPhone) => (
               <div
                 key={p.id}
-                className="flex items-center justify-between rounded-lg border border-slate-700/60 bg-slate-900/30 px-3.5 py-2.5"
+                className="flex items-center justify-between rounded-lg border border-line bg-surface px-3.5 py-2.5"
               >
                 <div>
                   <div className="flex items-center gap-2">
                     <a
                       href={`tel:${p.normalized_e164 ?? p.phone_number}`}
-                      className="text-sm font-medium text-slate-100 hover:text-slate-50"
+                      className="text-sm font-medium text-ink hover:text-ink"
                     >
                       {p.phone_number}
                     </a>
                     {p.is_primary && (
-                      <span className="rounded-full bg-indigo-950/80 border border-indigo-700/60 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-indigo-300">
+                      <span className="rounded-full bg-navy-50 border border-navy-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary-blue">
                         primary
                       </span>
                     )}
                     {p.phone_type && (
-                      <span className="text-xs text-slate-400">({p.phone_type})</span>
+                      <span className="text-xs text-ink-muted">({p.phone_type})</span>
                     )}
                   </div>
                   {p.normalized_e164 && p.normalized_e164 !== p.phone_number && (
-                    <p className="text-[11px] font-mono text-slate-500">
+                    <p className="text-[11px] font-mono text-ink-muted">
                       E.164: {p.normalized_e164}
                     </p>
                   )}
@@ -426,7 +426,7 @@ function ContactsSection({
                       <button
                         type="button"
                         onClick={() => onReplacePhone(p)}
-                        className="rounded px-2 py-1 text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-indigo-300 transition-colors"
+                        className="rounded px-2 py-1 text-xs font-medium text-ink-secondary hover:bg-surface-muted hover:text-primary-blue transition-colors"
                       >
                         Replace
                       </button>
@@ -434,7 +434,7 @@ function ContactsSection({
                     <button
                       type="button"
                       onClick={() => onRemovePhone(p)}
-                      className="rounded px-2 py-1 text-xs font-medium text-rose-400 hover:bg-rose-950/40 hover:text-rose-300 transition-colors"
+                      className="rounded px-2 py-1 text-xs font-medium text-danger-700 hover:bg-danger-100 hover:text-danger-700 transition-colors"
                     >
                       Remove
                     </button>
@@ -491,7 +491,7 @@ function AddressesSection({
           ? () => onReplaceAddress(currentPrimaryHomeAddress)
           : onAddAddress
       }
-      className="inline-flex items-center gap-1 rounded-md border border-slate-700 bg-slate-800/80 px-2.5 py-1 text-xs font-medium text-slate-200 hover:border-indigo-500 hover:text-indigo-300 transition-colors"
+      className="inline-flex items-center gap-1 rounded-md border border-line bg-surface-muted px-2.5 py-1 text-xs font-medium text-ink hover:border-primary-blue hover:text-primary-blue transition-colors"
     >
       <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -504,7 +504,7 @@ function AddressesSection({
   if (addresses.length === 0) {
     return (
       <Section title="Addresses" icon={icon} action={headerAction}>
-        <p className="text-xs text-slate-500 italic">No addresses on record.</p>
+        <p className="text-xs text-ink-muted italic">No addresses on record.</p>
       </Section>
     );
   }
@@ -513,21 +513,21 @@ function AddressesSection({
     <Section title="Addresses" icon={icon} action={headerAction}>
       <div className="space-y-4">
         {addresses.map((a: MemberAddress) => (
-          <div key={a.id} className="rounded-md border border-slate-700 bg-slate-900/40 px-4 py-3">
+          <div key={a.id} className="rounded-md border border-line bg-surface px-4 py-3">
             <div className="mb-2 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 {a.address_type && (
-                  <span className="text-xs font-medium text-slate-400 capitalize">
+                  <span className="text-xs font-medium text-ink-muted capitalize">
                     {a.address_type.replace(/_/g, ' ')}
                   </span>
                 )}
                 {a.is_primary && (
-                  <span className="rounded-full bg-indigo-950/80 border border-indigo-700/60 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-indigo-300">
+                  <span className="rounded-full bg-navy-50 border border-navy-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary-blue">
                     primary
                   </span>
                 )}
                 {a.is_mailing_address && (
-                  <span className="rounded-full bg-amber-950/80 border border-amber-700/60 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-300">
+                  <span className="rounded-full bg-warning-50 border border-warning-600/30 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-warning-700">
                     mailing
                   </span>
                 )}
@@ -538,14 +538,14 @@ function AddressesSection({
                   <button
                     type="button"
                     onClick={() => onReplaceAddress(a)}
-                    className="rounded px-2 py-1 text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-indigo-300 transition-colors"
+                    className="rounded px-2 py-1 text-xs font-medium text-ink-secondary hover:bg-surface-muted hover:text-primary-blue transition-colors"
                   >
                     Replace
                   </button>
                   <button
                     type="button"
                     onClick={() => onRemoveAddress(a)}
-                    className="rounded px-2 py-1 text-xs font-medium text-rose-400 hover:bg-rose-950/40 hover:text-rose-300 transition-colors"
+                    className="rounded px-2 py-1 text-xs font-medium text-danger-700 hover:bg-danger-100 hover:text-danger-700 transition-colors"
                   >
                     Remove
                   </button>
@@ -553,7 +553,7 @@ function AddressesSection({
               )}
             </div>
 
-            <address className="not-italic text-sm text-slate-200 leading-relaxed">
+            <address className="not-italic text-sm text-ink leading-relaxed">
               {a.address.formatted_address ? (
                 a.address.formatted_address
               ) : (
@@ -608,30 +608,30 @@ function PlacementsSection({
   const governanceRowValue = governance !== null ? (
     <div className="flex items-center justify-end gap-3 flex-1">
       {governance ? (
-        <span className="text-sm text-slate-200">
+        <span className="text-sm text-ink">
           {governance.node_name} ({governance.node_code}) · {governance.assignment_type ?? governance.assignment_status}
         </span>
       ) : (
-        <span className="text-slate-400 italic text-sm">Unplaced</span>
+        <span className="text-ink-muted italic text-sm">Unplaced</span>
       )}
       {canManagePlacements && (
         <button
           type="button"
           id="change-placement-button"
           onClick={onChangeGovernancePlacement}
-          className="rounded px-2 py-0.5 text-xs font-semibold text-indigo-400 hover:bg-indigo-950/40 hover:text-indigo-300 transition-colors border border-indigo-700/60"
+          className="rounded px-2 py-0.5 text-xs font-semibold text-primary-blue hover:bg-navy-100 hover:text-primary-blue transition-colors border border-navy-100"
         >
           Change Placement
         </button>
       )}
     </div>
   ) : (
-    <span className="text-slate-500 italic text-xs">restricted</span>
+    <span className="text-ink-muted italic text-xs">restricted</span>
   );
 
   return (
     <Section title="Placements" icon={icon}>
-      <dl className="divide-y divide-slate-700/50">
+      <dl className="divide-y divide-line">
         {section !== null && (
           section ? (
             <DataRow
@@ -639,7 +639,7 @@ function PlacementsSection({
               value={`${section.section_name} (${section.section_code}) · ${section.membership_status}`}
             />
           ) : (
-            <DataRow label="Section" value={<span className="text-slate-500 italic text-xs">Not placed in a section</span>} />
+            <DataRow label="Section" value={<span className="text-ink-muted italic text-xs">Not placed in a section</span>} />
           )
         )}
         {household !== null && (
@@ -649,15 +649,15 @@ function PlacementsSection({
               value={`${household.household_name} (${household.household_code}) · ${household.membership_role ?? household.membership_status}`}
             />
           ) : (
-            <DataRow label="Household" value={<span className="text-slate-500 italic text-xs">No household assignment</span>} />
+            <DataRow label="Household" value={<span className="text-ink-muted italic text-xs">No household assignment</span>} />
           )
         )}
         <div className="flex items-start justify-between gap-4 py-1.5">
-          <dt className="shrink-0 text-xs font-medium text-slate-400 w-32">Governance</dt>
-          <dd className="text-sm text-slate-200 text-right flex-1">{governanceRowValue}</dd>
+          <dt className="shrink-0 text-xs font-medium text-ink-muted w-32">Governance</dt>
+          <dd className="text-sm text-ink text-right flex-1">{governanceRowValue}</dd>
         </div>
-        {section === null && <DataRow label="Section" value={<span className="text-slate-500 italic text-xs">restricted</span>} />}
-        {household === null && <DataRow label="Household" value={<span className="text-slate-500 italic text-xs">restricted</span>} />}
+        {section === null && <DataRow label="Section" value={<span className="text-ink-muted italic text-xs">restricted</span>} />}
+        {household === null && <DataRow label="Household" value={<span className="text-ink-muted italic text-xs">restricted</span>} />}
       </dl>
     </Section>
   );
@@ -762,12 +762,12 @@ export default function MemberProfilePage() {
     return (
       <div className="space-y-4">
         {/* Back link skeleton */}
-        <div className="h-4 w-24 animate-pulse rounded bg-slate-800" />
+        <div className="h-4 w-24 animate-pulse rounded bg-surface-muted" />
         {/* Header skeleton */}
-        <div className="h-16 w-64 animate-pulse rounded-xl bg-slate-800" />
+        <div className="h-16 w-64 animate-pulse rounded-xl bg-surface-muted" />
         {/* Section skeletons */}
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="h-32 animate-pulse rounded-xl bg-slate-800" />
+          <div key={i} className="h-32 animate-pulse rounded-xl bg-surface-muted" />
         ))}
       </div>
     );
@@ -784,7 +784,7 @@ export default function MemberProfilePage() {
       <div className="space-y-6">
         <Link
           to="/app/members"
-          className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-200"
+          className="inline-flex items-center gap-1.5 text-sm text-ink-muted hover:text-ink"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -792,11 +792,11 @@ export default function MemberProfilePage() {
           Member Directory
         </Link>
 
-        <div className="rounded-xl border border-red-700 bg-red-900/20 p-6">
-          <h2 className="mb-2 text-base font-semibold text-red-300">
+        <div className="rounded-xl border border-danger-600 bg-danger-50 p-6">
+          <h2 className="mb-2 text-base font-semibold text-danger-700">
             {isNotFound ? 'Member Not Found' : 'Error Loading Profile'}
           </h2>
-          <p className="text-sm text-red-400">
+          <p className="text-sm text-danger-700">
             {isNotFound
               ? 'This member does not exist or is not accessible to your account.'
               : supabaseError?.message ?? 'An unexpected error occurred.'}
@@ -834,16 +834,16 @@ export default function MemberProfilePage() {
     <div className="space-y-6">
       {/* Toast Notification */}
       {successToast && (
-        <div className="flex items-center justify-between rounded-xl border border-emerald-600/40 bg-emerald-950/40 px-4 py-3 text-sm text-emerald-200 shadow-lg">
+        <div className="flex items-center justify-between rounded-xl border border-success-600/30 bg-success-50 px-4 py-3 text-sm text-success-700 shadow-lg">
           <div className="flex items-center gap-2">
-            <svg className="h-5 w-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="h-5 w-5 text-success-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
             <span>{successToast}</span>
           </div>
           <button
             onClick={() => setSuccessToast(null)}
-            className="text-xs text-emerald-400 hover:text-emerald-200"
+            className="text-xs text-success-700 hover:text-success-700"
           >
             Dismiss
           </button>
@@ -854,7 +854,7 @@ export default function MemberProfilePage() {
       <Link
         to="/app/members"
         id="member-profile-back"
-        className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-200"
+        className="inline-flex items-center gap-1.5 text-sm text-ink-muted hover:text-ink"
       >
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -864,10 +864,10 @@ export default function MemberProfilePage() {
 
       {/* Archived Record Banner */}
       {profile.record_status === 'archived' && (
-        <div className="rounded-xl border border-slate-700 bg-slate-800/80 p-4 space-y-2 shadow-sm">
+        <div className="rounded-xl border border-line bg-surface-muted p-4 space-y-2 shadow-sm">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-sm font-semibold text-slate-200">
-              <svg className="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <div className="flex items-center gap-2 text-sm font-semibold text-ink">
+              <svg className="h-5 w-5 text-ink-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
               </svg>
               <span>Archived Member Record</span>
@@ -877,7 +877,7 @@ export default function MemberProfilePage() {
                 type="button"
                 id="restore-record-button"
                 onClick={() => setIsRestoreRecordModalOpen(true)}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-700/60 bg-emerald-950/30 px-3 py-1.5 text-xs font-semibold text-emerald-300 hover:bg-emerald-950/60 hover:border-emerald-600 transition-colors"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-success-600/30 bg-success-50 px-3 py-1.5 text-xs font-semibold text-success-700 hover:bg-success-100 hover:border-success-600 transition-colors"
               >
                 <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -886,17 +886,17 @@ export default function MemberProfilePage() {
               </button>
             )}
           </div>
-          <p className="text-xs text-slate-400 leading-relaxed">
+          <p className="text-xs text-ink-muted leading-relaxed">
             This record is archived and excluded from standard active directory searches.
             {profile.archived_at && (
-              <span className="ml-1 text-slate-300">
+              <span className="ml-1 text-ink-secondary">
                 Archived on {new Date(profile.archived_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' })}.
               </span>
             )}
           </p>
           {profile.archive_reason && (
-            <p className="text-xs text-slate-400 pt-1 border-t border-slate-700/60">
-              <span className="font-medium text-slate-300">Reason:</span> {profile.archive_reason}
+            <p className="text-xs text-ink-muted pt-1 border-t border-line">
+              <span className="font-medium text-ink-secondary">Reason:</span> {profile.archive_reason}
             </p>
           )}
         </div>
@@ -905,11 +905,11 @@ export default function MemberProfilePage() {
       {/* Hero Header with Actions */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-5">
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-indigo-900 text-xl font-bold text-indigo-200">
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-navy-50 text-xl font-bold text-primary-blue">
             {initials}
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-100">
+            <h1 className="text-2xl font-bold tracking-tight text-ink">
               {profile.display_name}
             </h1>
             <div className="mt-1 flex items-center gap-3">
@@ -924,14 +924,14 @@ export default function MemberProfilePage() {
                       type="button"
                       id="change-status-button"
                       onClick={() => setIsChangeStatusModalOpen(true)}
-                      className="rounded px-2 py-0.5 text-xs font-semibold text-indigo-400 hover:bg-indigo-950/40 hover:text-indigo-300 transition-colors border border-indigo-700/60"
+                      className="rounded px-2 py-0.5 text-xs font-semibold text-primary-blue hover:bg-navy-100 hover:text-primary-blue transition-colors border border-navy-100"
                     >
                       Change Status
                     </button>
                   )}
                 </div>
               )}
-              <span className="text-xs text-slate-500 capitalize">{profile.record_status}</span>
+              <span className="text-xs text-ink-muted capitalize">{profile.record_status}</span>
             </div>
           </div>
         </div>
@@ -943,9 +943,9 @@ export default function MemberProfilePage() {
               type="button"
               id="record-deceased-button"
               onClick={() => setIsRecordDeceasedModalOpen(true)}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-amber-700/60 bg-amber-950/30 px-3.5 py-2 text-xs font-semibold text-amber-300 hover:bg-amber-950/60 hover:border-amber-600 transition-colors shadow-sm"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-warning-600/30 bg-warning-50 px-3.5 py-2 text-xs font-semibold text-warning-700 hover:bg-warning-100 hover:border-warning-600 transition-colors shadow-sm"
             >
-              <svg className="h-4 w-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="h-4 w-4 text-warning-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
               Record as Deceased
@@ -958,9 +958,9 @@ export default function MemberProfilePage() {
               type="button"
               id="revert-deceased-button"
               onClick={() => setIsRevertDeceasedModalOpen(true)}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-amber-600/60 bg-amber-950/30 px-3.5 py-2 text-xs font-semibold text-amber-300 hover:bg-amber-950/60 hover:border-amber-500 transition-colors shadow-sm"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-warning-600/30 bg-warning-50 px-3.5 py-2 text-xs font-semibold text-warning-700 hover:bg-warning-100 hover:border-warning-600 transition-colors shadow-sm"
             >
-              <svg className="h-4 w-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="h-4 w-4 text-warning-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               Correct Deceased Status
@@ -972,9 +972,9 @@ export default function MemberProfilePage() {
               type="button"
               id="archive-record-button"
               onClick={() => setIsArchiveModalOpen(true)}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-rose-800/60 bg-rose-950/30 px-3.5 py-2 text-xs font-semibold text-rose-300 hover:bg-rose-950/60 hover:border-rose-700 transition-colors shadow-sm"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-danger-600/30 bg-danger-50 px-3.5 py-2 text-xs font-semibold text-danger-700 hover:bg-danger-100 hover:border-danger-600 transition-colors shadow-sm"
             >
-              <svg className="h-4 w-4 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="h-4 w-4 text-danger-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
               </svg>
               Archive Record
@@ -986,7 +986,7 @@ export default function MemberProfilePage() {
               type="button"
               id="edit-profile-button"
               onClick={() => setIsEditModalOpen(true)}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800/80 px-4 py-2 text-xs font-semibold text-slate-200 hover:border-indigo-500 hover:text-indigo-300 transition-colors shadow-sm"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-surface-muted px-4 py-2 text-xs font-semibold text-ink hover:border-primary-blue hover:text-primary-blue transition-colors shadow-sm"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -1253,11 +1253,11 @@ export default function MemberProfilePage() {
 
       {/* Dev: raw JSON (DEV only) */}
       {import.meta.env.DEV && (
-        <details className="rounded-xl border border-slate-700 bg-slate-900 p-4 text-xs">
-          <summary className="cursor-pointer font-mono text-slate-400 hover:text-slate-200">
+        <details className="rounded-xl border border-line bg-surface p-4 text-xs">
+          <summary className="cursor-pointer font-mono text-ink-muted hover:text-ink">
             [DEV] Raw profile JSON
           </summary>
-          <pre className="mt-3 overflow-auto text-slate-300">
+          <pre className="mt-3 overflow-auto text-ink-secondary">
             {JSON.stringify(profile, null, 2)}
           </pre>
         </details>
