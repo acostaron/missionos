@@ -2751,6 +2751,102 @@ export type Database = {
           },
         ]
       }
+      member_account_invitations: {
+        Row: {
+          accepted_at: string | null
+          auth_user_id: string | null
+          cancelled_at: string | null
+          cancelled_by_profile_id: string | null
+          created_at: string
+          email: string
+          expires_at: string | null
+          failure_reason: string | null
+          id: string
+          invitation_status: string
+          invited_at: string
+          invited_by_profile_id: string
+          member_id: string
+          normalized_email: string
+          organization_id: string
+          profile_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          auth_user_id?: string | null
+          cancelled_at?: string | null
+          cancelled_by_profile_id?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string | null
+          failure_reason?: string | null
+          id?: string
+          invitation_status?: string
+          invited_at?: string
+          invited_by_profile_id: string
+          member_id: string
+          normalized_email: string
+          organization_id: string
+          profile_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          auth_user_id?: string | null
+          cancelled_at?: string | null
+          cancelled_by_profile_id?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string | null
+          failure_reason?: string | null
+          id?: string
+          invitation_status?: string
+          invited_at?: string
+          invited_by_profile_id?: string
+          member_id?: string
+          normalized_email?: string
+          organization_id?: string
+          profile_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_account_invitations_cancelled_by_profile_id_fkey"
+            columns: ["cancelled_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_account_invitations_invited_by_profile_id_fkey"
+            columns: ["invited_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_account_invitations_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_account_invitations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_account_invitations_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       member_addresses: {
         Row: {
           address_id: string
@@ -6629,6 +6725,17 @@ export type Database = {
         }
         Returns: Json
       }
+      finalize_member_account_invitation: {
+        Args: {
+          p_actor_profile_id: string
+          p_auth_user_id: string
+          p_email: string
+          p_invitation_status?: string
+          p_member_id: string
+          p_organization_id: string
+        }
+        Returns: Json
+      }
       get_current_authorization_context: {
         Args: { p_organization_id: string }
         Returns: Json
@@ -6830,6 +6937,10 @@ export type Database = {
         }
         Returns: Json
       }
+      lookup_auth_user_for_invitation: {
+        Args: { p_email: string; p_organization_id: string }
+        Returns: Json
+      }
       move_governance_node: {
         Args: {
           p_actor_profile_id?: string
@@ -6840,6 +6951,15 @@ export type Database = {
           p_reason?: string
         }
         Returns: string
+      }
+      prepare_member_account_invitation: {
+        Args: {
+          p_acknowledge_shared?: boolean
+          p_email: string
+          p_member_id: string
+          p_organization_id: string
+        }
+        Returns: Json
       }
       propose_member_merge: {
         Args: {
@@ -6870,6 +6990,16 @@ export type Database = {
         Args: {
           p_attendance: Json
           p_meeting_id: string
+          p_organization_id: string
+        }
+        Returns: Json
+      }
+      record_member_account_invitation_failure: {
+        Args: {
+          p_actor_profile_id: string
+          p_email: string
+          p_failure_reason: string
+          p_member_id: string
           p_organization_id: string
         }
         Returns: Json
