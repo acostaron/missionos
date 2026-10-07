@@ -6744,6 +6744,14 @@ export type Database = {
           status_id: string
         }[]
       }
+      get_my_member_context: {
+        Args: { p_organization_id: string }
+        Returns: Json
+      }
+      get_my_member_profile: {
+        Args: { p_organization_id: string }
+        Returns: Json
+      }
       get_pastoral_household_roster: {
         Args: { p_household_id: string; p_organization_id: string }
         Returns: Json
