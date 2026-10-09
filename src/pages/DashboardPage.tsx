@@ -6,6 +6,7 @@ import { Permissions } from '../types/permissions';
 import { Alert, Skeleton } from '../components/ui';
 import LeaderHome from '../features/home/components/LeaderHome';
 import MemberHome from '../features/home/components/MemberHome';
+import PendingInvitationNotice from '../features/home/components/PendingInvitationNotice';
 import { ORGANIZATION_ADMINISTRATOR_ROLE_CODE } from '../features/home/role-labels';
 
 /**
@@ -31,9 +32,12 @@ export default function DashboardPage() {
 
   if (!membership || !organization) {
     return (
-      <Alert variant="warning" title="No active organization membership">
-        You do not have an active membership in any organization. Please contact your administrator.
-      </Alert>
+      <div className="space-y-6">
+        <PendingInvitationNotice />
+        <Alert variant="warning" title="No active organization membership">
+          You do not have an active membership in any organization. Please contact your administrator.
+        </Alert>
+      </div>
     );
   }
 
@@ -43,22 +47,23 @@ export default function DashboardPage() {
     (r) => r.role_code === ORGANIZATION_ADMINISTRATOR_ROLE_CODE && r.assignment_status === 'active',
   );
 
-  if (hasPermission(Permissions.LeadershipPastoralDashboardView)) {
-    return (
-      <LeaderHome
-        organizationId={organization.id}
-        organizationName={organization.name}
-        firstName={firstName}
-        isOrgAdmin={isOrgAdmin}
-      />
-    );
-  }
-
   return (
-    <MemberHome
-      organizationId={organization.id}
-      organizationName={organization.name}
-      firstName={firstName}
-    />
+    <div className="space-y-6">
+      <PendingInvitationNotice />
+      {hasPermission(Permissions.LeadershipPastoralDashboardView) ? (
+        <LeaderHome
+          organizationId={organization.id}
+          organizationName={organization.name}
+          firstName={firstName}
+          isOrgAdmin={isOrgAdmin}
+        />
+      ) : (
+        <MemberHome
+          organizationId={organization.id}
+          organizationName={organization.name}
+          firstName={firstName}
+        />
+      )}
+    </div>
   );
 }

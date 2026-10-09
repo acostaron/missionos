@@ -1,6 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { fetchMemberAccountStatus, provisionMemberAccount } from './api';
-import type { ProvisionMemberAccountParams, MemberAccountStatus } from './types';
+import {
+  fetchMemberAccountStatus,
+  provisionMemberAccount,
+  fetchMyPendingAccountInvitations,
+} from './api';
+import type {
+  ProvisionMemberAccountParams,
+  MemberAccountStatus,
+  PendingAccountInvitation,
+} from './types';
 
 export function useMemberAccountStatus(
   organizationId: string | null | undefined,
@@ -16,6 +24,14 @@ export function useMemberAccountStatus(
       return fetchMemberAccountStatus(organizationId, memberId);
     },
     enabled: !!organizationId && !!memberId && (options?.enabled ?? true),
+  });
+}
+
+export function useMyPendingAccountInvitations(options?: { enabled?: boolean }) {
+  return useQuery<PendingAccountInvitation[]>({
+    queryKey: ['my-pending-account-invitations'],
+    queryFn: () => fetchMyPendingAccountInvitations(),
+    enabled: options?.enabled ?? true,
   });
 }
 

@@ -69,3 +69,16 @@ export type ProvisionMemberAccountResult =
   | ProvisionMemberAccountSuccess
   | ProvisionMemberAccountSharedWarning
   | ProvisionMemberAccountError;
+
+export interface PendingAccountInvitation {
+  invitation_id: string;
+  organization_id: string;
+  organization_name: string;
+  invitation_status: string;
+  invited_at: string;
+  expires_at: string | null;
+}
+
+export interface MyPendingAccountInvitationsResponse {
+  invitations: PendingAccountInvitation[];
+}

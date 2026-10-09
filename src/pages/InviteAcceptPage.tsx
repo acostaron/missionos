@@ -211,6 +211,7 @@ export default function InviteAcceptPage() {
         queryClient.invalidateQueries({ queryKey: selfServiceKeys.all }),
         queryClient.invalidateQueries({ queryKey: selfServiceKeys.context(result.organization_id) }),
         queryClient.invalidateQueries({ queryKey: selfServiceKeys.profile(result.organization_id) }),
+        queryClient.invalidateQueries({ queryKey: ['my-pending-account-invitations'] }),
       ]);
 
       setPageState('success');
@@ -256,7 +257,7 @@ export default function InviteAcceptPage() {
               className="w-full"
               onClick={() => {
                 const target = invitationIdParam
-                  ? `/login?redirect=${encodeURIComponent(`/invite/accept?invitation=${invitationIdParam}`)}`
+                  ? `/login?returnTo=${encodeURIComponent(`/invite/accept?invitation=${invitationIdParam}`)}`
                   : '/login';
                 navigate(target);
               }}

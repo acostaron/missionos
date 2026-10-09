@@ -3,6 +3,8 @@ import type {
   MemberAccountStatus,
   ProvisionMemberAccountParams,
   ProvisionMemberAccountResult,
+  PendingAccountInvitation,
+  MyPendingAccountInvitationsResponse,
 } from './types';
 
 export interface AcceptInvitationResult {
@@ -185,4 +187,11 @@ export async function provisionMemberAccount(
     email: data.email,
     invited_at: data.invited_at,
   };
+}
+
+export async function fetchMyPendingAccountInvitations(): Promise<PendingAccountInvitation[]> {
+  const { data, error } = await supabase.rpc('get_my_pending_account_invitations');
+  if (error) throw error;
+  const typed = data as unknown as MyPendingAccountInvitationsResponse;
+  return typed?.invitations ?? [];
 }

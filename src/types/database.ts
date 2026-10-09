@@ -6882,6 +6882,7 @@ export type Database = {
         Args: { p_organization_id: string }
         Returns: Json
       }
+      get_my_pending_account_invitations: { Args: never; Returns: Json }
       get_pastoral_household_roster: {
         Args: { p_household_id: string; p_organization_id: string }
         Returns: Json

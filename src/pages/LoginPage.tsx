@@ -1,20 +1,29 @@
 import { useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase/client';
 import { normalizeError } from '../lib/supabase/errors';
 import { useAuth } from '../hooks/use-auth';
 import { Alert, Button, Card, FormField, Input } from '../components/ui';
 
 export default function LoginPage() {
+  const [searchParams] = useSearchParams();
   const { user, isLoading: authLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Validate internal relative paths only, strictly preventing open redirects
+  const rawTarget = searchParams.get('returnTo') || searchParams.get('redirect');
+  const isValidInternalRedirect = (url: string | null): url is string => {
+    if (!url) return false;
+    return url.startsWith('/') && !url.startsWith('//') && !url.startsWith('/\\');
+  };
+  const destination = isValidInternalRedirect(rawTarget) ? rawTarget : '/app/dashboard';
+
   // Redirect authenticated users away from /login
   if (!authLoading && user) {
-    return <Navigate to="/app/dashboard" replace />;
+    return <Navigate to={destination} replace />;
   }
 
   const handleLogin = async (e: React.FormEvent) => {
