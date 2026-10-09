@@ -6813,6 +6813,10 @@ export type Database = {
           role_assignment_id: string
         }[]
       }
+      get_member_account_status: {
+        Args: { p_member_id: string; p_organization_id: string }
+        Returns: Json
+      }
       get_member_families: {
         Args: { p_member_id: string; p_organization_id: string }
         Returns: {

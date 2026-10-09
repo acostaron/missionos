@@ -16,6 +16,7 @@ import { RevertMemberDeceasedModal } from '../features/members/components/Revert
 import { RestoreMemberRecordModal } from '../features/members/components/RestoreMemberRecordModal';
 import { MemberStatusTimeline } from '../features/members/components/MemberStatusTimeline';
 import { MemberFamilyCard } from '../features/members/components/MemberFamilyCard';
+import { MemberAccountCard } from '../features/members/components/MemberAccountCard';
 import { MemberHouseholdCard } from '../features/households/components/MemberHouseholdCard';
 import {
   RemoveContactConfirmModal,
@@ -747,6 +748,7 @@ export default function MemberProfilePage() {
   const canAssignHousehold = !isPermLoading && hasPermission(Permissions.HouseholdsMembersAssign);
   const canTransferHousehold = !isPermLoading && hasPermission(Permissions.HouseholdsMembersTransfer);
   const canEndHousehold = !isPermLoading && hasPermission(Permissions.HouseholdsMembersEnd);
+  const canProvisionAccount = !isPermLoading && hasPermission(Permissions.MembersAccountsProvision);
 
   const {
     data: profile,
@@ -999,6 +1001,13 @@ export default function MemberProfilePage() {
 
       {/* Sections */}
       <OverviewSection profile={profile} />
+      <MemberAccountCard
+        organizationId={orgId}
+        memberId={profile.id}
+        memberName={profile.display_name}
+        canProvision={canProvisionAccount}
+        onSuccessToast={triggerToast}
+      />
       <IdentifiersSection identifiers={profile.identifiers} />
       <ContactsSection
         contacts={profile.contacts}
