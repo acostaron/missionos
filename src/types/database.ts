@@ -1,4 +1,4 @@
-export type Json =
+﻿export type Json =
   | string
   | number
   | boolean
@@ -1252,6 +1252,186 @@ export type Database = {
             columns: ["verified_by_profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      formation_program_requirements: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          is_mandatory: boolean
+          notes: string | null
+          program_id: string
+          target_audience: string
+          timing_norm: string | null
+          updated_at: string
+          valid_from: string | null
+          valid_to: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_mandatory?: boolean
+          notes?: string | null
+          program_id: string
+          target_audience: string
+          timing_norm?: string | null
+          updated_at?: string
+          valid_from?: string | null
+          valid_to?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_mandatory?: boolean
+          notes?: string | null
+          program_id?: string
+          target_audience?: string
+          timing_norm?: string | null
+          updated_at?: string
+          valid_from?: string | null
+          valid_to?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "formation_program_requirements_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "formation_programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      formation_programs: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          edition: string
+          effective_from: string | null
+          effective_to: string | null
+          id: string
+          is_active: boolean
+          organization_id: string | null
+          program_category: string
+          program_type: string
+          retired_at: string | null
+          sequence_order: number | null
+          source_document: string | null
+          source_url: string | null
+          source_verified_at: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          edition?: string
+          effective_from?: string | null
+          effective_to?: string | null
+          id?: string
+          is_active?: boolean
+          organization_id?: string | null
+          program_category: string
+          program_type: string
+          retired_at?: string | null
+          sequence_order?: number | null
+          source_document?: string | null
+          source_url?: string | null
+          source_verified_at?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          edition?: string
+          effective_from?: string | null
+          effective_to?: string | null
+          id?: string
+          is_active?: boolean
+          organization_id?: string | null
+          program_category?: string
+          program_type?: string
+          retired_at?: string | null
+          sequence_order?: number | null
+          source_document?: string | null
+          source_url?: string | null
+          source_verified_at?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "formation_programs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      formation_talks: {
+        Row: {
+          created_at: string
+          description: string | null
+          effective_from: string | null
+          effective_to: string | null
+          id: string
+          is_active: boolean
+          is_required: boolean
+          program_id: string
+          retired_at: string | null
+          sequence_order: number
+          session_label: string | null
+          talk_code: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          effective_from?: string | null
+          effective_to?: string | null
+          id?: string
+          is_active?: boolean
+          is_required?: boolean
+          program_id: string
+          retired_at?: string | null
+          sequence_order: number
+          session_label?: string | null
+          talk_code: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          effective_from?: string | null
+          effective_to?: string | null
+          id?: string
+          is_active?: boolean
+          is_required?: boolean
+          program_id?: string
+          retired_at?: string | null
+          sequence_order?: number
+          session_label?: string | null
+          talk_code?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "formation_talks_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "formation_programs"
             referencedColumns: ["id"]
           },
         ]
@@ -3022,6 +3202,247 @@ export type Database = {
           {
             foreignKeyName: "fk_member_emails__updated_by"
             columns: ["updated_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      member_formation_program_records: {
+        Row: {
+          attempt_number: number
+          completed_date: string | null
+          completed_month: number | null
+          completed_year: number | null
+          created_at: string
+          date_precision: string
+          id: string
+          member_id: string
+          organization_id: string
+          program_id: string
+          record_status: string
+          recorded_at: string
+          recorded_by_profile_id: string
+          source_reference: string | null
+          status: string
+          updated_at: string
+          verification_method: string
+          verification_notes: string | null
+          verified_at: string | null
+          verified_by_profile_id: string | null
+          void_reason: string | null
+          voided_at: string | null
+          voided_by_profile_id: string | null
+        }
+        Insert: {
+          attempt_number?: number
+          completed_date?: string | null
+          completed_month?: number | null
+          completed_year?: number | null
+          created_at?: string
+          date_precision?: string
+          id?: string
+          member_id: string
+          organization_id: string
+          program_id: string
+          record_status?: string
+          recorded_at?: string
+          recorded_by_profile_id: string
+          source_reference?: string | null
+          status: string
+          updated_at?: string
+          verification_method: string
+          verification_notes?: string | null
+          verified_at?: string | null
+          verified_by_profile_id?: string | null
+          void_reason?: string | null
+          voided_at?: string | null
+          voided_by_profile_id?: string | null
+        }
+        Update: {
+          attempt_number?: number
+          completed_date?: string | null
+          completed_month?: number | null
+          completed_year?: number | null
+          created_at?: string
+          date_precision?: string
+          id?: string
+          member_id?: string
+          organization_id?: string
+          program_id?: string
+          record_status?: string
+          recorded_at?: string
+          recorded_by_profile_id?: string
+          source_reference?: string | null
+          status?: string
+          updated_at?: string
+          verification_method?: string
+          verification_notes?: string | null
+          verified_at?: string | null
+          verified_by_profile_id?: string | null
+          void_reason?: string | null
+          voided_at?: string | null
+          voided_by_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_formation_program_records_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_formation_program_records_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_formation_program_records_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "formation_programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_formation_program_records_recorded_by_profile_id_fkey"
+            columns: ["recorded_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_formation_program_records_verified_by_profile_id_fkey"
+            columns: ["verified_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_formation_program_records_voided_by_profile_id_fkey"
+            columns: ["voided_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      member_formation_talk_records: {
+        Row: {
+          attended_date: string | null
+          created_at: string
+          id: string
+          member_id: string
+          notes: string | null
+          organization_id: string
+          program_id: string
+          program_record_id: string
+          record_status: string
+          recorded_at: string
+          recorded_by_profile_id: string
+          session_status: string
+          talk_id: string
+          updated_at: string
+          void_reason: string | null
+          voided_at: string | null
+          voided_by_profile_id: string | null
+        }
+        Insert: {
+          attended_date?: string | null
+          created_at?: string
+          id?: string
+          member_id: string
+          notes?: string | null
+          organization_id: string
+          program_id: string
+          program_record_id: string
+          record_status?: string
+          recorded_at?: string
+          recorded_by_profile_id: string
+          session_status: string
+          talk_id: string
+          updated_at?: string
+          void_reason?: string | null
+          voided_at?: string | null
+          voided_by_profile_id?: string | null
+        }
+        Update: {
+          attended_date?: string | null
+          created_at?: string
+          id?: string
+          member_id?: string
+          notes?: string | null
+          organization_id?: string
+          program_id?: string
+          program_record_id?: string
+          record_status?: string
+          recorded_at?: string
+          recorded_by_profile_id?: string
+          session_status?: string
+          talk_id?: string
+          updated_at?: string
+          void_reason?: string | null
+          voided_at?: string | null
+          voided_by_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_member_talk_parent_attempt"
+            columns: [
+              "program_record_id",
+              "organization_id",
+              "member_id",
+              "program_id",
+            ]
+            isOneToOne: false
+            referencedRelation: "member_formation_program_records"
+            referencedColumns: [
+              "id",
+              "organization_id",
+              "member_id",
+              "program_id",
+            ]
+          },
+          {
+            foreignKeyName: "fk_member_talk_parent_talk"
+            columns: ["talk_id", "program_id"]
+            isOneToOne: false
+            referencedRelation: "formation_talks"
+            referencedColumns: ["id", "program_id"]
+          },
+          {
+            foreignKeyName: "member_formation_talk_records_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_formation_talk_records_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_formation_talk_records_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "formation_programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_formation_talk_records_recorded_by_profile_id_fkey"
+            columns: ["recorded_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_formation_talk_records_voided_by_profile_id_fkey"
+            columns: ["voided_by_profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]

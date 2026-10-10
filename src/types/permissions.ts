@@ -86,6 +86,13 @@ export const Permissions = {
   // Phase 6B-9: Delegated Servant Leader Access
   LeadershipDelegatedAccessManage: 'leadership.delegated_access.manage',
   LeadershipDelegatedAccessView: 'leadership.delegated_access.view',
+
+  // Stage 3A: Formal Pastoral Formation
+  FormationCatalogView: 'formation.catalog.view',
+  FormationCatalogManage: 'formation.catalog.manage',
+  FormationRecordsView: 'formation.records.view',
+  FormationRecordsRecord: 'formation.records.record',
+  FormationRecordsCorrect: 'formation.records.correct',
 } as const;
 
 export type PermissionCode = typeof Permissions[keyof typeof Permissions];
