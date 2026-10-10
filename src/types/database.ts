@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -7184,6 +7184,18 @@ export type Database = {
           requires_same_family: boolean
           type_id: string
         }[]
+      }
+      get_formation_catalog: {
+        Args: {
+          p_include_inactive?: boolean
+          p_organization_id: string
+          p_program_category?: string
+        }
+        Returns: Json
+      }
+      get_formation_program: {
+        Args: { p_organization_id: string; p_program_id: string }
+        Returns: Json
       }
       get_household_formation_plan: {
         Args: { p_household_node_id: string; p_organization_id: string }
