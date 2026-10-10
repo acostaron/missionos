@@ -109,7 +109,7 @@ export default function MembersWithoutHouseholdPage() {
           </div>
 
           <div className="inline-flex items-center gap-2 rounded-lg bg-navy-50 border border-navy-100 px-3.5 py-2 text-primary-blue text-xs font-semibold self-start sm:self-auto">
-            <span>Unassigned Count:</span>
+            <span>Total Count:</span>
             <span className="font-bold text-sm text-primary-blue">{totalCount}</span>
           </div>
         </div>

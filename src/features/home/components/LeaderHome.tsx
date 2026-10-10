@@ -1,4 +1,4 @@
-import { HeartHandshake, House, UserPlus, Users } from 'lucide-react';
+import { HeartHandshake, House, UserPlus, UserX } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Alert, Skeleton, StatCard } from '../../../components/ui';
 import { usePastoralOperationsDashboard } from '../../households/api/get-pastoral-operations-dashboard';
@@ -13,7 +13,7 @@ import HomeWelcomeHeader from './HomeWelcomeHeader';
 import PastoralResponsibilityCard from './PastoralResponsibilityCard';
 import QuickActions from './QuickActions';
 import type { QuickAction } from './QuickActions';
-import { pluralize, servantRoleLabel } from '../role-labels';
+import { formatPastoralRolesList, pluralize, servantRoleLabel } from '../role-labels';
 
 type Props = {
   organizationId: string;
@@ -79,23 +79,82 @@ export default function LeaderHome({ organizationId, organizationName, firstName
 
   if (error) console.error('Home dashboard failed to load', error);
 
+  const canCreateMembers = hasPermission(Permissions.MembersRecordsCreate);
+  const canAssignMembers = hasPermission(Permissions.HouseholdsMembersAssign);
   const canViewHouseholds = hasPermission(Permissions.HouseholdsRecordsView);
-  const actions: QuickAction[] = [];
-  if (hasPermission(Permissions.MembersRecordsCreate))
-    actions.push({ key: 'add', label: 'Add Member', to: '/app/members/new', icon: <UserPlus /> });
-  if (hasPermission(Permissions.MembersRecordsView))
-    actions.push({ key: 'people', label: 'View People', to: '/app/members', icon: <Users /> });
-  if (canViewHouseholds)
-    actions.push({ key: 'households', label: 'View Households', to: '/app/households', icon: <House /> });
-  actions.push({ key: 'pastoral', label: 'Pastoral Review', to: '/app/pastoral-operations', icon: <HeartHandshake /> });
+  const canViewPastoralOps = hasPermission(Permissions.LeadershipPastoralDashboardView);
 
-  const offices = data ? Array.from(new Set(data.identity.serving_assignments.map((a) => a.role_code))) : [];
+  const hslAssignments = data?.identity.serving_assignments.filter(
+    (a) => a.role_code === 'household_servant_leader'
+  ) ?? [];
+  const singleLedHouseholdId = hslAssignments.length === 1 ? hslAssignments[0].governance_node_id : null;
+  const hasMultipleHouseholdAssignments = hslAssignments.length > 1;
+
+  const hasBroaderScope =
+    isOrgAdmin ||
+    hasMultipleHouseholdAssignments ||
+    (data?.identity.serving_assignments.some(
+      (a) => a.role_code !== 'household_servant_leader'
+    ) ?? false);
+
+  const actions: QuickAction[] = [];
+
+  if (canCreateMembers) {
+    actions.push({
+      key: 'add-member',
+      label: 'Add Member',
+      to: '/app/members/new',
+      icon: <UserPlus />,
+    });
+  }
+
+  if (canAssignMembers) {
+    actions.push({
+      key: 'unassigned-members',
+      label: 'Members Without a Household',
+      to: '/app/households/unassigned',
+      icon: <UserX />,
+    });
+  }
+
+  if (singleLedHouseholdId && canViewHouseholds) {
+    actions.push({
+      key: 'my-household',
+      label: 'My Household',
+      to: `/app/households/${singleLedHouseholdId}`,
+      icon: <House />,
+    });
+  }
+
+  if (canViewHouseholds && (hasBroaderScope || !singleLedHouseholdId)) {
+    actions.push({
+      key: 'view-households',
+      label: 'View Households',
+      to: '/app/households',
+      icon: <House />,
+    });
+  }
+
+  if (canViewPastoralOps) {
+    actions.push({
+      key: 'pastoral-operations',
+      label: 'Pastoral Operations',
+      to: '/app/pastoral-operations',
+      icon: <HeartHandshake />,
+    });
+  }
+
+  const distinctRoleCodes = data
+    ? Array.from(new Set(data.identity.serving_assignments.map((a) => a.role_code)))
+    : [];
+  const pastoralTitles = distinctRoleCodes.map((code) => servantRoleLabel(code));
+
   const responsibilities: string[] = [];
-  if (isOrgAdmin) responsibilities.push('Organization Administrator');
-  if (data && data.identity.serving_assignments.length === 1) {
-    responsibilities.push(servantRoleLabel(offices[0]));
-  } else if (data && data.identity.serving_assignments.length > 1) {
-    responsibilities.push(`Serving in ${data.identity.serving_assignments.length} pastoral leadership roles`);
+  if (isOrgAdmin) {
+    responsibilities.push('Organization Administrator');
+  }
+  if (pastoralTitles.length > 0) {
+    responsibilities.push(`Serving as ${formatPastoralRolesList(pastoralTitles)}`);
   }
 
   const header = (

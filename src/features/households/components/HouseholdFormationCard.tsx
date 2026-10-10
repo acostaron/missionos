@@ -140,7 +140,7 @@ export function HouseholdFormationCard({
       <div className="rounded-xl border border-line bg-surface-muted">
         <div className="flex items-center justify-between border-b border-line px-5 py-4">
           <div className="flex items-center gap-3">
-            <h3 className="text-sm font-semibold text-ink">Household Formation</h3>
+            <h3 className="text-sm font-semibold text-ink">Household Topics</h3>
             {status && (
               <span
                 className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium ${STATUS_STYLES[status] ?? STATUS_STYLES.no_plan}`}
@@ -155,7 +155,7 @@ export function HouseholdFormationCard({
               onClick={() => setIsAssignOpen(true)}
               className="inline-flex items-center gap-1.5 rounded-lg border border-navy-100 bg-navy-50 px-3 py-1.5 text-xs font-medium text-primary-blue hover:bg-navy-100 transition-colors"
             >
-              Assign Topic
+              Assign Household Topic
             </button>
           )}
         </div>
@@ -169,10 +169,10 @@ export function HouseholdFormationCard({
             </div>
           )}
 
-          {error && <p className="text-xs text-danger-700">Failed to load household formation.</p>}
+          {error && <p className="text-xs text-danger-700">Failed to load household topics.</p>}
 
           {!error && noPlan && (
-            <p className="text-xs text-ink-muted">No formation topics have been planned yet.</p>
+            <p className="text-xs text-ink-muted">No Household Topics have been planned yet.</p>
           )}
 
           {!error && !noPlan && (status || summary) && (
@@ -255,7 +255,7 @@ export function HouseholdFormationCard({
               {isHistoryLoading && <div className="h-10 animate-pulse rounded-lg bg-surface-muted" />}
               {historyError && <p className="text-xs text-danger-700">Failed to load topic history.</p>}
               {!isHistoryLoading && !historyError && history && history.history.length === 0 && (
-                <p className="text-xs text-ink-muted">No formation topics have been planned yet.</p>
+                <p className="text-xs text-ink-muted">No Household Topics have been planned yet.</p>
               )}
               {history?.history.map((row: HouseholdTopicHistoryRow) => (
                 <div

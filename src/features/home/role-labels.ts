@@ -41,3 +41,11 @@ export function officeForLevel(level: string | PastoralLevel | null | undefined)
 export function pluralize(count: number, singular: string, plural?: string): string {
   return `${count} ${count === 1 ? singular : (plural ?? `${singular}s`)}`;
 }
+
+/** Formats an array of pastoral office titles naturally (e.g. "A & B" or "A, B & C"). */
+export function formatPastoralRolesList(roles: string[]): string {
+  if (roles.length === 0) return '';
+  if (roles.length === 1) return roles[0];
+  if (roles.length === 2) return `${roles[0]} & ${roles[1]}`;
+  return `${roles.slice(0, -1).join(', ')} & ${roles[roles.length - 1]}`;
+}

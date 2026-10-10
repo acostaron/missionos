@@ -210,7 +210,7 @@ export function MemberHouseholdCard({
             <p className="text-xs text-ink-muted italic">No household assigned.</p>
             {canAssignHousehold && (
               <span className="text-[11px] text-ink-muted">
-                Use the Unassigned Members directory to place this member.
+                Use the Members Without a Household directory to place this member.
               </span>
             )}
           </div>

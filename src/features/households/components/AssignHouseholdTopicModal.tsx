@@ -106,7 +106,7 @@ export function AssignHouseholdTopicModal({
         <div className="flex items-center justify-between border-b border-slate-700/60 px-6 py-4">
           <div>
             <h2 id={titleId} className="text-sm font-semibold text-slate-100">
-              Assign Topic
+              Assign Household Topic
             </h2>
             <p className="mt-0.5 text-xs text-slate-400">{householdName}</p>
           </div>
@@ -128,19 +128,19 @@ export function AssignHouseholdTopicModal({
           )}
           {error && (
             <div className="rounded-lg border border-red-700/60 bg-red-950/40 p-3 text-xs text-red-300">
-              Failed to load formation topics.
+              Failed to load Household Topics.
             </div>
           )}
 
           {noCatalog ? (
             <p className="rounded-lg border border-slate-700/60 bg-slate-800/40 p-4 text-xs text-slate-400">
-              No formation topics are available yet.
+              No Household Topics are available in the Household Topic Library yet.
             </p>
           ) : (
             <>
               <div>
                 <label htmlFor={`${titleId}-search`} className="block text-xs font-medium text-slate-300 mb-1.5">
-                  Search Topics
+                  Search Household Topics
                 </label>
                 <input
                   id={`${titleId}-search`}
@@ -155,7 +155,7 @@ export function AssignHouseholdTopicModal({
 
               <div>
                 <label htmlFor={`${titleId}-topic`} className="block text-xs font-medium text-slate-300 mb-1.5">
-                  Topic <span className="text-red-400">*</span>
+                  Household Topic <span className="text-red-400">*</span>
                 </label>
                 <select
                   id={`${titleId}-topic`}
@@ -222,7 +222,7 @@ export function AssignHouseholdTopicModal({
               disabled={isSubmitting || !topicId || noCatalog}
               className="rounded-lg bg-indigo-600 px-4 py-2 text-xs font-medium text-white hover:bg-indigo-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? 'Assigning…' : 'Assign Topic'}
+              {isSubmitting ? 'Assigning…' : 'Assign Household Topic'}
             </button>
           </div>
         </form>

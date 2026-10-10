@@ -184,7 +184,7 @@ export default function PastoralOperationsDashboardPage() {
             to="/app/households/unassigned"
             className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-surface-muted px-3 py-2 text-xs font-semibold text-ink hover:bg-line transition-colors"
           >
-            <span>Unassigned Members</span>
+            <span>Members Without a Household</span>
             <span className="rounded-full bg-surface px-2 py-0.5 text-[11px] font-bold text-warning-700 border border-line">
               {unassigned_members_count}
             </span>

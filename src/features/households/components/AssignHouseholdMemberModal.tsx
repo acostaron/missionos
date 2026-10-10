@@ -261,7 +261,7 @@ export function AssignHouseholdMemberModal({
             {!preselectedMember && (
               <div>
                 <label className="block font-medium text-slate-300 mb-1.5">
-                  Select Unassigned Member <span className="text-rose-400">*</span>
+                  Select Member Without a Household <span className="text-rose-400">*</span>
                 </label>
                 {selectedMember ? (
                   <div className="flex items-center justify-between p-3 bg-slate-800/80 border border-slate-700 rounded-lg">
