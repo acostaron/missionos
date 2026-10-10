@@ -1,3 +1,13 @@
+# MissionOS
+
+Ministry Operating System for Missionary Families of Christ New York.
+
+### Project Stages
+- **Stage 2B:** COMPLETE — [Stage 2B Closure Record](docs/stages/stage-2b-closure.md)
+- **Stage 3:** NOT STARTED / BASELINE ESTABLISHED
+
+---
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
