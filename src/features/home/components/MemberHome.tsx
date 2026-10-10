@@ -1,6 +1,7 @@
-import { House } from 'lucide-react';
+import { House, User } from 'lucide-react';
 import { Card, EmptyState, Skeleton } from '../../../components/ui';
 import { useMyMemberContext } from '../../self-service/api';
+import { formatMeetingSchedule } from '../../self-service/formatters';
 import { Permissions } from '../../../types/permissions';
 import { usePermissions } from '../../../hooks/use-permissions';
 import HomeSection from './HomeSection';
@@ -15,9 +16,8 @@ type Props = {
 };
 
 /**
- * Minimal Member Home. Uses ONLY the self-service RPC (get_my_member_context),
+ * Role-aware Member Home. Uses ONLY the self-service RPC (get_my_member_context),
  * which resolves the caller's own member on the server. No member id is sent.
- * "View My Profile" is deferred until the My Profile pass.
  */
 export default function MemberHome({ organizationId, organizationName, firstName }: Props) {
   const { hasPermission } = usePermissions();
@@ -34,13 +34,22 @@ export default function MemberHome({ organizationId, organizationName, firstName
   const orgLine = [org?.unit, org?.chapter, org?.area].filter(Boolean).join(' · ');
 
   const actions: QuickAction[] = [];
-  if (household && hasPermission(Permissions.HouseholdsRecordsView))
+  if (canSelfService) {
+    actions.push({
+      key: 'profile',
+      label: 'View My Profile',
+      to: '/app/profile',
+      icon: <User />,
+    });
+  }
+  if (household && hasPermission(Permissions.HouseholdsRecordsView)) {
     actions.push({
       key: 'household',
       label: 'View My Household',
       to: `/app/households/${household.household_id}`,
       icon: <House />,
     });
+  }
 
   return (
     <div className="space-y-8">
@@ -71,7 +80,18 @@ export default function MemberHome({ organizationId, organizationName, firstName
                   Household Servant Leader: {household.leader_display_name}
                 </p>
               )}
-              {orgLine && <p className="mt-1 text-small text-ink-muted">{orgLine}</p>}
+              <div className="mt-2.5 border-t border-line pt-2.5">
+                <p className="text-caption font-medium text-ink-muted">Meeting Schedule</p>
+                <p className="mt-0.5 text-small text-ink">
+                  {formatMeetingSchedule({
+                    frequency: household.meeting_frequency,
+                    dayOfWeek: household.meeting_day_of_week,
+                    startTime: household.meeting_start_time,
+                    timezoneName: household.meeting_timezone_name,
+                  })}
+                </p>
+              </div>
+              {orgLine && <p className="mt-2 text-small text-ink-muted">{orgLine}</p>}
             </div>
           ) : (
             <EmptyState
@@ -81,6 +101,15 @@ export default function MemberHome({ organizationId, organizationName, firstName
           )}
         </Card>
       </HomeSection>
+
+      {!household && orgLine && !notLinked && !unavailable && (
+        <HomeSection title="My Community">
+          <Card padding="compact">
+            <p className="text-caption font-medium text-ink-muted">Organizational Placement</p>
+            <p className="mt-0.5 text-small font-medium text-ink">{orgLine}</p>
+          </Card>
+        </HomeSection>
+      )}
 
       {actions.length > 0 && (
         <HomeSection title="Quick Actions">
