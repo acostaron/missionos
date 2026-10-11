@@ -69,3 +69,161 @@ export interface FormationCatalogFilters {
   programCategory?: FormationProgramCategory;
   includeInactive?: boolean;
 }
+
+export type FormationProgramRecordStatus =
+  | 'in_progress'
+  | 'completed'
+  | 'waived';
+
+export type FormationRecordLifecycleStatus =
+  | 'active'
+  | 'superseded'
+  | 'voided';
+
+export type FormationDatePrecision =
+  | 'exact_date'
+  | 'month_year'
+  | 'year_only'
+  | 'approximate'
+  | 'unknown';
+
+export type FormationVerificationMethod =
+  | 'leader_attestation'
+  | 'attendance_roll'
+  | 'historical_backfill'
+  | 'pastoral_waiver';
+
+export type FormationSessionStatus =
+  | 'attended'
+  | 'absent_excused'
+  | 'makeup_attended'
+  | 'waived';
+
+export type FormationProgressStatus =
+  | 'not_applicable'
+  | 'not_started'
+  | 'in_progress'
+  | 'completed'
+  | 'waived';
+
+export interface FormationProgress {
+  total_talks: number;
+  required_talks: number;
+  attended_talks: number;
+  progress_percent: number | null;
+  progress_status: FormationProgressStatus;
+}
+
+export interface FormationTranscriptTalk {
+  talk_record_id: string;
+  talk_id: string;
+  talk_code: string;
+  title: string;
+  sequence_order: number;
+  session_status: FormationSessionStatus;
+  attended_date: string | null;
+  notes?: string | null;
+}
+
+export interface FormationTranscriptProgram {
+  record_id: string;
+  program_id: string;
+  code: string;
+  title: string;
+  edition: string;
+  program_category: FormationProgramCategory;
+  program_type: FormationProgramType;
+  attempt_number: number;
+  status: FormationProgramRecordStatus;
+  record_status: FormationRecordLifecycleStatus;
+  completed_date: string | null;
+  completed_year: number | null;
+  completed_month: number | null;
+  date_precision: FormationDatePrecision;
+  verification_method?: FormationVerificationMethod;
+  source_reference: string | null;
+  verified_at?: string | null;
+  verifier_display_name?: string | null;
+  verification_notes?: string | null;
+  recorded_at?: string;
+  talks: FormationTranscriptTalk[];
+  progress: FormationProgress;
+}
+
+export interface FormationTranscriptMemberSummary {
+  id: string;
+  member_number: string | null;
+  display_name: string;
+}
+
+export interface FormationTranscript {
+  organization_id?: string;
+  member: FormationTranscriptMemberSummary;
+  programs: FormationTranscriptProgram[];
+}
+
+export interface RecordFormationProgramInput {
+  organizationId: string;
+  memberId: string;
+  programId: string;
+  status: FormationProgramRecordStatus;
+  completedDate?: string | null;
+  completedYear?: number | null;
+  completedMonth?: number | null;
+  datePrecision?: FormationDatePrecision;
+  verificationMethod?: FormationVerificationMethod;
+  sourceReference?: string | null;
+  verificationNotes?: string | null;
+}
+
+export interface FormationProgramRecord {
+  id: string;
+  organization_id: string;
+  member_id: string;
+  program_id: string;
+  attempt_number: number;
+  status: FormationProgramRecordStatus;
+  record_status: FormationRecordLifecycleStatus;
+  completed_date: string | null;
+  completed_year: number | null;
+  completed_month: number | null;
+  date_precision: FormationDatePrecision;
+  verification_method: FormationVerificationMethod;
+  source_reference: string | null;
+  recorded_at: string;
+  verified_at: string | null;
+}
+
+export type FormationProgramRecordResult = FormationProgramRecord;
+
+export interface RecordFormationTalkInput {
+  organizationId: string;
+  programRecordId: string;
+  talkId: string;
+  sessionStatus: FormationSessionStatus;
+  attendedDate?: string | null;
+  notes?: string | null;
+}
+
+export interface FormationTalkRecord {
+  id: string;
+  organization_id: string;
+  member_id: string;
+  program_id: string;
+  program_record_id: string;
+  talk_id: string;
+  session_status: FormationSessionStatus;
+  attended_date: string | null;
+  record_status: FormationRecordLifecycleStatus;
+  recorded_at: string;
+}
+
+export type FormationTalkRecordResult = FormationTalkRecord;
+
+export interface VoidFormationRecordResult {
+  id: string;
+  record_status: 'voided';
+  voided_at: string;
+  void_reason: string;
+  cascade_voided_talk_count?: number;
+}

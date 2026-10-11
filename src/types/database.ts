@@ -7267,6 +7267,10 @@ export type Database = {
           is_primary_contact: boolean
         }[]
       }
+      get_member_formation_transcript: {
+        Args: { p_member_id: string; p_organization_id: string }
+        Returns: Json
+      }
       get_member_households: {
         Args: { p_member_id: string; p_organization_id: string }
         Returns: Json
@@ -7306,6 +7310,10 @@ export type Database = {
           status_category: string
           status_id: string
         }[]
+      }
+      get_my_formation_transcript: {
+        Args: { p_organization_id?: string }
+        Returns: Json
       }
       get_my_member_context: {
         Args: { p_organization_id: string }
@@ -7458,6 +7466,33 @@ export type Database = {
           p_member_id: string
           p_organization_id: string
           p_reason?: string
+        }
+        Returns: Json
+      }
+      record_member_formation_program: {
+        Args: {
+          p_completed_date?: string
+          p_completed_month?: number
+          p_completed_year?: number
+          p_date_precision?: string
+          p_member_id: string
+          p_organization_id: string
+          p_program_id: string
+          p_source_reference?: string
+          p_status: string
+          p_verification_method?: string
+          p_verification_notes?: string
+        }
+        Returns: Json
+      }
+      record_member_formation_talk: {
+        Args: {
+          p_attended_date?: string
+          p_notes?: string
+          p_organization_id: string
+          p_program_record_id: string
+          p_session_status: string
+          p_talk_id: string
         }
         Returns: Json
       }
@@ -7746,6 +7781,22 @@ export type Database = {
           p_verification_summary: string
         }
         Returns: string
+      }
+      void_member_formation_program_record: {
+        Args: {
+          p_organization_id: string
+          p_record_id: string
+          p_void_reason: string
+        }
+        Returns: Json
+      }
+      void_member_formation_talk_record: {
+        Args: {
+          p_organization_id: string
+          p_talk_record_id: string
+          p_void_reason: string
+        }
+        Returns: Json
       }
     }
     Enums: {
