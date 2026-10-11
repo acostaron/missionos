@@ -18,6 +18,7 @@ import { MemberStatusTimeline } from '../features/members/components/MemberStatu
 import { MemberFamilyCard } from '../features/members/components/MemberFamilyCard';
 import { MemberAccountCard } from '../features/members/components/MemberAccountCard';
 import { MemberHouseholdCard } from '../features/households/components/MemberHouseholdCard';
+import { MemberFormationCard } from '../features/formation/components/MemberFormationCard';
 import {
   RemoveContactConfirmModal,
   type RemoveTargetType,
@@ -164,9 +165,16 @@ function OverviewSection({ profile }: { profile: MemberProfile }) {
         {profile.birth_date && (
           <DataRow label="Birth date" value={profile.birth_date} />
         )}
-        {profile.sex && (
-          <DataRow label="Sex" value={<span className="capitalize">{profile.sex}</span>} />
-        )}
+        <DataRow
+          label="Sex"
+          value={
+            profile.sex ? (
+              <span className="capitalize">{profile.sex}</span>
+            ) : (
+              <span className="text-ink-muted">Not recorded</span>
+            )
+          }
+        />
         {profile.civil_status && (
           <DataRow label="Civil status" value={<span className="capitalize">{profile.civil_status}</span>} />
         )}
@@ -749,6 +757,7 @@ export default function MemberProfilePage() {
   const canTransferHousehold = !isPermLoading && hasPermission(Permissions.HouseholdsMembersTransfer);
   const canEndHousehold = !isPermLoading && hasPermission(Permissions.HouseholdsMembersEnd);
   const canProvisionAccount = !isPermLoading && hasPermission(Permissions.MembersAccountsProvision);
+  const canViewFormation = !isPermLoading && hasPermission(Permissions.FormationRecordsView);
 
   const {
     data: profile,
@@ -1098,6 +1107,13 @@ export default function MemberProfilePage() {
         canTransferHousehold={canTransferHousehold}
         canEndHousehold={canEndHousehold}
       />
+      {canViewFormation && (
+        <MemberFormationCard
+          organizationId={orgId}
+          memberId={profile.id}
+          canViewFormation={canViewFormation}
+        />
+      )}
 
       {/* Membership Lifecycle Section */}
       <Section

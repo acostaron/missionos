@@ -21,3 +21,7 @@ export const PastoralOperationsDashboardPage = lazy(
   () => import('../pages/PastoralOperationsDashboardPage')
 );
 export const MyProfilePage = lazy(() => import('../pages/MyProfilePage'));
+export const FormationCatalogPage = lazy(() => import('../pages/FormationCatalogPage'));
+export const FormationProgramDetailPage = lazy(
+  () => import('../pages/FormationProgramDetailPage')
+);

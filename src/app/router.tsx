@@ -16,6 +16,8 @@ import {
   MembersWithoutHouseholdPage,
   PastoralOperationsDashboardPage,
   MyProfilePage,
+  FormationCatalogPage,
+  FormationProgramDetailPage,
 } from './lazy-pages';
 
 
@@ -153,6 +155,22 @@ export const router = createBrowserRouter([
             element: (
               <Suspense fallback={<PageLoadingFallback />}>
                 <PastoralOperationsDashboardPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'formation',
+            element: (
+              <Suspense fallback={<PageLoadingFallback />}>
+                <FormationCatalogPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'formation/:programId',
+            element: (
+              <Suspense fallback={<PageLoadingFallback />}>
+                <FormationProgramDetailPage />
               </Suspense>
             ),
           },

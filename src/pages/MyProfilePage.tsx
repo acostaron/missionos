@@ -5,6 +5,7 @@ import { usePermissions } from '../hooks/use-permissions';
 import { Permissions } from '../types/permissions';
 import { useMyMemberProfile } from '../features/self-service/api';
 import { formatMeetingSchedule } from '../features/self-service/formatters';
+import { MyFormationCard } from '../features/formation/components/MyFormationCard';
 import { Badge, Card, EmptyState, PageHeader, Skeleton } from '../components/ui';
 
 function formatDate(dateStr: string | null | undefined): string | null {
@@ -408,6 +409,9 @@ export default function MyProfilePage() {
               )}
             </dl>
           </Card>
+
+          {/* Section E: My Formation */}
+          <MyFormationCard organizationId={orgId} enabled={canSelfService} />
         </div>
       )}
     </div>
