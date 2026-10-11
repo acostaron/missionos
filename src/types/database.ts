@@ -6517,6 +6517,7 @@ export type Database = {
           is_active: boolean
           name: string
           organization_id: string
+          tag_group: string | null
           updated_at: string
           updated_by: string | null
         }
@@ -6531,6 +6532,7 @@ export type Database = {
           is_active?: boolean
           name: string
           organization_id: string
+          tag_group?: string | null
           updated_at?: string
           updated_by?: string | null
         }
@@ -6545,6 +6547,7 @@ export type Database = {
           is_active?: boolean
           name?: string
           organization_id?: string
+          tag_group?: string | null
           updated_at?: string
           updated_by?: string | null
         }
