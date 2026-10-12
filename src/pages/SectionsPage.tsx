@@ -140,7 +140,7 @@ export default function SectionsPage() {
                 <div>
                   <div className="flex items-center gap-3">
                     <h2 className="text-base font-semibold text-ink">
-                      Full Missionary Community (FMC)
+                      FMC — Familias Misioneras de Cristo
                     </h2>
                     <span className="inline-flex items-center rounded-full bg-navy-50 px-2.5 py-0.5 text-xs font-semibold text-navy-800">
                       {data.fmc.tagged_member_count} tagged{' '}
@@ -148,7 +148,7 @@ export default function SectionsPage() {
                     </span>
                   </div>
                   <p className="mt-1 text-caption text-ink-secondary">
-                    Members tagged with full missionary community dedication across all sections.
+                    Spanish-speaking community. FMC is a label on top of a member's section, not a section of its own.
                   </p>
                 </div>
 

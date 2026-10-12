@@ -355,7 +355,7 @@ export function EditHouseholdModal({
           {/* Capacity & Flags */}
           <div className="space-y-4 pt-4 border-t border-slate-800">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Capacity &amp; Section Options
+              Capacity &amp; Membership Options
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
