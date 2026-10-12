@@ -758,6 +758,8 @@ export default function MemberProfilePage() {
   const canEndHousehold = !isPermLoading && hasPermission(Permissions.HouseholdsMembersEnd);
   const canProvisionAccount = !isPermLoading && hasPermission(Permissions.MembersAccountsProvision);
   const canViewFormation = !isPermLoading && hasPermission(Permissions.FormationRecordsView);
+  const canRecordFormation = !isPermLoading && hasPermission(Permissions.FormationRecordsRecord);
+  const canCorrectFormation = !isPermLoading && hasPermission(Permissions.FormationRecordsCorrect);
 
   const {
     data: profile,
@@ -1111,7 +1113,11 @@ export default function MemberProfilePage() {
         <MemberFormationCard
           organizationId={orgId}
           memberId={profile.id}
+          memberName={profile.display_name}
           canViewFormation={canViewFormation}
+          canRecord={canRecordFormation}
+          canCorrect={canCorrectFormation}
+          onSuccessToast={triggerToast}
         />
       )}
 

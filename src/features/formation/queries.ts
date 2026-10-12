@@ -1,15 +1,21 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   getFormationCatalog,
   getFormationProgram,
   getMemberFormationTranscript,
   getMyFormationTranscript,
+  recordFormationProgram,
+  recordFormationTalk,
+  voidFormationProgramRecord,
+  voidFormationTalkRecord,
 } from './api';
 import type {
   FormationCatalogFilters,
   FormationProgramDetail,
   FormationProgramSummary,
   FormationTranscript,
+  RecordFormationProgramInput,
+  RecordFormationTalkInput,
 } from './types';
 
 export const formationKeys = {
@@ -109,5 +115,81 @@ export function useMyFormationTranscript(
     enabled,
     staleTime: 60 * 1000,
     retry: false,
+  });
+}
+
+/**
+ * Mutation hook to record a formation program completion or participation.
+ */
+export function useRecordFormationProgram() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: RecordFormationProgramInput) => recordFormationProgram(input),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: formationKeys.memberTranscript(variables.organizationId, variables.memberId),
+      });
+    },
+  });
+}
+
+/**
+ * Mutation hook to record a formation talk participation.
+ */
+export function useRecordFormationTalk(memberId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: RecordFormationTalkInput) => recordFormationTalk(input),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: formationKeys.memberTranscript(variables.organizationId, memberId),
+      });
+    },
+  });
+}
+
+/**
+ * Mutation hook to void an erroneous program record and its talks.
+ */
+export function useVoidFormationProgramRecord(memberId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      organizationId,
+      recordId,
+      voidReason,
+    }: {
+      organizationId: string;
+      recordId: string;
+      voidReason: string;
+    }) => voidFormationProgramRecord(organizationId, recordId, voidReason),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: formationKeys.memberTranscript(variables.organizationId, memberId),
+      });
+    },
+  });
+}
+
+/**
+ * Mutation hook to void an erroneous talk record.
+ */
+export function useVoidFormationTalkRecord(memberId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      organizationId,
+      talkRecordId,
+      voidReason,
+    }: {
+      organizationId: string;
+      talkRecordId: string;
+      voidReason: string;
+    }) => voidFormationTalkRecord(organizationId, talkRecordId, voidReason),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: formationKeys.memberTranscript(variables.organizationId, memberId),
+      });
+    },
   });
 }

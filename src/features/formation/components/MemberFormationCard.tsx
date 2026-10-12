@@ -1,18 +1,46 @@
-import { BookOpen } from 'lucide-react';
+import { useState } from 'react';
+import { BookOpen, Plus } from 'lucide-react';
 import { useMemberFormationTranscript } from '../queries';
 import { FormationProgramRow } from './FormationProgramRow';
+import { RecordFormationProgramModal } from './RecordFormationProgramModal';
+import { RecordFormationTalkModal } from './RecordFormationTalkModal';
+import { VoidFormationRecordModal } from './VoidFormationRecordModal';
+import type { FormationTranscriptProgram } from '../types';
+import { Button } from '../../../components/ui';
 
 interface MemberFormationCardProps {
   organizationId: string | null;
   memberId: string;
+  memberName?: string;
   canViewFormation: boolean;
+  canRecord?: boolean;
+  canCorrect?: boolean;
+  onSuccessToast?: (msg: string) => void;
 }
 
 export function MemberFormationCard({
   organizationId,
   memberId,
+  memberName,
   canViewFormation,
+  canRecord = false,
+  canCorrect = false,
+  onSuccessToast,
 }: MemberFormationCardProps) {
+  const [isRecordProgramOpen, setIsRecordProgramOpen] = useState(false);
+  const [recordTalkProgram, setRecordTalkProgram] = useState<FormationTranscriptProgram | null>(null);
+  const [voidModalState, setVoidModalState] = useState<{
+    isOpen: boolean;
+    mode: 'program' | 'talk';
+    recordId: string;
+    recordTitle: string;
+  }>({
+    isOpen: false,
+    mode: 'program',
+    recordId: '',
+    recordTitle: '',
+  });
+
   const {
     data: transcript,
     isLoading,
@@ -40,6 +68,19 @@ export function MemberFormationCard({
             Formation
           </h2>
         </div>
+
+        {canRecord && organizationId && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setIsRecordProgramOpen(true)}
+            className="h-7 text-xs px-2.5 py-0 gap-1.5 font-semibold"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            <span>Record Formation</span>
+          </Button>
+        )}
       </div>
 
       <div className="px-5 py-4">
@@ -58,11 +99,75 @@ export function MemberFormationCard({
         ) : (
           <div className="space-y-3">
             {activePrograms.map((prog) => (
-              <FormationProgramRow key={prog.record_id} program={prog} />
+              <FormationProgramRow
+                key={prog.record_id}
+                program={prog}
+                organizationId={organizationId}
+                showAdminDetails={true}
+                canRecord={canRecord}
+                canCorrect={canCorrect}
+                onOpenRecordTalk={(p) => setRecordTalkProgram(p)}
+                onOpenVoidProgram={(p) =>
+                  setVoidModalState({
+                    isOpen: true,
+                    mode: 'program',
+                    recordId: p.record_id,
+                    recordTitle: `${p.code} — ${p.title}`,
+                  })
+                }
+                onOpenVoidTalk={(talk, title) =>
+                  setVoidModalState({
+                    isOpen: true,
+                    mode: 'talk',
+                    recordId: talk.talk_record_id,
+                    recordTitle: title,
+                  })
+                }
+              />
             ))}
           </div>
         )}
       </div>
+
+      {/* Record Formation Program Modal */}
+      {canRecord && organizationId && isRecordProgramOpen && (
+        <RecordFormationProgramModal
+          isOpen={isRecordProgramOpen}
+          onClose={() => setIsRecordProgramOpen(false)}
+          organizationId={organizationId}
+          memberId={memberId}
+          memberName={memberName}
+          onSuccessToast={onSuccessToast}
+        />
+      )}
+
+      {/* Record Formation Talk Modal */}
+      {canRecord && organizationId && recordTalkProgram && (
+        <RecordFormationTalkModal
+          isOpen={!!recordTalkProgram}
+          onClose={() => setRecordTalkProgram(null)}
+          organizationId={organizationId}
+          memberId={memberId}
+          programRecord={recordTalkProgram}
+          onSuccessToast={onSuccessToast}
+        />
+      )}
+
+      {/* Void Record Modal */}
+      {canCorrect && organizationId && voidModalState.isOpen && (
+        <VoidFormationRecordModal
+          isOpen={voidModalState.isOpen}
+          onClose={() =>
+            setVoidModalState((prev) => ({ ...prev, isOpen: false }))
+          }
+          organizationId={organizationId}
+          memberId={memberId}
+          mode={voidModalState.mode}
+          recordId={voidModalState.recordId}
+          recordTitle={voidModalState.recordTitle}
+          onSuccessToast={onSuccessToast}
+        />
+      )}
     </div>
   );
 }
