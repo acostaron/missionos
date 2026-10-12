@@ -6774,6 +6774,17 @@ export type Database = {
         }
         Returns: Json
       }
+      appoint_area_coordinator: {
+        Args: {
+          p_effective_from?: string
+          p_exception_reason?: string
+          p_member_id: string
+          p_node_id: string
+          p_organization_id: string
+          p_role_code: string
+        }
+        Returns: Json
+      }
       appoint_leader: {
         Args: {
           p_actor_profile_id?: string
@@ -7082,6 +7093,14 @@ export type Database = {
           p_preferred_name?: string
           p_sex?: string
           p_state_province_name?: string
+        }
+        Returns: Json
+      }
+      end_area_coordinator: {
+        Args: {
+          p_assignment_id: string
+          p_organization_id: string
+          p_reason?: string
         }
         Returns: Json
       }
