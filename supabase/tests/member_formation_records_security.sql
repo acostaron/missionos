@@ -88,6 +88,35 @@ BEGIN
     AND grantee IN ('anon', 'PUBLIC');
   ASSERT v_count = 0, format('PART 1.5 FAILED: expected 0 public/anon execute grants, found %s', v_count);
   RAISE NOTICE 'PART 1.5 PASSED: Execution strictly revoked from public/anon';
+
+  -- 1.6 private.guard_formation_record_member_active() exists and is hardened
+  SELECT count(*) INTO v_count
+  FROM pg_proc p
+  WHERE p.pronamespace = 'private'::regnamespace
+    AND p.proname = 'guard_formation_record_member_active'
+    AND p.prosecdef = true
+    AND p.proconfig::text LIKE '%search_path=pg_catalog, public, private%';
+  ASSERT v_count = 1, format('PART 1.6 FAILED: expected 1 trigger function, found %s', v_count);
+  RAISE NOTICE 'PART 1.6 PASSED: Trigger function private.guard_formation_record_member_active() exists and is hardened';
+
+  -- 1.7 BEFORE INSERT triggers exist on both tables
+  SELECT count(*) INTO v_count
+  FROM pg_trigger t
+  JOIN pg_class c ON c.oid = t.tgrelid
+  WHERE c.relname IN ('member_formation_program_records', 'member_formation_talk_records')
+    AND t.tgname IN ('trg_guard_formation_program_record_member_active', 'trg_guard_formation_talk_record_member_active')
+    AND NOT t.tgisinternal;
+  ASSERT v_count = 2, format('PART 1.7 FAILED: expected 2 triggers, found %s', v_count);
+  RAISE NOTICE 'PART 1.7 PASSED: BEFORE INSERT triggers exist on both formation tables';
+
+  -- 1.8 Trigger function execute privileges revoked from public, anon, authenticated
+  SELECT count(*) INTO v_count
+  FROM information_schema.routine_privileges
+  WHERE routine_schema = 'private'
+    AND routine_name = 'guard_formation_record_member_active'
+    AND grantee IN ('anon', 'authenticated', 'PUBLIC');
+  ASSERT v_count = 0, format('PART 1.8 FAILED: expected 0 execute grants, found %s', v_count);
+  RAISE NOTICE 'PART 1.8 PASSED: Execution revoked from public, anon, authenticated on trigger function';
 END $$;
 
 
@@ -836,6 +865,77 @@ BEGIN
     AND entity_id = (v_res->>'id')::uuid;
   ASSERT v_count = 1, 'TEST V.5 FAILED: audit event actor != authenticated caller';
   RAISE NOTICE 'TEST V.5 PASSED: Audit event actor remains authentic caller';
+
+  -- ---------------------------------------------------------------------------
+  -- TEST W: Formation Records Active Members Only (Pass 3A-5C)
+  -- ---------------------------------------------------------------------------
+  -- W.1: record_member_formation_program on an ARCHIVED member -> 22023 with exact message
+  PERFORM set_config('role', 'authenticated', true);
+  PERFORM set_config('request.jwt.claim.sub', v_admin_user::text, true);
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', v_admin_user, 'role', 'authenticated')::text, true);
+
+  -- Set Member B as archived
+  PERFORM set_config('role', 'postgres', true);
+  UPDATE public.members
+  SET record_status = 'archived',
+      archived_at = now(),
+      archive_reason = 'Archived test member for active guard test'
+  WHERE id = v_member_b_id;
+
+  PERFORM set_config('role', 'authenticated', true);
+  v_passed := false;
+  BEGIN
+    PERFORM public.record_member_formation_program(
+      p_organization_id => v_org_id,
+      p_member_id => v_member_b_id,
+      p_program_id => v_prog_cr_id,
+      p_status => 'in_progress'
+    );
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLSTATE = '22023' AND SQLERRM = 'Formation can only be recorded for active members.' THEN
+      v_passed := true;
+    END IF;
+  END;
+  ASSERT v_passed, 'TEST W.1 FAILED: recording program for archived member was not rejected with 22023 active members only message';
+  RAISE NOTICE 'TEST W.1 PASSED: record_member_formation_program on archived member rejected with 22023';
+
+  -- W.2: record_member_formation_program on an ACTIVE member -> succeeds
+  v_res := public.record_member_formation_program(
+    p_organization_id => v_org_id,
+    p_member_id => v_member_a_id,
+    p_program_id => v_prog_cr_id,
+    p_status => 'in_progress'
+  );
+  v_rec2_id := (v_res->>'id')::uuid;
+  ASSERT v_rec2_id IS NOT NULL, 'TEST W.2 FAILED: program record id is null for active member';
+  RAISE NOTICE 'TEST W.2 PASSED: record_member_formation_program on active member succeeds';
+
+  -- W.3: record_member_formation_talk on that active record -> succeeds
+  v_res := public.record_member_formation_talk(
+    p_organization_id => v_org_id,
+    p_program_record_id => v_rec2_id,
+    p_talk_id => v_talk_cr_2_id,
+    p_session_status => 'attended'
+  );
+  ASSERT (v_res->>'id') IS NOT NULL, 'TEST W.3 FAILED: talk record id is null for active member';
+  RAISE NOTICE 'TEST W.3 PASSED: record_member_formation_talk on active member succeeds';
+
+  -- W.4: Archive scenario: with existing active record, set member record_status='archived', then void succeeds
+  PERFORM set_config('role', 'postgres', true);
+  UPDATE public.members
+  SET record_status = 'archived',
+      archived_at = now(),
+      archive_reason = 'Archived test member for void test'
+  WHERE id = v_member_a_id;
+
+  PERFORM set_config('role', 'authenticated', true);
+  v_res := public.void_member_formation_program_record(
+    p_organization_id => v_org_id,
+    p_record_id => v_rec2_id,
+    p_void_reason => 'Correction allowed on archived member'
+  );
+  ASSERT (v_res->>'record_status') = 'voided', 'TEST W.4 FAILED: voiding record on archived member did not succeed';
+  RAISE NOTICE 'TEST W.4 PASSED: void_member_formation_program_record on archived member succeeds (correction allowed)';
 
 END $$;
 
