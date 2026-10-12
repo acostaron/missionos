@@ -1,7 +1,16 @@
 # MissionOS SPA Rewrite & Security Headers for GreenGeeks (Apache / LiteSpeed)
 
+# PWA Manifest MIME Type
+<IfModule mod_mime.c>
+  AddType application/manifest+json .webmanifest
+</IfModule>
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
+
+  # Do NOT rewrite sw.js, registerSW.js, manifest.webmanifest, or /icons/
+  RewriteCond %{REQUEST_URI} ^/(sw\.js|registerSW\.js|manifest\.webmanifest|icons/) [NC]
+  RewriteRule ^ - [L]
 
   # Serve real files and directories directly
   RewriteCond %{REQUEST_FILENAME} !-f
@@ -10,6 +19,11 @@
 </IfModule>
 
 <IfModule mod_headers.c>
+  # Cache-Control "no-cache" for HTML, service worker, and manifest
+  <FilesMatch "^(index\.html|sw\.js|registerSW\.js|manifest\.webmanifest)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+
   # Prevent MIME type sniffing
   Header always set X-Content-Type-Options "nosniff"
 

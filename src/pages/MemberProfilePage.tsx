@@ -1114,6 +1114,7 @@ export default function MemberProfilePage() {
           organizationId={orgId}
           memberId={profile.id}
           memberName={profile.display_name}
+          memberRecordStatus={profile.record_status}
           canViewFormation={canViewFormation}
           canRecord={canRecordFormation}
           canCorrect={canCorrectFormation}

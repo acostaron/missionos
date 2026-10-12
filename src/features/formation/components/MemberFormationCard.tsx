@@ -12,6 +12,7 @@ interface MemberFormationCardProps {
   organizationId: string | null;
   memberId: string;
   memberName?: string;
+  memberRecordStatus?: string;
   canViewFormation: boolean;
   canRecord?: boolean;
   canCorrect?: boolean;
@@ -22,11 +23,15 @@ export function MemberFormationCard({
   organizationId,
   memberId,
   memberName,
+  memberRecordStatus,
   canViewFormation,
   canRecord = false,
   canCorrect = false,
   onSuccessToast,
 }: MemberFormationCardProps) {
+  const isMemberActive = memberRecordStatus === 'active';
+  const effectiveCanRecord = canRecord && isMemberActive;
+
   const [isRecordProgramOpen, setIsRecordProgramOpen] = useState(false);
   const [recordTalkProgram, setRecordTalkProgram] = useState<FormationTranscriptProgram | null>(null);
   const [voidModalState, setVoidModalState] = useState<{
@@ -69,9 +74,10 @@ export function MemberFormationCard({
           </h2>
         </div>
 
-        {canRecord && organizationId && (
+        {effectiveCanRecord && organizationId && (
           <Button
             type="button"
+            id="record-formation-button"
             variant="outline"
             size="sm"
             onClick={() => setIsRecordProgramOpen(true)}
@@ -104,7 +110,7 @@ export function MemberFormationCard({
                 program={prog}
                 organizationId={organizationId}
                 showAdminDetails={true}
-                canRecord={canRecord}
+                canRecord={effectiveCanRecord}
                 canCorrect={canCorrect}
                 onOpenRecordTalk={(p) => setRecordTalkProgram(p)}
                 onOpenVoidProgram={(p) =>
@@ -130,7 +136,7 @@ export function MemberFormationCard({
       </div>
 
       {/* Record Formation Program Modal */}
-      {canRecord && organizationId && isRecordProgramOpen && (
+      {effectiveCanRecord && organizationId && isRecordProgramOpen && (
         <RecordFormationProgramModal
           isOpen={isRecordProgramOpen}
           onClose={() => setIsRecordProgramOpen(false)}
@@ -142,7 +148,7 @@ export function MemberFormationCard({
       )}
 
       {/* Record Formation Talk Modal */}
-      {canRecord && organizationId && recordTalkProgram && (
+      {effectiveCanRecord && organizationId && recordTalkProgram && (
         <RecordFormationTalkModal
           isOpen={!!recordTalkProgram}
           onClose={() => setRecordTalkProgram(null)}
