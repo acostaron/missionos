@@ -332,7 +332,7 @@ export default function MyProfilePage() {
 
                 {data.household.parent_node_name && (
                   <div className="sm:col-span-2">
-                    <dt className="text-caption font-medium text-ink-muted">Parent Group</dt>
+                    <dt className="text-caption font-medium text-ink-muted">Parent Section</dt>
                     <dd className="mt-1 text-small text-ink">
                       {data.household.parent_node_name}
                     </dd>

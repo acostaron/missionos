@@ -25,3 +25,4 @@ export const FormationCatalogPage = lazy(() => import('../pages/FormationCatalog
 export const FormationProgramDetailPage = lazy(
   () => import('../pages/FormationProgramDetailPage')
 );
+export const SectionsPage = lazy(() => import('../pages/SectionsPage'));

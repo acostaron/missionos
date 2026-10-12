@@ -1,4 +1,4 @@
-import { Home, Users, House, HeartHandshake, BookOpen } from 'lucide-react';
+import { Home, Users, Layers, House, HeartHandshake, BookOpen } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { Permissions } from '../../types/permissions';
 import type { PermissionCode } from '../../types/permissions';
@@ -17,7 +17,7 @@ export type NavItem = {
 
 /**
  * Primary navigation. Only domains with real routes are listed.
- * Reserved (not yet implemented): Events & Mission, Groups,
+ * Reserved (not yet implemented): Events & Mission,
  * Finance, Administration.
  */
 export const NAV_ITEMS: NavItem[] = [
@@ -28,6 +28,14 @@ export const NAV_ITEMS: NavItem[] = [
     shortLabel: 'People',
     to: '/app/members',
     icon: Users,
+    permission: Permissions.MembersRecordsView,
+  },
+  {
+    id: 'nav-sections',
+    label: 'Sections',
+    shortLabel: 'Sections',
+    to: '/app/sections',
+    icon: Layers,
     permission: Permissions.MembersRecordsView,
   },
   {

@@ -19,6 +19,9 @@ import { MemberFamilyCard } from '../features/members/components/MemberFamilyCar
 import { MemberAccountCard } from '../features/members/components/MemberAccountCard';
 import { MemberHouseholdCard } from '../features/households/components/MemberHouseholdCard';
 import { MemberFormationCard } from '../features/formation/components/MemberFormationCard';
+import { useMemberSection } from '../features/sections/queries';
+import { ChangeMemberSectionModal } from '../features/sections/components/ChangeMemberSectionModal';
+import type { MemberSection } from '../features/sections/types';
 import {
   RemoveContactConfirmModal,
   type RemoveTargetType,
@@ -589,20 +592,28 @@ function AddressesSection({
 
 interface PlacementsSectionProps {
   section: SectionPlacement | null;
+  memberSectionData?: MemberSection | null;
   household: HouseholdPlacement | null;
   governance: GovernancePlacement | null;
   canManagePlacements: boolean;
+  canChangeSection: boolean;
   onChangeGovernancePlacement: () => void;
+  onChangeSection: () => void;
 }
 
 function PlacementsSection({
   section,
+  memberSectionData,
   household,
   governance,
   canManagePlacements,
+  canChangeSection,
   onChangeGovernancePlacement,
+  onChangeSection,
 }: PlacementsSectionProps) {
-  const allRestricted = section === null && household === null && governance === null;
+  const hasSectionAccess = memberSectionData !== undefined || section !== null;
+  const currentSection = memberSectionData ?? section;
+  const allRestricted = !hasSectionAccess && household === null && governance === null;
   const icon = (
     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round"
@@ -613,6 +624,39 @@ function PlacementsSection({
   if (allRestricted) {
     return <Section title="Placements" icon={icon}><RestrictedSection label="Placements" /></Section>;
   }
+
+  const sectionRowValue = hasSectionAccess ? (
+    <div className="flex items-center justify-end gap-3 flex-1">
+      {currentSection ? (
+        <span className="text-sm text-ink">
+          {memberSectionData ? (
+            <>
+              {memberSectionData.section_name}
+              {memberSectionData.paired_member && (
+                <> with {memberSectionData.paired_member.display_name}</>
+              )}
+            </>
+          ) : (
+            `${section?.section_name} (${section?.section_code}) · ${section?.membership_status}`
+          )}
+        </span>
+      ) : (
+        <span className="text-ink-muted italic text-sm">Not placed in a section</span>
+      )}
+      {canChangeSection && (
+        <button
+          type="button"
+          id="change-section-button"
+          onClick={onChangeSection}
+          className="rounded px-2 py-0.5 text-xs font-semibold text-primary-blue hover:bg-navy-100 hover:text-primary-blue transition-colors border border-navy-100"
+        >
+          Change Section
+        </button>
+      )}
+    </div>
+  ) : (
+    <span className="text-ink-muted italic text-xs">restricted</span>
+  );
 
   const governanceRowValue = governance !== null ? (
     <div className="flex items-center justify-end gap-3 flex-1">
@@ -641,16 +685,10 @@ function PlacementsSection({
   return (
     <Section title="Placements" icon={icon}>
       <dl className="divide-y divide-line">
-        {section !== null && (
-          section ? (
-            <DataRow
-              label="Section"
-              value={`${section.section_name} (${section.section_code}) · ${section.membership_status}`}
-            />
-          ) : (
-            <DataRow label="Section" value={<span className="text-ink-muted italic text-xs">Not placed in a section</span>} />
-          )
-        )}
+        <div className="flex items-start justify-between gap-4 py-1.5">
+          <dt className="shrink-0 text-xs font-medium text-ink-muted w-32">Section</dt>
+          <dd className="text-sm text-ink text-right flex-1">{sectionRowValue}</dd>
+        </div>
         {household !== null && (
           household ? (
             <DataRow
@@ -665,7 +703,6 @@ function PlacementsSection({
           <dt className="shrink-0 text-xs font-medium text-ink-muted w-32">Governance</dt>
           <dd className="text-sm text-ink text-right flex-1">{governanceRowValue}</dd>
         </div>
-        {section === null && <DataRow label="Section" value={<span className="text-ink-muted italic text-xs">restricted</span>} />}
         {household === null && <DataRow label="Household" value={<span className="text-ink-muted italic text-xs">restricted</span>} />}
       </dl>
     </Section>
@@ -708,6 +745,9 @@ export default function MemberProfilePage() {
 
   // Placement modal state
   const [isChangePlacementModalOpen, setIsChangePlacementModalOpen] = useState(false);
+
+  // Section modal state
+  const [isChangeSectionModalOpen, setIsChangeSectionModalOpen] = useState(false);
 
   // Status change modal state
   const [isChangeStatusModalOpen, setIsChangeStatusModalOpen] = useState(false);
@@ -764,9 +804,10 @@ export default function MemberProfilePage() {
   const {
     data: profile,
     isLoading,
-
     error,
   } = useMemberProfile(orgId, memberId ?? null);
+
+  const { data: memberSectionData } = useMemberSection(orgId, memberId ?? null);
 
   // -------------------------------------------------------------------------
   // Loading
@@ -1095,10 +1136,13 @@ export default function MemberProfilePage() {
       />
       <PlacementsSection
         section={profile.section_placement}
+        memberSectionData={memberSectionData}
         household={profile.household_placement}
         governance={profile.governance_placement}
         canManagePlacements={canManagePlacements}
+        canChangeSection={(canManagePlacements || canEditProfile) && profile.record_status === 'active'}
         onChangeGovernancePlacement={() => setIsChangePlacementModalOpen(true)}
+        onChangeSection={() => setIsChangeSectionModalOpen(true)}
       />
       <MemberHouseholdCard
         organizationId={orgId}
@@ -1160,6 +1204,20 @@ export default function MemberProfilePage() {
           organizationId={orgId}
           memberId={profile.id}
           currentPlacement={profile.governance_placement}
+          onSuccessToast={triggerToast}
+        />
+      )}
+
+      {/* Change Section Modal */}
+      {(canManagePlacements || canEditProfile) && orgId && isChangeSectionModalOpen && (
+        <ChangeMemberSectionModal
+          isOpen={isChangeSectionModalOpen}
+          onClose={() => setIsChangeSectionModalOpen(false)}
+          organizationId={orgId}
+          memberId={profile.id}
+          currentSectionCode={
+            memberSectionData?.section_code ?? profile.section_placement?.section_code
+          }
           onSuccessToast={triggerToast}
         />
       )}

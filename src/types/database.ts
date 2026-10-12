@@ -6952,6 +6952,16 @@ export type Database = {
         }
         Returns: Json
       }
+      change_member_section: {
+        Args: {
+          p_effective_from?: string
+          p_member_id: string
+          p_organization_id: string
+          p_reason?: string
+          p_section_code: string
+        }
+        Returns: Json
+      }
       close_governance_node: {
         Args: {
           p_actor_profile_id?: string
@@ -7301,6 +7311,10 @@ export type Database = {
         Args: { p_member_id: string; p_organization_id: string }
         Returns: Json
       }
+      get_member_section: {
+        Args: { p_member_id: string; p_organization_id: string }
+        Returns: Json
+      }
       get_member_status_history: {
         Args: { p_member_id: string; p_organization_id: string }
         Returns: {
@@ -7369,6 +7383,10 @@ export type Database = {
           parent_governance_node_id: string
           parent_node_name: string
         }[]
+      }
+      get_sections_overview: {
+        Args: { p_organization_id: string }
+        Returns: Json
       }
       get_servant_leader_access_status: {
         Args: { p_leadership_assignment_id: string; p_organization_id: string }
