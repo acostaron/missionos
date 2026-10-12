@@ -9,7 +9,7 @@ import {
   voidFormationRecordSchema,
   type VoidFormationRecordFormValues,
 } from '../form-schemas';
-import { normalizeError } from '../../../lib/supabase/errors';
+import { getFormationErrorMessage } from '../error-message';
 import { Alert, Button, FormField, Modal, Textarea } from '../../../components/ui';
 
 interface VoidFormationRecordModalProps {
@@ -86,8 +86,7 @@ export function VoidFormationRecordModal({
 
       onClose();
     } catch (err: unknown) {
-      const normalized = normalizeError(err);
-      setErrorMessage(normalized.technicalMessage || normalized.message);
+      setErrorMessage(getFormationErrorMessage(err));
     }
   };
 

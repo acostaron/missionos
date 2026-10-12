@@ -1,7 +1,15 @@
 import { z } from 'zod';
 
-const currentYear = new Date().getFullYear();
-const today = new Date().toISOString().split('T')[0];
+/**
+ * Returns today's date formatted as YYYY-MM-DD in the user's local timezone.
+ */
+export function localToday(): string {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
 
 export const recordFormationProgramSchema = z
   .object({
@@ -35,6 +43,9 @@ export const recordFormationProgramSchema = z
     verificationNotes: z.string().max(1000, 'Internal notes cannot exceed 1000 characters').optional(),
   })
   .superRefine((data, ctx) => {
+    const today = localToday();
+    const currentYear = new Date().getFullYear();
+
     if (data.status === 'completed' || data.status === 'waived') {
       if (data.datePrecision === 'exact_date') {
         if (!data.completedDate) {
@@ -87,6 +98,7 @@ export const recordFormationTalkSchema = z
     notes: z.string().max(500, 'Notes cannot exceed 500 characters').optional(),
   })
   .superRefine((data, ctx) => {
+    const today = localToday();
     if (data.attendedDate && data.attendedDate > today) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,

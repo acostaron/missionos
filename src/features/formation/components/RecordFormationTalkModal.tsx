@@ -3,11 +3,12 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useFormationProgram, useRecordFormationTalk } from '../queries';
 import {
+  localToday,
   recordFormationTalkSchema,
   type RecordFormationTalkFormValues,
 } from '../form-schemas';
 import type { FormationSessionStatus, FormationTranscriptProgram } from '../types';
-import { normalizeError } from '../../../lib/supabase/errors';
+import { getFormationErrorMessage } from '../error-message';
 import { Alert, Button, FormField, Input, Modal, Select, Textarea } from '../../../components/ui';
 
 interface RecordFormationTalkModalProps {
@@ -37,7 +38,7 @@ export function RecordFormationTalkModal({
   );
 
   const recordTalkMutation = useRecordFormationTalk(memberId);
-  const today = new Date().toISOString().split('T')[0];
+  const today = localToday();
 
   const {
     register,
@@ -56,12 +57,10 @@ export function RecordFormationTalkModal({
 
   // Calculate unrecorded talks: talks of that program not yet recorded in the parent program record
   const recordedTalkIds = new Set(programRecord.talks.map((t) => t.talk_id));
-  const unrecordedTalks = (programDetail?.talks ?? []).filter(
+  const availableTalks = (programDetail?.talks ?? []).filter(
     (t) => !recordedTalkIds.has(t.id)
   );
-  const recordedTalks = (programDetail?.talks ?? []).filter(
-    (t) => recordedTalkIds.has(t.id)
-  );
+  const isAllRecorded = !isProgramLoading && !!programDetail && availableTalks.length === 0;
 
   useEffect(() => {
     if (isOpen) {
@@ -91,8 +90,7 @@ export function RecordFormationTalkModal({
       onSuccessToast?.('Talk recorded');
       onClose();
     } catch (err: unknown) {
-      const normalized = normalizeError(err);
-      setErrorMessage(normalized.technicalMessage || normalized.message);
+      setErrorMessage(getFormationErrorMessage(err));
     }
   };
 
@@ -118,7 +116,7 @@ export function RecordFormationTalkModal({
             type="submit"
             form="record-formation-talk-form"
             loading={recordTalkMutation.isPending}
-            disabled={isProgramLoading || !programDetail || programDetail.talks.length === 0}
+            disabled={isProgramLoading || !programDetail || isAllRecorded}
           >
             Save Talk
           </Button>
@@ -134,43 +132,38 @@ export function RecordFormationTalkModal({
           <Alert variant="danger">{errorMessage}</Alert>
         )}
 
+        {isAllRecorded && (
+          <Alert variant="info">All talks for this course are recorded.</Alert>
+        )}
+
         {/* Talk selection */}
         <FormField
           label="Talk / Session"
           required
           error={errors.talkId?.message}
           hint={
-            unrecordedTalks.length === 0 && !isProgramLoading
-              ? 'All talks for this program have already been recorded.'
-              : 'Select a talk session'
+            isAllRecorded
+              ? 'All talks for this course are recorded.'
+              : 'Select a talk session not yet recorded'
           }
         >
-          <Select {...register('talkId')} disabled={isProgramLoading}>
-            <option value="">-- Select a talk --</option>
-            {unrecordedTalks.length > 0 && (
-              <optgroup label="Unrecorded talks">
-                {unrecordedTalks.map((talk) => (
-                  <option key={talk.id} value={talk.id}>
-                    {talk.sequence_order}. {talk.talk_code} — {talk.title}
-                  </option>
-                ))}
-              </optgroup>
-            )}
-            {recordedTalks.length > 0 && (
-              <optgroup label="Already recorded talks">
-                {recordedTalks.map((talk) => (
-                  <option key={talk.id} value={talk.id}>
-                    {talk.sequence_order}. {talk.talk_code} — {talk.title} (Recorded)
-                  </option>
-                ))}
-              </optgroup>
-            )}
+          <Select {...register('talkId')} disabled={isProgramLoading || isAllRecorded}>
+            <option value="">
+              {isAllRecorded
+                ? '-- All talks for this course are recorded --'
+                : '-- Select a talk --'}
+            </option>
+            {availableTalks.map((talk) => (
+              <option key={talk.id} value={talk.id}>
+                {talk.sequence_order}. {talk.talk_code} — {talk.title}
+              </option>
+            ))}
           </Select>
         </FormField>
 
         {/* Session Status */}
         <FormField label="Session Status" required error={errors.sessionStatus?.message}>
-          <Select {...register('sessionStatus')}>
+          <Select {...register('sessionStatus')} disabled={isAllRecorded}>
             <option value="attended">Attended</option>
             <option value="absent_excused">Excused absence</option>
             <option value="makeup_attended">Make-up attended</option>
@@ -184,7 +177,7 @@ export function RecordFormationTalkModal({
           hint="Optional date of attendance (cannot be in the future)"
           error={errors.attendedDate?.message}
         >
-          <Input type="date" max={today} {...register('attendedDate')} />
+          <Input type="date" max={today} {...register('attendedDate')} disabled={isAllRecorded} />
         </FormField>
 
         {/* Note */}
@@ -198,6 +191,7 @@ export function RecordFormationTalkModal({
             placeholder="e.g. Completed via make-up session with household leader"
             maxLength={500}
             {...register('notes')}
+            disabled={isAllRecorded}
           />
         </FormField>
       </form>

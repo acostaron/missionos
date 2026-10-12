@@ -264,3 +264,136 @@ Untracked files:
 
 no changes added to commit (use "git add" and/or "git commit -a")
 ```
+
+---
+
+## 5. Fix Pass: Pass 3A-5B-Fix
+
+### 5.1 Overview of Fixes
+1. **`RecordFormationTalkModal`**:
+   - List ONLY talks with no active talk record for this program attempt.
+   - Removed the "Already recorded talks" group.
+   - If none remain, shows `"All talks for this course are recorded."` and disables the Save button.
+2. **Unified Error Display (`src/features/formation/error-message.ts`)**:
+   - For business-rule errors (SQLSTATE 22023, 23505, P0001, P0002): surfaces the server's message text (while stripping any raw internal SQL/constraint details).
+   - For 42501: surfaces `"You don't have permission to do this."`.
+   - Otherwise: surfaces the normalizer's friendly message (`normalized.message`).
+   - Integrated into `RecordFormationProgramModal`, `RecordFormationTalkModal`, and `VoidFormationRecordModal`.
+3. **Local Date Calculation (`src/features/formation/form-schemas.ts`)**:
+   - Removed module-level `today` and `currentYear`.
+   - Added `localToday()` helper returning `YYYY-MM-DD` in the user's local timezone (preventing UTC rollover false positives).
+   - Dynamically computes local today and current year inside Zod refinements.
+
+### 5.2 Manual Test Results
+- **Tomorrow (local `2026-10-12`):** Form rejected submission with validation issue: `"Completion date cannot be in the future"`.
+- **Today (local `2026-10-11`):** Form accepted submission and created Covenant Recollection (CR) completed record.
+- **Voided:** Test record voided with reason `"Cleaning up local date test"`.
+- **Final Database Verification (SQL):**
+```sql
+SELECT
+  record_status,
+  COUNT(*) as program_records_count
+FROM member_formation_program_records
+GROUP BY record_status;
+```
+Output:
+```json
+[{"record_status":"voided","program_records_count":4}]
+```
+
+```sql
+SELECT
+  record_status,
+  COUNT(*) as talk_records_count
+FROM member_formation_talk_records
+GROUP BY record_status;
+```
+Output:
+```json
+[{"record_status":"voided","talk_records_count":2}]
+```
+- Active program records count = `0`
+- Active talk records count = `0`
+
+### 5.3 Quality Check Raw Outputs
+
+#### `npm run lint`
+```
+> missionos@0.0.0 lint
+> oxlint
+
+Found 0 warnings and 0 errors.
+Finished in 26ms on 228 files with 104 rules using 16 threads.
+```
+
+#### `npm run build`
+```
+> missionos@0.0.0 build
+> tsc -b && vite build
+
+vite v8.1.5 building client environment for production...
+transforming...✓ 2171 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                            0.55 kB │ gzip:  0.32 kB
+dist/assets/index-DmowB6rc.css                            81.95 kB │ gzip: 13.32 kB
+dist/assets/external-link-BpsAQCv_.js                      0.24 kB │ gzip:  0.19 kB
+dist/assets/compat-09RdQZcw.js                             0.34 kB │ gzip:  0.17 kB
+dist/assets/get-placement-nodes-bi_kadM0.js                0.41 kB │ gzip:  0.30 kB
+dist/assets/shield-alert-CWDFnooW.js                       0.45 kB │ gzip:  0.30 kB
+dist/assets/sparkles-D_Wb_iX4.js                           0.48 kB │ gzip:  0.27 kB
+dist/assets/search-households-BFPvqS1p.js                  0.58 kB │ gzip:  0.39 kB
+dist/assets/types-CYVU9AA0.js                              0.70 kB │ gzip:  0.29 kB
+dist/assets/queries-C2b_LXVI.js                            1.13 kB │ gzip:  0.57 kB
+dist/assets/FormationCatalogPage-CTe75LEa.js               5.93 kB │ gzip:  2.11 kB
+dist/assets/MembersWithoutHouseholdPage-Cawp1Ybk.js        6.53 kB │ gzip:  2.16 kB
+dist/assets/FormationProgramRow-fcd-SNL7.js                6.87 kB │ gzip:  2.18 kB
+dist/assets/schemas-DCTfIrQl.js                            7.05 kB │ gzip:  1.39 kB
+dist/assets/formatters-CP_PB1HI.js                         9.40 kB │ gzip:  2.66 kB
+dist/assets/AssignHouseholdMemberModal-CTpvNu42.js         9.88 kB │ gzip:  3.04 kB
+dist/assets/HouseholdsPage-CERMYPvk.js                    10.30 kB │ gzip:  3.04 kB
+dist/assets/FormationProgramDetailPage-CaOcm3f8.js        10.66 kB │ gzip:  2.89 kB
+dist/assets/MyProfilePage-B3IaqgS1.js                     13.92 kB │ gzip:  3.02 kB
+dist/assets/PastoralPlacementReviewModal-CxO62Ktp.js      14.66 kB │ gzip:  3.86 kB
+dist/assets/EndHouseholdMembershipModal-CIvlFQRk.js       17.39 kB │ gzip:  3.95 kB
+dist/assets/CreateHouseholdModal-vsOuLfAO.js              17.73 kB │ gzip:  3.85 kB
+dist/assets/MembersPage-vU7iMSrt.js                       18.52 kB │ gzip:  5.11 kB
+dist/assets/PastoralOperationsDashboardPage-f5yOupcN.js   25.45 kB │ gzip:  5.01 kB
+dist/assets/zod-DeHAYLbm.js                               30.30 kB │ gzip: 10.90 kB
+dist/assets/NewMemberPage-C_JptT33.js                     39.77 kB │ gzip:  7.92 kB
+dist/assets/schemas-CErIMat5.js                           66.14 kB │ gzip: 17.74 kB
+dist/assets/FamilyProfilePage-BCFp_Roc.js                 85.58 kB │ gzip: 13.61 kB
+dist/assets/HouseholdProfilePage-CrBP35FX.js             120.75 kB │ gzip: 20.50 kB
+dist/assets/MemberProfilePage-0izlACCN.js                158.46 kB │ gzip: 27.23 kB
+dist/assets/index-BrzTEMBm.js                            257.58 kB │ gzip: 77.88 kB
+dist/assets/permissions-Bfr0yFrI.js                      339.62 kB │ gzip: 96.08 kB
+
+✓ built in 497ms
+```
+
+#### `git diff --check`
+```
+(Clean. No whitespace issues.)
+```
+
+#### `git status`
+```
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   docs/stages/pass-3a-5b-report.md
+	modified:   src/features/formation/components/RecordFormationProgramModal.tsx
+	modified:   src/features/formation/components/RecordFormationTalkModal.tsx
+	modified:   src/features/formation/components/VoidFormationRecordModal.tsx
+	modified:   src/features/formation/form-schemas.ts
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	src/features/formation/error-message.ts
+
+no changes added to commit (use "git add" and/or "git commit -a")
+```
+

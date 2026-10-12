@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useFormationCatalog, useRecordFormationProgram } from '../queries';
 import { formatProgramCategory } from '../formatters';
 import {
+  localToday,
   recordFormationProgramSchema,
   type RecordFormationProgramFormValues,
 } from '../form-schemas';
@@ -13,7 +14,7 @@ import type {
   FormationProgramSummary,
   FormationVerificationMethod,
 } from '../types';
-import { normalizeError } from '../../../lib/supabase/errors';
+import { getFormationErrorMessage } from '../error-message';
 import { Alert, Button, FormField, Input, Modal, Select, Textarea } from '../../../components/ui';
 
 interface RecordFormationProgramModalProps {
@@ -59,7 +60,7 @@ export function RecordFormationProgramModal({
   const recordProgramMutation = useRecordFormationProgram();
 
   const currentYear = new Date().getFullYear();
-  const today = new Date().toISOString().split('T')[0];
+  const today = localToday();
 
   const {
     register,
@@ -170,8 +171,7 @@ export function RecordFormationProgramModal({
       onSuccessToast?.('Formation recorded');
       onClose();
     } catch (err: unknown) {
-      const normalized = normalizeError(err);
-      setErrorMessage(normalized.technicalMessage || normalized.message);
+      setErrorMessage(getFormationErrorMessage(err));
     }
   };
 
