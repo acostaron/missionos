@@ -227,7 +227,7 @@ export function CreateHouseholdModal({
               <label className="block text-xs font-medium text-slate-300">
                 Parent Placement Node <span className="text-rose-400">*</span>
                 <span className="text-slate-400 font-normal ml-1">
-                  {selectedPastoralLevel === 'member' && '(Must attach to Unit, or Chapter if no Units exist)'}
+                  {selectedPastoralLevel === 'member' && '(Attach to a Unit, the Area, or a Chapter with no units)'}
                   {selectedPastoralLevel === 'unit' && '(Must attach to Unit)'}
                   {selectedPastoralLevel === 'chapter' && '(Must attach to Chapter)'}
                   {selectedPastoralLevel === 'area' && '(Must attach to Area / State)'}
@@ -248,8 +248,12 @@ export function CreateHouseholdModal({
                       if (selectedPastoralLevel === 'area' || selectedPastoralLevel === 'fraternal') {
                         return node.node_type_code === 'area_state';
                       }
-                      // member level allows unit (or chapter fallback)
-                      return node.node_type_code === 'unit' || node.node_type_code === 'chapter';
+                      // member level allows unit, chapter fallback, or area_state
+                      return (
+                        node.node_type_code === 'unit' ||
+                        node.node_type_code === 'chapter' ||
+                        node.node_type_code === 'area_state'
+                      );
                     })
                     .map((node) => {
                       const isSelected = selectedParentId === node.governance_node_id;
