@@ -189,7 +189,7 @@ export default function PlaceMembersPage() {
       {/* Page Header */}
       <PageHeader
         title="Place Members"
-        description="Assign members to a section, chapter or unit. Each change is kept in the member's history."
+        description="Assign members to a section, the area, a chapter or a unit. Each change is kept in the member's history."
       />
 
       {/* Summary Counts */}
@@ -522,6 +522,7 @@ export default function PlaceMembersPage() {
                 Change section…
               </Button>
               <Button
+                id="place-selected-btn"
                 variant="primary"
                 onClick={() => setIsModalOpen(true)}
               >

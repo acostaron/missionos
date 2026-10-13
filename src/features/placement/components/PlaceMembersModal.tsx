@@ -56,8 +56,11 @@ export function PlaceMembersModal({
   const selectedTargetNodeId = watch('targetNodeId');
   const selectedEffectiveFrom = watch('effectiveFrom') || today;
 
-  // Group chapters and units
-  const { chapters, unitsByChapter } = useMemo(() => {
+  // Group areas, chapters and units
+  const { areas, chapters, unitsByChapter } = useMemo(() => {
+    const ars = nodes.filter((n) => n.node_type_code === 'area_state');
+    ars.sort((a, b) => a.node_name.localeCompare(b.node_name));
+
     const chs = nodes.filter((n) => n.node_type_code === 'chapter');
     chs.sort((a, b) => a.node_name.localeCompare(b.node_name));
 
@@ -72,7 +75,7 @@ export function PlaceMembersModal({
     for (const [, list] of unitMap) {
       list.sort((a, b) => a.node_name.localeCompare(b.node_name));
     }
-    return { chapters: chs, unitsByChapter: unitMap };
+    return { areas: ars, chapters: chs, unitsByChapter: unitMap };
   }, [nodes]);
 
   // Selected target label
@@ -80,6 +83,9 @@ export function PlaceMembersModal({
     if (!selectedTargetNodeId) return '';
     const found = nodes.find((n) => n.governance_node_id === selectedTargetNodeId);
     if (!found) return '';
+    if (found.node_type_code === 'area_state') {
+      return `${found.node_name} (area level)`;
+    }
     if (found.node_type_code === 'chapter') {
       return `${found.node_name} (chapter only)`;
     }
@@ -138,7 +144,7 @@ export function PlaceMembersModal({
       description={
         result
           ? undefined
-          : 'Assign selected members to a chapter or unit. Placements are recorded in the member history.'
+          : 'Assign selected members to the area, a chapter or a unit. Placements are recorded in the member history.'
       }
       size="md"
       closeOnBackdrop={false}
@@ -185,13 +191,13 @@ export function PlaceMembersModal({
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
 
-          {/* Target Chapter or Unit */}
+          {/* Target Area, Chapter or Unit */}
           <div>
             <label
               htmlFor="target-select"
               className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1"
             >
-              Target Chapter or Unit <span className="text-rose-400">*</span>
+              Target <span className="text-rose-400">*</span>
             </label>
             <select
               id="target-select"
@@ -199,7 +205,12 @@ export function PlaceMembersModal({
               disabled={isNodesLoading || isSubmitting}
               className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
             >
-              <option value="">Select chapter or unit...</option>
+              <option value="">Select the area, a chapter or a unit...</option>
+              {areas.map((ar) => (
+                <option key={ar.governance_node_id} value={ar.governance_node_id}>
+                  {ar.node_name} (area level)
+                </option>
+              ))}
               {chapters.map((ch) => {
                 const childUnits = unitsByChapter.get(ch.governance_node_id) || [];
                 return (
@@ -295,6 +306,7 @@ export function PlaceMembersModal({
           {/* Modal Footer / Actions */}
           <div className="flex justify-end gap-3 pt-2">
             <Button
+              id="cancel-place-modal-btn"
               type="button"
               variant="outline"
               onClick={handleClose}

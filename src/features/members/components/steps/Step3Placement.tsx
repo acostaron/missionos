@@ -40,7 +40,8 @@ export function Step3Placement({
     );
   }
 
-  // Separate chapters and units
+  // Separate areas, chapters and units
+  const areas = nodes?.filter((n) => n.node_type_code === 'area_state') || [];
   const chapters = nodes?.filter((n) => n.node_type_code === 'chapter') || [];
   const units = nodes?.filter((n) => n.node_type_code === 'unit') || [];
 
@@ -92,6 +93,42 @@ export function Step3Placement({
             </div>
             <span className="text-xs font-mono text-slate-500 uppercase">Default</span>
           </label>
+
+          {/* Area Nodes */}
+          {areas.map((ar) => {
+            const isAreaSelected = selectedNodeId === ar.governance_node_id;
+
+            return (
+              <div
+                key={ar.governance_node_id}
+                className="rounded-xl border border-slate-700/80 bg-slate-800/30 overflow-hidden"
+              >
+                <label
+                  className={`flex items-center justify-between p-3.5 cursor-pointer transition-colors ${
+                    isAreaSelected
+                      ? 'border-indigo-500 bg-indigo-950/30 text-indigo-100'
+                      : 'hover:bg-slate-800/60 text-slate-200'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="radio"
+                      value={ar.governance_node_id}
+                      {...register('governanceNodeId')}
+                      className="h-4 w-4 border-slate-700 bg-slate-900 text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <div>
+                      <p className="text-sm font-semibold">{ar.node_name} (area level)</p>
+                      <p className="text-xs text-slate-400">Area</p>
+                    </div>
+                  </div>
+                  <span className="rounded bg-slate-800 px-2 py-0.5 text-[10px] font-mono uppercase text-slate-400">
+                    {ar.node_code}
+                  </span>
+                </label>
+              </div>
+            );
+          })}
 
           {/* Grouped Chapters & Units */}
           {chapters.map((ch) => {

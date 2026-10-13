@@ -99,7 +99,8 @@ export function ChangeGovernancePlacementModal({
 
   const samePlacementMessage = getSamePlacementMessage();
 
-  // Group chapters and units
+  // Group areas, chapters and units
+  const areas = nodes?.filter((n) => n.node_type_code === 'area_state') || [];
   const chapters = nodes?.filter((n) => n.node_type_code === 'chapter') || [];
   const units = nodes?.filter((n) => n.node_type_code === 'unit') || [];
 
@@ -267,6 +268,42 @@ export function ChangeGovernancePlacementModal({
                   </div>
                   <span className="text-[10px] uppercase font-mono text-slate-500">Unplaced</span>
                 </label>
+
+                {/* Area Nodes */}
+                {areas.map((ar) => {
+                  const isAreaSelected = selectedNodeId === ar.governance_node_id;
+
+                  return (
+                    <div
+                      key={ar.governance_node_id}
+                      className="rounded-lg border border-slate-800 bg-slate-900/30 overflow-hidden"
+                    >
+                      <label
+                        className={`flex items-center justify-between p-2.5 cursor-pointer transition-colors ${
+                          isAreaSelected
+                            ? 'bg-indigo-950/40 text-indigo-100'
+                            : 'hover:bg-slate-800/40 text-slate-200'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <input
+                            type="radio"
+                            value={ar.governance_node_id}
+                            {...register('targetGovernanceNodeId')}
+                            className="h-4 w-4 border-slate-700 bg-slate-900 text-indigo-600 focus:ring-indigo-500"
+                          />
+                          <div>
+                            <p className="text-xs font-semibold">{ar.node_name} (area level)</p>
+                            <p className="text-[10px] text-slate-400">Area</p>
+                          </div>
+                        </div>
+                        <span className="rounded bg-slate-800 px-1.5 py-0.5 text-[10px] font-mono uppercase text-slate-400">
+                          {ar.node_code}
+                        </span>
+                      </label>
+                    </div>
+                  );
+                })}
 
                 {/* Chapters & Units */}
                 {chapters.map((ch) => {
