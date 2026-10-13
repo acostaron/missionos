@@ -1,12 +1,15 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
-import { fetchPlacementWorklist, placeMembersBulk } from './api';
+import { fetchPlacementWorklist, placeMembersBulk, changeMembersSectionBulk } from './api';
 import { memberKeys } from '../members/queries';
+import { sectionKeys } from '../sections/queries';
 import { pastoralDashboardKeys } from '../households/api/get-pastoral-operations-dashboard';
 import type {
   FetchPlacementWorklistParams,
   PlacementWorklistResponse,
   PlaceMembersBulkParams,
   PlaceMembersBulkResponse,
+  ChangeMembersSectionBulkParams,
+  ChangeMembersSectionBulkResponse,
 } from './types';
 
 export const placementKeys = {
@@ -47,6 +50,25 @@ export function usePlaceMembersBulk(orgId: string | null) {
       queryClient.invalidateQueries({ queryKey: memberKeys.all });
       // Invalidate pastoral operations dashboard queries
       queryClient.invalidateQueries({ queryKey: pastoralDashboardKeys.all });
+    },
+  });
+}
+
+export function useChangeMembersSectionBulk(orgId: string | null) {
+  const queryClient = useQueryClient();
+
+  return useMutation<ChangeMembersSectionBulkResponse, Error, ChangeMembersSectionBulkParams>({
+    mutationFn: (params) => {
+      if (!orgId) throw new Error('Organization ID is required');
+      return changeMembersSectionBulk(orgId, params);
+    },
+    onSuccess: () => {
+      // Invalidate placement worklist queries
+      queryClient.invalidateQueries({ queryKey: placementKeys.all });
+      // Invalidate member directory & profile queries
+      queryClient.invalidateQueries({ queryKey: memberKeys.all });
+      // Invalidate sections overview and member section queries
+      queryClient.invalidateQueries({ queryKey: sectionKeys.all });
     },
   });
 }

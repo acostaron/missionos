@@ -80,3 +80,42 @@ export const placeMembersSchema = z.object({
 });
 
 export type PlaceMembersFormValues = z.infer<typeof placeMembersSchema>;
+
+export const changeMembersSectionBulkChangedItemSchema = z.object({
+  member_id: z.string().uuid(),
+  previous_section_code: z.string().nullable(),
+});
+
+export const changeMembersSectionBulkSkippedItemSchema = z.object({
+  member_id: z.string().uuid(),
+  reason: z.string(),
+  message: z.string().optional(),
+});
+
+export const changeMembersSectionBulkResponseSchema = z.object({
+  status: z.string(),
+  section_code: z.string(),
+  effective_from: z.string(),
+  changed_count: z.number(),
+  skipped_count: z.number(),
+  changed: z.array(changeMembersSectionBulkChangedItemSchema),
+  skipped: z.array(changeMembersSectionBulkSkippedItemSchema),
+  correlation_id: z.string().uuid(),
+});
+
+export const changeSectionsSchema = z.object({
+  sectionCode: z.string().min(1, 'Please select a section'),
+  effectiveFrom: z
+    .string()
+    .min(1, 'Effective date is required')
+    .refine((val) => {
+      const today = localToday();
+      return val <= today;
+    }, 'Effective date cannot be in the future'),
+  reason: z
+    .string()
+    .trim()
+    .min(5, 'Reason must be at least 5 characters'),
+});
+
+export type ChangeSectionsFormValues = z.infer<typeof changeSectionsSchema>;

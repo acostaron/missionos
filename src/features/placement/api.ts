@@ -2,12 +2,15 @@ import { supabase } from '../../lib/supabase/client';
 import {
   placementWorklistResponseSchema,
   placeMembersBulkResponseSchema,
+  changeMembersSectionBulkResponseSchema,
 } from './schemas';
 import type {
   FetchPlacementWorklistParams,
   PlacementWorklistResponse,
   PlaceMembersBulkParams,
   PlaceMembersBulkResponse,
+  ChangeMembersSectionBulkParams,
+  ChangeMembersSectionBulkResponse,
 } from './types';
 
 export async function fetchPlacementWorklist(
@@ -41,4 +44,20 @@ export async function placeMembersBulk(
 
   if (error) throw error;
   return placeMembersBulkResponseSchema.parse(data);
+}
+
+export async function changeMembersSectionBulk(
+  orgId: string,
+  params: ChangeMembersSectionBulkParams
+): Promise<ChangeMembersSectionBulkResponse> {
+  const { data, error } = await supabase.rpc('change_members_section_bulk', {
+    p_organization_id: orgId,
+    p_member_ids: params.memberIds,
+    p_section_code: params.sectionCode,
+    p_effective_from: params.effectiveFrom,
+    p_reason: params.reason,
+  });
+
+  if (error) throw error;
+  return changeMembersSectionBulkResponseSchema.parse(data);
 }

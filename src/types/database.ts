@@ -6962,6 +6962,16 @@ export type Database = {
         }
         Returns: Json
       }
+      change_members_section_bulk: {
+        Args: {
+          p_effective_from: string
+          p_member_ids: string[]
+          p_organization_id: string
+          p_reason: string
+          p_section_code: string
+        }
+        Returns: Json
+      }
       close_governance_node: {
         Args: {
           p_actor_profile_id?: string

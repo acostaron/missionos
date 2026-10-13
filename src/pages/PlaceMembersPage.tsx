@@ -6,6 +6,7 @@ import { Permissions } from '../types/permissions';
 import { usePlacementWorklist } from '../features/placement/queries';
 import { useSectionsOverview } from '../features/sections/queries';
 import { PlaceMembersModal } from '../features/placement/components/PlaceMembersModal';
+import { ChangeSectionsModal } from '../features/placement/components/ChangeSectionsModal';
 import { PageHeader } from '../components/ui/PageHeader';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
@@ -52,6 +53,7 @@ export default function PlaceMembersPage() {
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isChangeSectionModalOpen, setIsChangeSectionModalOpen] = useState(false);
 
   // Debounce search input (300ms)
   useEffect(() => {
@@ -124,6 +126,7 @@ export default function PlaceMembersPage() {
           display_name: m.display_name,
           member_number: m.member_number,
           has_placement: !!m.placement,
+          section_code: m.section?.code ?? null,
         });
       }
     }
@@ -140,6 +143,7 @@ export default function PlaceMembersPage() {
           display_name: m.display_name,
           member_number: m.member_number,
           has_placement: !!m.placement,
+          section_code: m.section?.code ?? null,
         });
       }
     }
@@ -157,6 +161,15 @@ export default function PlaceMembersPage() {
     }
     setSelectedMembers(next);
   };
+
+  const handleSectionChangeComplete = (changedMemberIds: string[]) => {
+    const next = new Map(selectedMembers);
+    for (const id of changedMemberIds) {
+      next.delete(id);
+    }
+    setSelectedMembers(next);
+  };
+
 
   // Permission check
   if (!canManagePlacements && !isPermLoading) {
@@ -176,7 +189,7 @@ export default function PlaceMembersPage() {
       {/* Page Header */}
       <PageHeader
         title="Place Members"
-        description="Assign members to a chapter or unit. Each change is kept in the member's placement history."
+        description="Assign members to a section, chapter or unit. Each change is kept in the member's history."
       />
 
       {/* Summary Counts */}
@@ -344,6 +357,7 @@ export default function PlaceMembersPage() {
                     >
                       <td className="px-4 py-3">
                         <input
+                          id={`member-checkbox-${m.member_number ?? m.id}`}
                           type="checkbox"
                           checked={isSelected}
                           disabled={isDisabled}
@@ -491,6 +505,7 @@ export default function PlaceMembersPage() {
                 {selectedMembers.size === 1 ? 'member' : 'members'} selected
               </span>
               <button
+                id="clear-selection-btn"
                 type="button"
                 onClick={handleClearSelection}
                 className="text-xs text-ink-muted underline hover:text-ink"
@@ -498,12 +513,21 @@ export default function PlaceMembersPage() {
                 Clear
               </button>
             </div>
-            <Button
-              variant="primary"
-              onClick={() => setIsModalOpen(true)}
-            >
-              Place selected…
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                id="change-section-btn"
+                variant="outline"
+                onClick={() => setIsChangeSectionModalOpen(true)}
+              >
+                Change section…
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => setIsModalOpen(true)}
+              >
+                Place selected…
+              </Button>
+            </div>
           </div>
         </div>
       )}
@@ -516,6 +540,17 @@ export default function PlaceMembersPage() {
           organizationId={orgId}
           selectedMembers={selectedMembers}
           onPlacementComplete={handlePlacementComplete}
+        />
+      )}
+
+      {/* Bulk Section Change Modal */}
+      {orgId && (
+        <ChangeSectionsModal
+          isOpen={isChangeSectionModalOpen}
+          onClose={() => setIsChangeSectionModalOpen(false)}
+          organizationId={orgId}
+          selectedMembers={selectedMembers}
+          onSectionChangeComplete={handleSectionChangeComplete}
         />
       )}
     </div>
