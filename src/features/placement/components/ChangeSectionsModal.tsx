@@ -64,6 +64,7 @@ export function ChangeSectionsModal({
   const selectedCount = selectedMembers.size;
   const selectedList = useMemo(() => Array.from(selectedMembers.entries()), [selectedMembers]);
 
+  // TODO: Pass 6.1B: use section kind
   const hasCouplesMember = useMemo(
     () => selectedList.some(([, info]) => info.section_code === 'sec_couples'),
     [selectedList]
