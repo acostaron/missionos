@@ -13,6 +13,7 @@ export interface SectionCoordinator {
 }
 
 export interface SectionOverviewItem {
+  node_id: string;
   code: string;
   name: string;
   active_member_count: number;

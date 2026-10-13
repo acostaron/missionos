@@ -215,6 +215,7 @@ export default function MembersPage() {
 
   const canCreateMember = !isPermLoading && hasPermission(Permissions.MembersRecordsCreate);
   const canCreateFamily = !isPermLoading && hasPermission(Permissions.FamiliesRecordsCreate);
+  const canPlaceMembers = !isPermLoading && hasPermission(Permissions.MembersPlacementsManage);
 
   const [isCreateFamilyOpen, setIsCreateFamilyOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -277,6 +278,25 @@ export default function MembersPage() {
         </div>
 
         <div className="flex items-center gap-3">
+          {canPlaceMembers && (
+            <Link
+              to="/app/members/place"
+              id="place-members-button"
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-line bg-surface-muted px-4 py-2 text-sm font-medium text-ink shadow-sm hover:bg-line hover:text-white focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 focus:ring-offset-slate-900 transition-colors"
+            >
+              <svg
+                className="h-4 w-4 text-ink-muted"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+              Place Members
+            </Link>
+          )}
+
           {canCreateFamily && (
             <button
               type="button"

@@ -19,6 +19,7 @@ import {
   FormationCatalogPage,
   FormationProgramDetailPage,
   SectionsPage,
+  PlaceMembersPage,
 } from './lazy-pages';
 
 
@@ -108,6 +109,14 @@ export const router = createBrowserRouter([
             element: (
               <Suspense fallback={<PageLoadingFallback />}>
                 <NewMemberPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'members/place',
+            element: (
+              <Suspense fallback={<PageLoadingFallback />}>
+                <PlaceMembersPage />
               </Suspense>
             ),
           },

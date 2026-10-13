@@ -26,3 +26,4 @@ export const FormationProgramDetailPage = lazy(
   () => import('../pages/FormationProgramDetailPage')
 );
 export const SectionsPage = lazy(() => import('../pages/SectionsPage'));
+export const PlaceMembersPage = lazy(() => import('../pages/PlaceMembersPage'));

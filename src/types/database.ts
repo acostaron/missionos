@@ -7384,6 +7384,17 @@ export type Database = {
           parent_node_name: string
         }[]
       }
+      get_placement_worklist: {
+        Args: {
+          p_organization_id: string
+          p_page?: number
+          p_page_size?: number
+          p_search?: string
+          p_section_node_id?: string
+          p_view?: string
+        }
+        Returns: Json
+      }
       get_sections_overview: {
         Args: { p_organization_id: string }
         Returns: Json
@@ -7533,6 +7544,16 @@ export type Database = {
           p_program_record_id: string
           p_session_status: string
           p_talk_id: string
+        }
+        Returns: Json
+      }
+      place_members_bulk: {
+        Args: {
+          p_effective_from: string
+          p_member_ids: string[]
+          p_organization_id: string
+          p_reason: string
+          p_target_governance_node_id: string
         }
         Returns: Json
       }
