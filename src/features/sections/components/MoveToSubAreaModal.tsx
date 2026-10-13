@@ -319,7 +319,7 @@ export function MoveToSubAreaModal({
           <textarea
             id="move-reason-textarea"
             rows={3}
-            placeholder="e.g. Relocated to Spanish-speaking FMC community"
+            placeholder="e.g. Moving to FMC New York"
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             disabled={isSubmitting}
