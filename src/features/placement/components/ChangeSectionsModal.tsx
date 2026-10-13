@@ -10,6 +10,7 @@ import { changeSectionsSchema, type ChangeSectionsFormValues } from '../schemas'
 import { getSectionChangeErrorMessage, formatSkipReason } from '../error-message';
 import { localToday } from '../../formation/form-schemas';
 import type { SelectedMemberInfo, ChangeMembersSectionBulkResponse } from '../types';
+import { parseSectionOptions } from '../../sections/section-options';
 
 interface ChangeSectionsModalProps {
   isOpen: boolean;
@@ -55,19 +56,25 @@ export function ChangeSectionsModal({
   const selectedSectionCode = watch('sectionCode');
   const selectedEffectiveFrom = watch('effectiveFrom') || today;
 
-  const sections = useMemo(() => sectionsData?.sections ?? [], [sectionsData]);
+  const parsedSections = useMemo(
+    () => parseSectionOptions(sectionsData),
+    [sectionsData]
+  );
 
   const selectedSectionName = useMemo(() => {
-    return sections.find((s) => s.code === selectedSectionCode)?.name;
-  }, [sections, selectedSectionCode]);
+    return parsedSections.byCode.get(selectedSectionCode)?.name;
+  }, [parsedSections, selectedSectionCode]);
 
   const selectedCount = selectedMembers.size;
   const selectedList = useMemo(() => Array.from(selectedMembers.entries()), [selectedMembers]);
 
-  // TODO: Pass 6.1B: use section kind
   const hasCouplesMember = useMemo(
-    () => selectedList.some(([, info]) => info.section_code === 'sec_couples'),
-    [selectedList]
+    () =>
+      selectedList.some(([, info]) => {
+        const meta = info.section_code ? parsedSections.byCode.get(info.section_code) : null;
+        return meta?.kind === 'couples';
+      }),
+    [selectedList, parsedSections]
   );
 
   const handleClose = () => {
@@ -175,10 +182,17 @@ export function ChangeSectionsModal({
               className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
             >
               <option value="">Select section...</option>
-              {sections.map((sec) => (
-                <option key={sec.code} value={sec.code}>
-                  {sec.name}
-                </option>
+              {parsedSections.groups.map((group) => (
+                <optgroup
+                  key={group.subAreaCode || 'all'}
+                  label={group.subAreaName || 'Sections'}
+                >
+                  {group.sections.map((sec) => (
+                    <option key={sec.code} value={sec.code}>
+                      {sec.displayLabel}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
             {errors.sectionCode && (

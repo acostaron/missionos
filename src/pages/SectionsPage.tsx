@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useOrganizationContext } from '../hooks/use-organization-context';
 import { usePermissions } from '../hooks/use-permissions';
 import { Permissions } from '../types/permissions';
@@ -63,6 +64,15 @@ export default function SectionsPage() {
   const canViewSections = !isPermLoading && hasPermission(Permissions.MembersRecordsView);
   const { data, isLoading, error } = useSectionsOverview(canViewSections ? orgId : null);
 
+  const sortedSubAreas = useMemo(() => {
+    if (!data?.sub_areas) return [];
+    return [...data.sub_areas].sort((a, b) => {
+      if (a.code === 'mfc_ny') return -1;
+      if (b.code === 'mfc_ny') return 1;
+      return a.name.localeCompare(b.name);
+    });
+  }, [data?.sub_areas]);
+
   if (!canViewSections && !isPermLoading) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -103,32 +113,66 @@ export default function SectionsPage() {
         </div>
       ) : data ? (
         <div className="space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {data.sections.map((section) => (
-              <Card key={section.code} className="flex flex-col justify-between p-6">
-                <div>
-                  <div className="flex items-start justify-between gap-2">
-                    <h2 className="text-base font-semibold text-ink">{section.name}</h2>
-                    <span className="inline-flex items-center rounded-full bg-navy-50 px-2.5 py-0.5 text-xs font-semibold text-navy-800">
-                      {section.active_member_count}{' '}
-                      {section.active_member_count === 1 ? 'member' : 'members'}
-                    </span>
-                  </div>
+          {sortedSubAreas.length > 0 ? (
+            sortedSubAreas.map((subArea) => (
+              <div key={subArea.code} className="space-y-4">
+                <h2 className="text-lg font-semibold text-ink">{subArea.name}</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {subArea.sections.map((section) => (
+                    <Card key={section.code} className="flex flex-col justify-between p-6">
+                      <div>
+                        <div className="flex items-start justify-between gap-2">
+                          <h3 className="text-base font-semibold text-ink">{section.name}</h3>
+                          <span className="inline-flex items-center rounded-full bg-navy-50 px-2.5 py-0.5 text-xs font-semibold text-navy-800">
+                            {section.active_member_count}{' '}
+                            {section.active_member_count === 1 ? 'member' : 'members'}
+                          </span>
+                        </div>
 
-                  <div className="mt-5 pt-4 border-t border-line">
-                    <span className="text-caption font-medium uppercase tracking-wider text-ink-muted">
-                      Coordinator
-                    </span>
-                    <CoordinatorDisplay
-                      coordinator={section.coordinator}
-                      isException={section.is_exception}
-                      exceptionReason={section.exception_reason}
-                    />
-                  </div>
+                        <div className="mt-5 pt-4 border-t border-line">
+                          <span className="text-caption font-medium uppercase tracking-wider text-ink-muted">
+                            Coordinator
+                          </span>
+                          <CoordinatorDisplay
+                            coordinator={section.coordinator}
+                            isException={section.is_exception}
+                            exceptionReason={section.exception_reason}
+                          />
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
                 </div>
-              </Card>
-            ))}
-          </div>
+              </div>
+            ))
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {data.sections.map((section) => (
+                <Card key={section.code} className="flex flex-col justify-between p-6">
+                  <div>
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="text-base font-semibold text-ink">{section.name}</h3>
+                      <span className="inline-flex items-center rounded-full bg-navy-50 px-2.5 py-0.5 text-xs font-semibold text-navy-800">
+                        {section.active_member_count}{' '}
+                        {section.active_member_count === 1 ? 'member' : 'members'}
+                      </span>
+                    </div>
+
+                    <div className="mt-5 pt-4 border-t border-line">
+                      <span className="text-caption font-medium uppercase tracking-wider text-ink-muted">
+                        Coordinator
+                      </span>
+                      <CoordinatorDisplay
+                        coordinator={section.coordinator}
+                        isException={section.is_exception}
+                        exceptionReason={section.exception_reason}
+                      />
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
 
           {/* FMC Card at the bottom */}
           <div>

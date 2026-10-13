@@ -1218,6 +1218,8 @@ export default function MemberProfilePage() {
           currentSectionCode={
             memberSectionData?.section_code ?? profile.section_placement?.section_code
           }
+          currentSubAreaCode={memberSectionData?.sub_area_code}
+          currentSectionKind={memberSectionData?.section_kind}
           onSuccessToast={triggerToast}
         />
       )}

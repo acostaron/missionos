@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useOrganizationContext } from '../hooks/use-organization-context';
 import { usePermissions } from '../hooks/use-permissions';
 import { Permissions } from '../types/permissions';
 import { usePlacementWorklist } from '../features/placement/queries';
 import { useSectionsOverview } from '../features/sections/queries';
+import { parseSectionOptions } from '../features/sections/section-options';
 import { PlaceMembersModal } from '../features/placement/components/PlaceMembersModal';
 import { ChangeSectionsModal } from '../features/placement/components/ChangeSectionsModal';
 import { PageHeader } from '../components/ui/PageHeader';
@@ -65,6 +66,11 @@ export default function PlaceMembersPage() {
 
   // Load sections overview for section filter dropdown
   const { data: sectionsData } = useSectionsOverview(canManagePlacements ? orgId : null);
+
+  const parsedSections = useMemo(
+    () => parseSectionOptions(sectionsData),
+    [sectionsData]
+  );
 
   // Load placement worklist
   const {
@@ -258,10 +264,17 @@ export default function PlaceMembersPage() {
             className="rounded-lg border border-border bg-surface px-3 py-1.5 text-xs text-ink focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
           >
             <option value="">All sections</option>
-            {sectionsData?.sections.map((sec) => (
-              <option key={sec.node_id} value={sec.node_id}>
-                {sec.name}
-              </option>
+            {parsedSections.groups.map((group) => (
+              <optgroup
+                key={group.subAreaCode || 'all'}
+                label={group.subAreaName || 'Sections'}
+              >
+                {group.sections.map((sec) => (
+                  <option key={sec.nodeId} value={sec.nodeId}>
+                    {sec.displayLabel}
+                  </option>
+                ))}
+              </optgroup>
             ))}
           </select>
 
@@ -377,7 +390,9 @@ export default function PlaceMembersPage() {
                         {m.member_number ?? '—'}
                       </td>
                       <td className="px-4 py-3 text-ink">
-                        {m.section?.name ?? '—'}
+                        {m.section?.code
+                          ? parsedSections.getDisplayLabel(m.section.code)
+                          : (m.section?.name ?? '—')}
                       </td>
                       <td className="px-4 py-3">
                         {formatPlacementDisplay(m.placement)}
@@ -452,7 +467,9 @@ export default function PlaceMembersPage() {
                         {m.section?.name && (
                           <>
                             <span>·</span>
-                            <span>{m.section.name}</span>
+                            <span>
+                              {parsedSections.getDisplayLabel(m.section.code) || m.section.name}
+                            </span>
                           </>
                         )}
                       </div>

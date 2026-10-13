@@ -1,5 +1,12 @@
 import { supabase } from '../../lib/supabase/client';
-import type { SectionsOverviewResponse, MemberSection, ChangeMemberSectionParams } from './types';
+import type {
+  SectionsOverviewResponse,
+  MemberSection,
+  ChangeMemberSectionParams,
+  SubAreaPlacementTarget,
+  MoveMemberToSubAreaParams,
+  MoveMemberToSubAreaResult,
+} from './types';
 
 export async function getSectionsOverview(organizationId: string): Promise<SectionsOverviewResponse> {
   const { data, error } = await supabase.rpc('get_sections_overview', {
@@ -34,4 +41,33 @@ export async function changeMemberSection(params: ChangeMemberSectionParams): Pr
 
   if (error) throw error;
   return data;
+}
+
+export async function getSubAreaPlacementTargets(
+  organizationId: string,
+  subAreaNodeId: string
+): Promise<SubAreaPlacementTarget[]> {
+  const { data, error } = await (supabase.rpc as any)('get_sub_area_placement_targets', {
+    p_organization_id: organizationId,
+    p_sub_area_node_id: subAreaNodeId,
+  });
+
+  if (error) throw error;
+  return (data ?? []) as unknown as SubAreaPlacementTarget[];
+}
+
+export async function moveMemberToSubArea(
+  params: MoveMemberToSubAreaParams
+): Promise<MoveMemberToSubAreaResult> {
+  const { data, error } = await (supabase.rpc as any)('move_member_to_sub_area', {
+    p_organization_id: params.organizationId,
+    p_member_id: params.memberId,
+    p_section_code: params.sectionCode,
+    p_target_governance_node_id: params.targetGovernanceNodeId,
+    p_effective_from: params.effectiveFrom,
+    p_reason: params.reason,
+  });
+
+  if (error) throw error;
+  return data as unknown as MoveMemberToSubAreaResult;
 }

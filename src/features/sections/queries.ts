@@ -1,13 +1,30 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getSectionsOverview, getMemberSection, changeMemberSection } from './api';
-import type { ChangeMemberSectionParams, SectionsOverviewResponse, MemberSection } from './types';
+import {
+  getSectionsOverview,
+  getMemberSection,
+  changeMemberSection,
+  getSubAreaPlacementTargets,
+  moveMemberToSubArea,
+} from './api';
+import type {
+  ChangeMemberSectionParams,
+  SectionsOverviewResponse,
+  MemberSection,
+  MoveMemberToSubAreaParams,
+  MoveMemberToSubAreaResult,
+  SubAreaPlacementTarget,
+} from './types';
 import { memberKeys } from '../members/queries';
+import { placementKeys } from '../placement/queries';
+import { pastoralDashboardKeys } from '../households/api/get-pastoral-operations-dashboard';
 
 export const sectionKeys = {
   all: ['sections'] as const,
   overview: (orgId: string | null) => [...sectionKeys.all, 'overview', orgId] as const,
   memberSection: (orgId: string | null, memberId: string | null) =>
     [...sectionKeys.all, 'member', orgId, memberId] as const,
+  subAreaTargets: (orgId: string | null, subAreaNodeId: string | null) =>
+    [...sectionKeys.all, 'targets', orgId, subAreaNodeId] as const,
 };
 
 export function useSectionsOverview(orgId: string | null) {
@@ -49,6 +66,45 @@ export function useChangeMemberSection() {
       // Invalidate all member section queries to refresh any partner's section info
       queryClient.invalidateQueries({
         queryKey: sectionKeys.all,
+      });
+    },
+  });
+}
+
+export function useSubAreaPlacementTargets(
+  orgId: string | null,
+  subAreaNodeId: string | null
+) {
+  return useQuery<SubAreaPlacementTarget[]>({
+    queryKey: sectionKeys.subAreaTargets(orgId, subAreaNodeId),
+    queryFn: async (): Promise<SubAreaPlacementTarget[]> => {
+      if (!orgId || !subAreaNodeId) throw new Error('Org and Sub-area Node ID are required');
+      return getSubAreaPlacementTargets(orgId, subAreaNodeId);
+    },
+    enabled: !!orgId && !!subAreaNodeId,
+  });
+}
+
+export function useMoveMemberToSubArea() {
+  const queryClient = useQueryClient();
+
+  return useMutation<MoveMemberToSubAreaResult, Error, MoveMemberToSubAreaParams>({
+    mutationFn: (params) => moveMemberToSubArea(params),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: sectionKeys.all,
+      });
+      queryClient.invalidateQueries({
+        queryKey: sectionKeys.memberSection(variables.organizationId, variables.memberId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: memberKeys.all,
+      });
+      queryClient.invalidateQueries({
+        queryKey: placementKeys.all,
+      });
+      queryClient.invalidateQueries({
+        queryKey: pastoralDashboardKeys.all,
       });
     },
   });
