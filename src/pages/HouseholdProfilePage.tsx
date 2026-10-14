@@ -451,7 +451,7 @@ export default function HouseholdProfilePage() {
                           Serving since {lead.effective_from}
                         </p>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                         <span className="inline-flex items-center rounded-full border border-navy-100 bg-navy-50 px-2 py-0.5 text-[10px] font-medium text-primary-blue">
                           Formal Office
                         </span>
@@ -545,114 +545,211 @@ export default function HouseholdProfilePage() {
             No active members assigned to this household.
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-surface text-ink-muted border-b border-line">
-                <tr>
-                  <th className="px-5 py-3 font-medium">Member</th>
-                  <th className="px-5 py-3 font-medium">Number</th>
-                  <th className="px-5 py-3 font-medium">Household Role</th>
-                  <th className="px-5 py-3 font-medium">Status</th>
-                  <th className="px-5 py-3 font-medium">Joined Date</th>
-                  {(canTransferMembers || canEndMembers) && (
-                    <th className="px-5 py-3 font-medium text-right">Actions</th>
-                  )}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-line text-ink">
-                {members.map((m) => {
-                  const isServant = m.membership_role === 'servant';
-                  const isDerivedWifeLeader =
-                    data.household_leaders &&
-                    m.member_id === data.household_leaders.wife.member_id;
+          <>
+            {/* Tablet / Desktop Table */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-surface text-ink-muted border-b border-line">
+                  <tr>
+                    <th className="px-5 py-3 font-medium">Member</th>
+                    <th className="px-5 py-3 font-medium">Number</th>
+                    <th className="px-5 py-3 font-medium">Household Role</th>
+                    <th className="px-5 py-3 font-medium">Status</th>
+                    <th className="px-5 py-3 font-medium">Joined Date</th>
+                    {(canTransferMembers || canEndMembers) && (
+                      <th className="px-5 py-3 font-medium text-right">Actions</th>
+                    )}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-line text-ink">
+                  {members.map((m) => {
+                    const isServant = m.membership_role === 'servant';
+                    const isDerivedWifeLeader =
+                      data.household_leaders &&
+                      m.member_id === data.household_leaders.wife.member_id;
 
-                  return (
-                    <tr key={m.household_membership_id} className="hover:bg-surface-muted transition-colors">
-                      <td className="px-5 py-3">
-                        {canViewMembers ? (
-                          <Link
-                            to={`/app/members/${m.member_id}`}
-                            className="font-medium hover:text-primary-blue hover:underline transition-colors"
-                          >
-                            {m.display_name}
-                          </Link>
-                        ) : (
-                          <span className="font-medium text-ink">
-                            {m.display_name}
-                          </span>
-                        )}
-                        {m.is_primary && (
-                          <span className="ml-2 text-[10px] text-ink-muted">
-                            (primary)
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-5 py-3 font-mono text-ink-muted">
-                        {m.member_number || '—'}
-                      </td>
-                      <td className="px-5 py-3">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                            isServant
-                              ? 'border border-navy-100 bg-navy-50 text-primary-blue'
-                              : 'text-ink-secondary'
-                          }`}>
-                            {formatRole(m.membership_role)}
-                          </span>
-                          {isDerivedWifeLeader && (
-                            <span
-                              title="Pastoral couple designation derived from verified marriage to current Household Servant. No separate formal leadership assignment exists."
-                              className="inline-flex items-center rounded-full border border-navy-100 bg-navy-50 px-2 py-0.5 text-[10px] font-medium text-primary-blue"
+                    return (
+                      <tr key={m.household_membership_id} className="hover:bg-surface-muted transition-colors">
+                        <td className="px-5 py-3">
+                          {canViewMembers ? (
+                            <Link
+                              to={`/app/members/${m.member_id}`}
+                              className="font-medium hover:text-primary-blue hover:underline transition-colors"
                             >
-                              Household Leader
+                              {m.display_name}
+                            </Link>
+                          ) : (
+                            <span className="font-medium text-ink">
+                              {m.display_name}
                             </span>
                           )}
-                        </div>
-                      </td>
-                      <td className="px-5 py-3">
-                        <span className="inline-flex items-center rounded-full border border-success-600/30 bg-success-50 px-2 py-0.5 text-[10px] font-medium text-success-700">
-                          {m.membership_status}
-                        </span>
-                      </td>
-                      <td className="px-5 py-3 text-ink-muted">
-                        {m.effective_from}
-                      </td>
-                      {(canTransferMembers || canEndMembers) && (
-                        <td className="px-5 py-3 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            {canTransferMembers && (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setSelectedMember(m);
-                                  setIsTransferModalOpen(true);
-                                }}
-                                className="inline-flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium text-primary-blue hover:bg-navy-100 hover:text-primary-blue transition-colors"
+                          {m.is_primary && (
+                            <span className="ml-2 text-[10px] text-ink-muted">
+                              (primary)
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-5 py-3 font-mono text-ink-muted">
+                          {m.member_number || '—'}
+                        </td>
+                        <td className="px-5 py-3">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                              isServant
+                                ? 'border border-navy-100 bg-navy-50 text-primary-blue'
+                                : 'text-ink-secondary'
+                            }`}>
+                              {formatRole(m.membership_role)}
+                            </span>
+                            {isDerivedWifeLeader && (
+                              <span
+                                title="Pastoral couple designation derived from verified marriage to current Household Servant. No separate formal leadership assignment exists."
+                                className="inline-flex items-center rounded-full border border-navy-100 bg-navy-50 px-2 py-0.5 text-[10px] font-medium text-primary-blue"
                               >
-                                Transfer
-                              </button>
-                            )}
-                            {canEndMembers && (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setSelectedMember(m);
-                                  setIsEndModalOpen(true);
-                                }}
-                                className="inline-flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium text-danger-700 hover:bg-danger-100 hover:text-danger-700 transition-colors"
-                              >
-                                End Assignment
-                              </button>
+                                Household Leader
+                              </span>
                             )}
                           </div>
                         </td>
+                        <td className="px-5 py-3">
+                          <span className="inline-flex items-center rounded-full border border-success-600/30 bg-success-50 px-2 py-0.5 text-[10px] font-medium text-success-700">
+                            {m.membership_status}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3 text-ink-muted">
+                          {m.effective_from}
+                        </td>
+                        {(canTransferMembers || canEndMembers) && (
+                          <td className="px-5 py-3 text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              {canTransferMembers && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedMember(m);
+                                    setIsTransferModalOpen(true);
+                                  }}
+                                  className="inline-flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium text-primary-blue hover:bg-navy-100 hover:text-primary-blue transition-colors"
+                                >
+                                  Transfer
+                                </button>
+                              )}
+                              {canEndMembers && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedMember(m);
+                                    setIsEndModalOpen(true);
+                                  }}
+                                  className="inline-flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium text-danger-700 hover:bg-danger-100 hover:text-danger-700 transition-colors"
+                                >
+                                  End Assignment
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        )}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Cards List */}
+            <div className="sm:hidden divide-y divide-line">
+              {members.map((m) => {
+                const isServant = m.membership_role === 'servant';
+                const isDerivedWifeLeader =
+                  data.household_leaders &&
+                  m.member_id === data.household_leaders.wife.member_id;
+
+                return (
+                  <div key={m.household_membership_id} className="p-4 space-y-1.5">
+                    {/* Line 1: Name + (primary) */}
+                    <div className="flex items-center flex-wrap gap-1.5">
+                      {canViewMembers ? (
+                        <Link
+                          to={`/app/members/${m.member_id}`}
+                          className="font-medium text-ink hover:text-primary-blue hover:underline transition-colors"
+                        >
+                          {m.display_name}
+                        </Link>
+                      ) : (
+                        <span className="font-medium text-ink">
+                          {m.display_name}
+                        </span>
                       )}
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                      {m.is_primary && (
+                        <span className="text-[10px] text-ink-muted">
+                          (primary)
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Line 2: Member number · Joined {effective_from} */}
+                    <p className="text-xs text-ink-muted">
+                      <span className="font-mono">{m.member_number || '—'}</span>
+                      <span className="mx-1.5">·</span>
+                      Joined {m.effective_from}
+                    </p>
+
+                    {/* Line 3: Role and status badges */}
+                    <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                        isServant
+                          ? 'border border-navy-100 bg-navy-50 text-primary-blue'
+                          : 'text-ink-secondary'
+                      }`}>
+                        {formatRole(m.membership_role)}
+                      </span>
+                      {isDerivedWifeLeader && (
+                        <span
+                          title="Pastoral couple designation derived from verified marriage to current Household Servant. No separate formal leadership assignment exists."
+                          className="inline-flex items-center rounded-full border border-navy-100 bg-navy-50 px-2 py-0.5 text-[10px] font-medium text-primary-blue"
+                        >
+                          Household Leader
+                        </span>
+                      )}
+                      <span className="inline-flex items-center rounded-full border border-success-600/30 bg-success-50 px-2 py-0.5 text-[10px] font-medium text-success-700">
+                        {m.membership_status}
+                      </span>
+                    </div>
+
+                    {/* Line 4: Actions (Transfer / End buttons) */}
+                    {(canTransferMembers || canEndMembers) && (
+                      <div className="flex items-center gap-2 flex-wrap pt-1">
+                        {canTransferMembers && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedMember(m);
+                              setIsTransferModalOpen(true);
+                            }}
+                            className="inline-flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium text-primary-blue hover:bg-navy-100 hover:text-primary-blue transition-colors"
+                          >
+                            Transfer
+                          </button>
+                        )}
+                        {canEndMembers && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedMember(m);
+                              setIsEndModalOpen(true);
+                            }}
+                            className="inline-flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium text-danger-700 hover:bg-danger-100 hover:text-danger-700 transition-colors"
+                          >
+                            End Assignment
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </>
         )}
       </div>
 
