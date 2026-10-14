@@ -12,6 +12,7 @@ import {
   Trash2,
   RotateCcw,
   BookOpen,
+  GraduationCap,
 } from 'lucide-react';
 import {
   Alert,
@@ -205,6 +206,15 @@ export default function EventPage() {
 
             <h1 className="text-h1 font-bold text-ink">{event.title}</h1>
 
+            {event.is_program_session && event.program_run_id && (
+              <div className="flex items-center gap-2 text-small font-medium text-primary">
+                <GraduationCap className="h-4 w-4" />
+                <Link to={`/app/programs/${event.program_run_id}`} className="hover:underline">
+                  Program: {event.program_title} · Session {event.session_number} of {event.session_count}
+                </Link>
+              </div>
+            )}
+
             {event.event_type === 'formation_talk' && event.formation_program_name && (
               <div className="flex items-center gap-2 text-small font-medium text-success-700">
                 <BookOpen className="h-4 w-4" />
@@ -219,14 +229,24 @@ export default function EventPage() {
           {event.can_manage && (
             <div className="flex flex-wrap items-center gap-2">
               {event.event_status !== 'cancelled' && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  icon={<Edit className="h-3.5 w-3.5" />}
-                  onClick={() => setIsEditModalOpen(true)}
-                >
-                  Edit
-                </Button>
+                event.is_program_session && event.program_run_id ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate(`/app/programs/${event.program_run_id}`)}
+                  >
+                    Change on program page
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    icon={<Edit className="h-3.5 w-3.5" />}
+                    onClick={() => setIsEditModalOpen(true)}
+                  >
+                    Edit
+                  </Button>
+                )
               )}
 
               {event.event_status === 'scheduled' && (
@@ -369,18 +389,27 @@ export default function EventPage() {
             )}
           </div>
 
-          <div className="rounded-control bg-surface-muted p-4">
-            <p className="text-caption font-medium text-ink-muted">Present Attendees</p>
-            <p className="mt-1 text-h2 font-bold text-ink">
-              Present {event.present_expected_count} of {event.expected_count} expected{' '}
-              <span className="text-h3 font-medium text-ink-muted">({pct}%)</span>
-            </p>
-            {event.guest_count > 0 && (
-              <p className="mt-1 text-small font-medium text-ink-secondary">
-                +{event.guest_count} guest{event.guest_count === 1 ? '' : 's'} checked in
+          {event.is_program_session ? (
+            <div className="rounded-control bg-surface-muted p-4">
+              <p className="text-caption font-medium text-ink-muted">Session Attendance</p>
+              <p className="mt-1 text-h2 font-bold text-ink">
+                Participants present {event.present_count} of {event.expected_count} · Team {event.team_count}
               </p>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="rounded-control bg-surface-muted p-4">
+              <p className="text-caption font-medium text-ink-muted">Present Attendees</p>
+              <p className="mt-1 text-h2 font-bold text-ink">
+                Present {event.present_expected_count} of {event.expected_count} expected{' '}
+                <span className="text-h3 font-medium text-ink-muted">({pct}%)</span>
+              </p>
+              {event.guest_count > 0 && (
+                <p className="mt-1 text-small font-medium text-ink-secondary">
+                  +{event.guest_count} guest{event.guest_count === 1 ? '' : 's'} checked in
+                </p>
+              )}
+            </div>
+          )}
 
           {!canRecordAttendance && (
             <p className="text-small text-ink-muted">

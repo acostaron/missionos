@@ -23,6 +23,8 @@ import {
   CalendarPage,
   EventPage,
   EventAttendancePage,
+  ProgramsPage,
+  ProgramPage,
 } from './lazy-pages';
 
 
@@ -168,6 +170,22 @@ export const router = createBrowserRouter([
             element: (
               <Suspense fallback={<PageLoadingFallback />}>
                 <EventAttendancePage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'programs',
+            element: (
+              <Suspense fallback={<PageLoadingFallback />}>
+                <ProgramsPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'programs/:runId',
+            element: (
+              <Suspense fallback={<PageLoadingFallback />}>
+                <ProgramPage />
               </Suspense>
             ),
           },

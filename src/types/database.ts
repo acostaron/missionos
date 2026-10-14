@@ -1,4 +1,4 @@
-export type Json =
+﻿export type Json =
   | string
   | number
   | boolean
@@ -1082,6 +1082,8 @@ export type Database = {
           id: string
           location_text: string | null
           organization_id: string
+          program_run_id: string | null
+          session_number: number | null
           starts_at: string
           title: string
           updated_at: string
@@ -1103,6 +1105,8 @@ export type Database = {
           id?: string
           location_text?: string | null
           organization_id: string
+          program_run_id?: string | null
+          session_number?: number | null
           starts_at: string
           title: string
           updated_at?: string
@@ -1124,6 +1128,8 @@ export type Database = {
           id?: string
           location_text?: string | null
           organization_id?: string
+          program_run_id?: string | null
+          session_number?: number | null
           starts_at?: string
           title?: string
           updated_at?: string
@@ -1170,6 +1176,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_program_run_id_fkey"
+            columns: ["program_run_id"]
+            isOneToOne: false
+            referencedRelation: "program_runs"
             referencedColumns: ["id"]
           },
           {
@@ -6184,6 +6197,262 @@ export type Database = {
         }
         Relationships: []
       }
+      program_participant_attendance: {
+        Row: {
+          event_id: string
+          id: string
+          organization_id: string
+          participant_id: string
+          recorded_at: string
+          recorded_by_profile_id: string
+          removed_at: string | null
+          removed_by_profile_id: string | null
+        }
+        Insert: {
+          event_id: string
+          id?: string
+          organization_id: string
+          participant_id: string
+          recorded_at?: string
+          recorded_by_profile_id: string
+          removed_at?: string | null
+          removed_by_profile_id?: string | null
+        }
+        Update: {
+          event_id?: string
+          id?: string
+          organization_id?: string
+          participant_id?: string
+          recorded_at?: string
+          recorded_by_profile_id?: string
+          removed_at?: string | null
+          removed_by_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_participant_attendance_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_participant_attendance_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_participant_attendance_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "program_participants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_participant_attendance_recorded_by_profile_id_fkey"
+            columns: ["recorded_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_participant_attendance_removed_by_profile_id_fkey"
+            columns: ["removed_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      program_participants: {
+        Row: {
+          created_at: string
+          created_by_profile_id: string
+          email: string | null
+          first_name: string | null
+          id: string
+          invited_by_member_id: string | null
+          last_name: string | null
+          member_id: string | null
+          notes: string | null
+          organization_id: string
+          participant_status: string
+          phone: string | null
+          program_run_id: string
+          updated_at: string
+          updated_by_profile_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by_profile_id: string
+          email?: string | null
+          first_name?: string | null
+          id?: string
+          invited_by_member_id?: string | null
+          last_name?: string | null
+          member_id?: string | null
+          notes?: string | null
+          organization_id: string
+          participant_status?: string
+          phone?: string | null
+          program_run_id: string
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by_profile_id?: string
+          email?: string | null
+          first_name?: string | null
+          id?: string
+          invited_by_member_id?: string | null
+          last_name?: string | null
+          member_id?: string | null
+          notes?: string | null
+          organization_id?: string
+          participant_status?: string
+          phone?: string | null
+          program_run_id?: string
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_participants_created_by_profile_id_fkey"
+            columns: ["created_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_participants_invited_by_member_id_fkey"
+            columns: ["invited_by_member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_participants_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_participants_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_participants_program_run_id_fkey"
+            columns: ["program_run_id"]
+            isOneToOne: false
+            referencedRelation: "program_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_participants_updated_by_profile_id_fkey"
+            columns: ["updated_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      program_runs: {
+        Row: {
+          audience_node_id: string | null
+          cancel_reason: string | null
+          chapter_node_id: string | null
+          created_at: string
+          created_by_profile_id: string
+          description: string | null
+          id: string
+          organization_id: string
+          program_code: string
+          run_status: string
+          section_node_ids: string[]
+          session_count: number
+          title: string
+          updated_at: string
+          updated_by_profile_id: string | null
+        }
+        Insert: {
+          audience_node_id?: string | null
+          cancel_reason?: string | null
+          chapter_node_id?: string | null
+          created_at?: string
+          created_by_profile_id: string
+          description?: string | null
+          id?: string
+          organization_id: string
+          program_code: string
+          run_status?: string
+          section_node_ids?: string[]
+          session_count: number
+          title: string
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Update: {
+          audience_node_id?: string | null
+          cancel_reason?: string | null
+          chapter_node_id?: string | null
+          created_at?: string
+          created_by_profile_id?: string
+          description?: string | null
+          id?: string
+          organization_id?: string
+          program_code?: string
+          run_status?: string
+          section_node_ids?: string[]
+          session_count?: number
+          title?: string
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_runs_audience_node_id_fkey"
+            columns: ["audience_node_id"]
+            isOneToOne: false
+            referencedRelation: "governance_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_runs_chapter_node_id_fkey"
+            columns: ["chapter_node_id"]
+            isOneToOne: false
+            referencedRelation: "governance_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_runs_created_by_profile_id_fkey"
+            columns: ["created_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_runs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_runs_updated_by_profile_id_fkey"
+            columns: ["updated_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       role_permissions: {
         Row: {
           app_role_id: string
@@ -7031,6 +7300,31 @@ export type Database = {
         }
         Returns: Json
       }
+      add_program_participant: {
+        Args: {
+          p_email?: string
+          p_first_name?: string
+          p_invited_by_member_id?: string
+          p_last_name?: string
+          p_member_id?: string
+          p_notes?: string
+          p_organization_id: string
+          p_phone?: string
+          p_run_id: string
+        }
+        Returns: Json
+      }
+      add_program_session: {
+        Args: {
+          p_ends_at?: string
+          p_location_text?: string
+          p_organization_id: string
+          p_run_id: string
+          p_session_number: number
+          p_starts_at: string
+        }
+        Returns: Json
+      }
       appoint_area_coordinator: {
         Args: {
           p_effective_from?: string
@@ -7387,6 +7681,18 @@ export type Database = {
         }
         Returns: Json
       }
+      create_program_run: {
+        Args: {
+          p_chapter_code?: string
+          p_description?: string
+          p_organization_id: string
+          p_program_code: string
+          p_section_codes?: string[]
+          p_session_count?: number
+          p_title: string
+        }
+        Returns: Json
+      }
       create_sub_area_sections: {
         Args: { p_organization_id: string; p_sub_area_node_id: string }
         Returns: Json
@@ -7692,6 +7998,14 @@ export type Database = {
         }
         Returns: Json
       }
+      get_program_run: {
+        Args: { p_organization_id: string; p_run_id: string }
+        Returns: Json
+      }
+      get_program_session_roster: {
+        Args: { p_event_id: string; p_organization_id: string }
+        Returns: Json
+      }
       get_sections_overview: {
         Args: { p_organization_id: string }
         Returns: Json
@@ -7753,6 +8067,10 @@ export type Database = {
       }
       list_events: {
         Args: { p_from: string; p_organization_id: string; p_to: string }
+        Returns: Json
+      }
+      list_program_runs: {
+        Args: { p_include_closed?: boolean; p_organization_id: string }
         Returns: Json
       }
       lookup_auth_user_for_invitation: {
@@ -8082,6 +8400,32 @@ export type Database = {
         }
         Returns: Json
       }
+      set_program_participant_attendance: {
+        Args: {
+          p_event_id: string
+          p_organization_id: string
+          p_participant_ids: string[]
+          p_present?: boolean
+        }
+        Returns: Json
+      }
+      set_program_participant_status: {
+        Args: {
+          p_organization_id: string
+          p_participant_id: string
+          p_status: string
+        }
+        Returns: Json
+      }
+      set_program_run_status: {
+        Args: {
+          p_organization_id: string
+          p_reason?: string
+          p_run_id: string
+          p_status: string
+        }
+        Returns: Json
+      }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
       skip_household_topic: {
@@ -8193,6 +8537,38 @@ export type Database = {
           p_preferred_language_code?: string
           p_preferred_name?: string
           p_sex?: string
+        }
+        Returns: Json
+      }
+      update_program_participant: {
+        Args: {
+          p_email?: string
+          p_first_name?: string
+          p_invited_by_member_id?: string
+          p_last_name?: string
+          p_notes?: string
+          p_organization_id: string
+          p_participant_id: string
+          p_phone?: string
+        }
+        Returns: Json
+      }
+      update_program_run: {
+        Args: {
+          p_description?: string
+          p_organization_id: string
+          p_run_id: string
+          p_title: string
+        }
+        Returns: Json
+      }
+      update_program_session: {
+        Args: {
+          p_ends_at?: string
+          p_event_id: string
+          p_location_text?: string
+          p_organization_id: string
+          p_starts_at: string
         }
         Returns: Json
       }

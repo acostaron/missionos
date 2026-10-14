@@ -1,4 +1,4 @@
-import { Home, Users, Layers, CalendarDays, House, HeartHandshake, BookOpen } from 'lucide-react';
+import { Home, Users, Layers, CalendarDays, GraduationCap, House, HeartHandshake, BookOpen } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { Permissions } from '../../types/permissions';
 import type { PermissionCode } from '../../types/permissions';
@@ -43,6 +43,14 @@ export const NAV_ITEMS: NavItem[] = [
     shortLabel: 'Calendar',
     to: '/app/calendar',
     icon: CalendarDays,
+    permission: Permissions.EventsView,
+  },
+  {
+    id: 'nav-programs',
+    label: 'Programs',
+    shortLabel: 'Programs',
+    to: '/app/programs',
+    icon: GraduationCap,
     permission: Permissions.EventsView,
   },
   {

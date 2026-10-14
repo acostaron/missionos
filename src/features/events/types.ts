@@ -27,10 +27,17 @@ export interface EventSummary {
   formation_talk_id: string | null;
   formation_talk_title: string | null;
   formation_posted_at: string | null;
+  program_run_id?: string | null;
+  program_code?: string | null;
+  program_title?: string | null;
+  session_number?: number | null;
+  session_count?: number | null;
+  is_program_session?: boolean;
   expected_count: number;
   present_count: number;
   present_expected_count: number;
   guest_count: number;
+  team_count?: number;
   is_greeter: boolean;
   can_record: boolean;
   can_manage: boolean;
