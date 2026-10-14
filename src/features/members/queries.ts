@@ -315,6 +315,73 @@ export function useMemberPhotoPath(
   });
 }
 
+export const memberPhotoPathsItemSchema = z.object({
+  member_id: z.string(),
+  photo_path: z.string(),
+});
+export const memberPhotoPathsSchema = z.array(memberPhotoPathsItemSchema);
+
+export function useMemberPhotoUrls(
+  organizationId: string | null,
+  memberIds: string[],
+) {
+  const sortedIdsJoined = [...memberIds].sort().join(',');
+
+  return useQuery({
+    queryKey: ['members', 'photo-urls', organizationId, sortedIdsJoined] as const,
+    queryFn: async (): Promise<Map<string, string>> => {
+      if (!organizationId || memberIds.length === 0) return new Map();
+
+      try {
+        const { data, error } = await supabase.rpc('get_member_photo_paths', {
+          p_organization_id: organizationId,
+          p_member_ids: memberIds,
+        });
+
+        if (error) {
+          console.warn('Failed to fetch member photo paths:', error);
+          return new Map();
+        }
+
+        const items = memberPhotoPathsSchema.parse(data || []);
+        if (items.length === 0) return new Map();
+
+        const paths = items.map((i) => i.photo_path);
+        const { data: signedData, error: storageError } = await supabase.storage
+          .from('member-photos')
+          .createSignedUrls(paths, 3600);
+
+        if (storageError || !signedData) {
+          console.warn('Failed to create signed photo URLs:', storageError);
+          return new Map();
+        }
+
+        const pathToUrl = new Map<string, string>();
+        for (const item of signedData) {
+          if (item.signedUrl && item.path) {
+            pathToUrl.set(item.path, item.signedUrl);
+          }
+        }
+
+        const resultMap = new Map<string, string>();
+        for (const item of items) {
+          const url = pathToUrl.get(item.photo_path);
+          if (url) {
+            resultMap.set(item.member_id, url);
+          }
+        }
+
+        return resultMap;
+      } catch (err) {
+        console.warn('Error loading member photo URLs:', err);
+        return new Map();
+      }
+    },
+    enabled: !!organizationId && memberIds.length > 0,
+    staleTime: 50 * 60 * 1000,
+  });
+}
+
 export {
   setMemberNumber,
   useSetMemberNumber,

@@ -1,10 +1,10 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { KeyRound } from 'lucide-react';
 import { useOrganizationContext } from '../hooks/use-organization-context';
 import { usePermissions } from '../hooks/use-permissions';
 import { Permissions } from '../types/permissions';
-import { useSearchMembers } from '../features/members/queries';
+import { useSearchMembers, useMemberPhotoUrls } from '../features/members/queries';
 import type { MemberListItem } from '../features/members/queries';
 import { CreateFamilyModal } from '../features/families/components/CreateFamilyModal';
 
@@ -91,13 +91,21 @@ function StatusBadge({ status }: { status: MemberListItem['membership_status'] }
   );
 }
 
-function MemberRow({ member }: { member: MemberListItem }) {
+function MemberRow({ member, photoUrl }: { member: MemberListItem; photoUrl?: string }) {
+  const [imgError, setImgError] = useState(false);
+
   const initials = member.display_name
     .split(' ')
     .map((w: string) => w[0])
     .slice(0, 2)
     .join('')
     .toUpperCase();
+
+  const firstWord = member.display_name.trim().split(/\s+/)[0] || '';
+  const showPreferred = Boolean(
+    member.preferred_name &&
+    member.preferred_name.trim().toLowerCase() !== firstWord.toLowerCase()
+  );
 
   return (
     <Link
@@ -106,8 +114,18 @@ function MemberRow({ member }: { member: MemberListItem }) {
       className="group flex items-center gap-3 rounded-lg border border-line bg-surface-muted px-3 py-3 sm:gap-4 sm:px-4 transition-all hover:border-primary-blue hover:bg-surface-muted"
     >
       {/* Avatar */}
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-navy-50 text-sm font-semibold text-primary-blue">
-        {initials}
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-navy-50 text-sm font-semibold text-primary-blue overflow-hidden">
+        {photoUrl && !imgError ? (
+          <img
+            src={photoUrl}
+            alt=""
+            className="h-10 w-10 rounded-full object-cover"
+            loading="lazy"
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          initials
+        )}
       </div>
 
       {/* Name + status */}
@@ -115,7 +133,7 @@ function MemberRow({ member }: { member: MemberListItem }) {
         <p className="truncate text-sm font-medium text-ink">
           {member.display_name}
         </p>
-        {member.preferred_name && member.preferred_name !== member.display_name && (
+        {showPreferred && (
           <p className="truncate text-xs text-ink-muted">
             Preferred: {member.preferred_name}
           </p>
@@ -249,6 +267,12 @@ export default function MembersPage() {
     page,
     pageSize: PAGE_SIZE,
   });
+
+  const memberIds = useMemo(
+    () => data?.members.map((m: MemberListItem) => m.id) ?? [],
+    [data?.members]
+  );
+  const { data: photoUrls } = useMemberPhotoUrls(orgId, memberIds);
 
   // -------------------------------------------------------------------------
   // Loading state
@@ -436,7 +460,7 @@ export default function MembersPage() {
 
           <div className="space-y-1.5">
             {data.members.map((m: MemberListItem) => (
-            <MemberRow key={m.id} member={m} />
+              <MemberRow key={m.id} member={m} photoUrl={photoUrls?.get(m.id)} />
             ))}
           </div>
 

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, User, Mail, Phone, Home, Heart, ShieldAlert } from 'lucide-react';
 import { useOrganizationContext } from '../hooks/use-organization-context';
 import {
@@ -25,6 +26,7 @@ import {
 } from '../components/ui';
 
 export default function EditMyProfilePage() {
+  const queryClient = useQueryClient();
   const { activeOrganization, isLoading: isOrgLoading } = useOrganizationContext();
   const orgId = activeOrganization?.id ?? null;
 
@@ -388,6 +390,9 @@ export default function EditMyProfilePage() {
           effectiveMemberId={details.member_id}
           currentPath={details.photo_path}
           memberName={details.display_name}
+          onPhotoChanged={() => {
+            queryClient.invalidateQueries({ queryKey: ['members', 'photo-urls'] });
+          }}
         />
       </Card>
 

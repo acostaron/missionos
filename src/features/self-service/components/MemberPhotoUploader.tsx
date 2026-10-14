@@ -50,6 +50,7 @@ export function MemberPhotoUploader({
 
       queryClient.invalidateQueries({ queryKey: selfServiceKeys.all });
       queryClient.invalidateQueries({ queryKey: ['members'] });
+      queryClient.invalidateQueries({ queryKey: ['members', 'photo-urls'] });
       setSuccessMsg('Photo updated successfully.');
       onPhotoChanged?.(newPath);
     } catch (err) {
@@ -77,6 +78,7 @@ export function MemberPhotoUploader({
 
       queryClient.invalidateQueries({ queryKey: selfServiceKeys.all });
       queryClient.invalidateQueries({ queryKey: ['members'] });
+      queryClient.invalidateQueries({ queryKey: ['members', 'photo-urls'] });
       setSuccessMsg('Photo removed.');
       setIsRemoveModalOpen(false);
       onPhotoChanged?.(null);

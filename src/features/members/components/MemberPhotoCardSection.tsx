@@ -29,6 +29,9 @@ export function MemberPhotoCardSection({
     queryClient.invalidateQueries({
       queryKey: ['members', 'photo-path', organizationId, memberId],
     });
+    queryClient.invalidateQueries({
+      queryKey: ['members', 'photo-urls'],
+    });
   };
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
   const [reissueReason, setReissueReason] = useState('');
