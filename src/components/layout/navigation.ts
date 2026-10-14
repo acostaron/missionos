@@ -1,4 +1,4 @@
-import { Home, Users, Layers, House, HeartHandshake, BookOpen } from 'lucide-react';
+import { Home, Users, Layers, CalendarDays, House, HeartHandshake, BookOpen } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { Permissions } from '../../types/permissions';
 import type { PermissionCode } from '../../types/permissions';
@@ -17,8 +17,7 @@ export type NavItem = {
 
 /**
  * Primary navigation. Only domains with real routes are listed.
- * Reserved (not yet implemented): Events & Mission,
- * Finance, Administration.
+ * Reserved (not yet implemented): Finance, Administration.
  */
 export const NAV_ITEMS: NavItem[] = [
   { id: 'nav-dashboard', label: 'Home', shortLabel: 'Home', to: '/app/dashboard', icon: Home },
@@ -37,6 +36,14 @@ export const NAV_ITEMS: NavItem[] = [
     to: '/app/sections',
     icon: Layers,
     permission: Permissions.MembersRecordsView,
+  },
+  {
+    id: 'nav-calendar',
+    label: 'Calendar',
+    shortLabel: 'Calendar',
+    to: '/app/calendar',
+    icon: CalendarDays,
+    permission: Permissions.EventsView,
   },
   {
     id: 'nav-households',

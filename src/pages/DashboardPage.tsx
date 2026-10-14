@@ -8,6 +8,7 @@ import LeaderHome from '../features/home/components/LeaderHome';
 import MemberHome from '../features/home/components/MemberHome';
 import PendingInvitationNotice from '../features/home/components/PendingInvitationNotice';
 import { ORGANIZATION_ADMINISTRATOR_ROLE_CODE } from '../features/home/role-labels';
+import { EventsGreetingCard } from '../features/events/components/EventsGreetingCard';
 
 /**
  * Home. Capability-driven: users with the existing
@@ -50,6 +51,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <PendingInvitationNotice />
+      <EventsGreetingCard organizationId={organization.id} />
       {hasPermission(Permissions.LeadershipPastoralDashboardView) ? (
         <LeaderHome
           organizationId={organization.id}

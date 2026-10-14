@@ -93,6 +93,11 @@ export const Permissions = {
   FormationRecordsView: 'formation.records.view',
   FormationRecordsRecord: 'formation.records.record',
   FormationRecordsCorrect: 'formation.records.correct',
+
+  // Pass 7: Event Calendar
+  EventsView: 'events.view',
+  EventsManage: 'events.manage',
+  EventsAttendanceRecord: 'events.attendance.record',
 } as const;
 
 export type PermissionCode = typeof Permissions[keyof typeof Permissions];

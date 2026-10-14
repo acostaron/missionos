@@ -20,6 +20,9 @@ import {
   FormationProgramDetailPage,
   SectionsPage,
   PlaceMembersPage,
+  CalendarPage,
+  EventPage,
+  EventAttendancePage,
 } from './lazy-pages';
 
 
@@ -141,6 +144,30 @@ export const router = createBrowserRouter([
             element: (
               <Suspense fallback={<PageLoadingFallback />}>
                 <SectionsPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'calendar',
+            element: (
+              <Suspense fallback={<PageLoadingFallback />}>
+                <CalendarPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'calendar/:eventId',
+            element: (
+              <Suspense fallback={<PageLoadingFallback />}>
+                <EventPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'calendar/:eventId/attendance',
+            element: (
+              <Suspense fallback={<PageLoadingFallback />}>
+                <EventAttendancePage />
               </Suspense>
             ),
           },
