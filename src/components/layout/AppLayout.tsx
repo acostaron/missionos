@@ -72,7 +72,7 @@ export default function AppLayout() {
       />
       <div className="flex min-w-0 flex-1 flex-col">
         <AppHeader email={user?.email} organizationName={orgName} onSignOut={signOut} />
-        <main className="w-full flex-1 px-4 py-6 pb-24 sm:px-6 sm:py-8 md:pb-8 lg:px-8">
+        <main className="min-w-0 w-full flex-1 overflow-x-clip px-4 py-6 pb-24 sm:px-6 sm:py-8 md:pb-8 lg:px-8">
           <div className="mx-auto w-full max-w-7xl">
             <Outlet />
           </div>

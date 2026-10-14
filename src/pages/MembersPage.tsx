@@ -103,7 +103,7 @@ function MemberRow({ member }: { member: MemberListItem }) {
     <Link
       to={`/app/members/${member.id}`}
       id={`member-row-${member.id}`}
-      className="group flex items-center gap-4 rounded-lg border border-line bg-surface-muted px-4 py-3 transition-all hover:border-primary-blue hover:bg-surface-muted"
+      className="group flex items-center gap-3 rounded-lg border border-line bg-surface-muted px-3 py-3 sm:gap-4 sm:px-4 transition-all hover:border-primary-blue hover:bg-surface-muted"
     >
       {/* Avatar */}
       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-navy-50 text-sm font-semibold text-primary-blue">
@@ -112,7 +112,7 @@ function MemberRow({ member }: { member: MemberListItem }) {
 
       {/* Name + status */}
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-ink group-hover:text-white">
+        <p className="truncate text-sm font-medium text-ink">
           {member.display_name}
         </p>
         {member.preferred_name && member.preferred_name !== member.display_name && (
@@ -120,17 +120,24 @@ function MemberRow({ member }: { member: MemberListItem }) {
             Preferred: {member.preferred_name}
           </p>
         )}
+        {/* Mobile secondary line */}
+        <div className="mt-1 flex flex-wrap items-center gap-2 sm:hidden">
+          {member.member_number !== null ? (
+            <span className="font-mono text-xs text-ink-secondary">{member.member_number}</span>
+          ) : null}
+          <StatusBadge status={member.membership_status} />
+        </div>
       </div>
 
       {/* Member number — only when permission allows */}
-      <div className="w-28 shrink-0 text-right">
+      <div className="hidden w-28 shrink-0 text-right sm:block">
         {member.member_number !== null ? (
           <span className="font-mono text-xs text-ink-secondary">{member.member_number}</span>
         ) : null}
       </div>
 
       {/* Membership status */}
-      <div className="w-28 shrink-0 text-right">
+      <div className="hidden w-28 shrink-0 text-right sm:block">
         <StatusBadge status={member.membership_status} />
       </div>
 
@@ -279,12 +286,12 @@ export default function MembersPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           {canIssueCodes && (
             <Link
               to="/app/members/logins"
               id="member-logins-button"
-              className="inline-flex items-center justify-center gap-2 rounded-lg border border-line bg-surface-muted px-4 py-2 text-sm font-medium text-ink shadow-sm hover:bg-line hover:text-white focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 focus:ring-offset-slate-900 transition-colors"
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-line bg-surface-muted px-3 py-2 sm:px-4 text-sm font-medium text-ink shadow-sm hover:bg-line focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 focus:ring-offset-slate-900 transition-colors"
             >
               <KeyRound className="h-4 w-4 text-ink-muted" />
               Member logins
@@ -295,7 +302,7 @@ export default function MembersPage() {
             <Link
               to="/app/members/place"
               id="place-members-button"
-              className="inline-flex items-center justify-center gap-2 rounded-lg border border-line bg-surface-muted px-4 py-2 text-sm font-medium text-ink shadow-sm hover:bg-line hover:text-white focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 focus:ring-offset-slate-900 transition-colors"
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-line bg-surface-muted px-3 py-2 sm:px-4 text-sm font-medium text-ink shadow-sm hover:bg-line focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 focus:ring-offset-slate-900 transition-colors"
             >
               <svg
                 className="h-4 w-4 text-ink-muted"
@@ -315,7 +322,7 @@ export default function MembersPage() {
               type="button"
               onClick={() => setIsCreateFamilyOpen(true)}
               id="create-family-button"
-              className="inline-flex items-center justify-center gap-2 rounded-lg border border-line bg-surface-muted px-4 py-2 text-sm font-medium text-ink shadow-sm hover:bg-line hover:text-white focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 focus:ring-offset-slate-900 transition-colors"
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-line bg-surface-muted px-3 py-2 sm:px-4 text-sm font-medium text-ink shadow-sm hover:bg-line focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 focus:ring-offset-slate-900 transition-colors"
             >
               <svg
                 className="h-4 w-4 text-ink-muted"
@@ -334,7 +341,7 @@ export default function MembersPage() {
             <Link
               to="/app/members/new"
               id="add-member-button"
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 focus:ring-offset-slate-900 transition-colors"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-3 py-2 sm:px-4 text-sm font-medium text-white shadow-sm hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 focus:ring-offset-slate-900 transition-colors"
             >
               <svg
                 className="h-4 w-4"
@@ -419,7 +426,7 @@ export default function MembersPage() {
       {data && data.members.length > 0 && (
         <>
           {/* Column headers */}
-          <div className="flex items-center gap-4 px-4 text-xs font-medium uppercase tracking-wider text-ink-muted">
+          <div className="hidden sm:flex items-center gap-4 px-4 text-xs font-medium uppercase tracking-wider text-ink-muted">
             <div className="w-10 shrink-0" aria-hidden />
             <div className="flex-1">Name</div>
             <div className="w-28 shrink-0 text-right">Member #</div>
