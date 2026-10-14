@@ -64,6 +64,15 @@ export function AppProviders({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     try {
+      try {
+        Object.keys(localStorage).forEach((key) => {
+          if (key.startsWith('missionos.myCard.')) {
+            localStorage.removeItem(key);
+          }
+        });
+      } catch {
+        // ignore localStorage errors
+      }
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
     } catch (e) {

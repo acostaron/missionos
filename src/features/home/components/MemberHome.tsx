@@ -1,4 +1,4 @@
-import { House, User } from 'lucide-react';
+import { CalendarDays, House, QrCode, User } from 'lucide-react';
 import { Card, EmptyState, Skeleton } from '../../../components/ui';
 import { useMyMemberContext } from '../../self-service/api';
 import { formatMeetingSchedule } from '../../self-service/formatters';
@@ -40,6 +40,18 @@ export default function MemberHome({ organizationId, organizationName, firstName
       label: 'View My Profile',
       to: '/app/profile',
       icon: <User />,
+    });
+    actions.push({
+      key: 'my-card',
+      label: 'My MFC ID',
+      to: '/app/my-card',
+      icon: <QrCode />,
+    });
+    actions.push({
+      key: 'my-events',
+      label: 'My events',
+      to: '/app/my-events',
+      icon: <CalendarDays />,
     });
   }
   if (household && hasPermission(Permissions.HouseholdsRecordsView)) {

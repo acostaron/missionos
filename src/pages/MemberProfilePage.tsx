@@ -18,6 +18,7 @@ import { SetMemberNumberModal } from '../features/members/components/SetMemberNu
 import { MemberStatusTimeline } from '../features/members/components/MemberStatusTimeline';
 import { MemberFamilyCard } from '../features/members/components/MemberFamilyCard';
 import { MemberAccountCard } from '../features/members/components/MemberAccountCard';
+import { MemberPhotoCardSection } from '../features/members/components/MemberPhotoCardSection';
 import { MemberHouseholdCard } from '../features/households/components/MemberHouseholdCard';
 import { MemberFormationCard } from '../features/formation/components/MemberFormationCard';
 import { useMemberSection } from '../features/sections/queries';
@@ -1091,6 +1092,14 @@ export default function MemberProfilePage() {
         canProvision={canProvisionAccount}
         onSuccessToast={triggerToast}
       />
+      {canEditProfile && orgId && (
+        <MemberPhotoCardSection
+          organizationId={orgId}
+          memberId={profile.id}
+          memberName={profile.display_name}
+          initialPhotoPath={null}
+        />
+      )}
       <IdentifiersSection identifiers={profile.identifiers} />
       <ContactsSection
         contacts={profile.contacts}

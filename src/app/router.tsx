@@ -26,6 +26,9 @@ import {
   ProgramPage,
   MemberLoginsPage,
   ClaimAccountPage,
+  EditMyProfilePage,
+  MyCardPage,
+  MyEventsPage,
 } from './lazy-pages';
 
 
@@ -255,6 +258,30 @@ export const router = createBrowserRouter([
             element: (
               <Suspense fallback={<PageLoadingFallback />}>
                 <MyProfilePage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'profile/edit',
+            element: (
+              <Suspense fallback={<PageLoadingFallback />}>
+                <EditMyProfilePage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'my-card',
+            element: (
+              <Suspense fallback={<PageLoadingFallback />}>
+                <MyCardPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'my-events',
+            element: (
+              <Suspense fallback={<PageLoadingFallback />}>
+                <MyEventsPage />
               </Suspense>
             ),
           },

@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { CircleUser, LogOut } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { CalendarDays, CircleUser, LogOut, QrCode, User } from 'lucide-react';
+import { usePermissions } from '../../hooks/use-permissions';
+import { Permissions } from '../../types/permissions';
 
 type Props = {
   email?: string | null;
@@ -11,6 +14,8 @@ type Props = {
 export default function UserMenu({ email, organizationName, onSignOut }: Props) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const { hasPermission } = usePermissions();
+  const canSelfService = hasPermission(Permissions.MembersSelfServiceView);
 
   useEffect(() => {
     if (!open) return;
@@ -51,6 +56,34 @@ export default function UserMenu({ email, organizationName, onSignOut }: Props) 
               <div className="truncate text-xs text-ink-muted">{organizationName}</div>
             )}
           </div>
+          {canSelfService && (
+            <div className="border-b border-line pb-1 mb-1">
+              <Link
+                to="/app/profile"
+                role="menuitem"
+                onClick={() => setOpen(false)}
+                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-ink hover:bg-canvas focus-visible:outline-2 focus-visible:outline-focus"
+              >
+                <User size={16} aria-hidden="true" /> My profile
+              </Link>
+              <Link
+                to="/app/my-card"
+                role="menuitem"
+                onClick={() => setOpen(false)}
+                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-ink hover:bg-canvas focus-visible:outline-2 focus-visible:outline-focus"
+              >
+                <QrCode size={16} aria-hidden="true" /> My MFC ID
+              </Link>
+              <Link
+                to="/app/my-events"
+                role="menuitem"
+                onClick={() => setOpen(false)}
+                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-ink hover:bg-canvas focus-visible:outline-2 focus-visible:outline-focus"
+              >
+                <CalendarDays size={16} aria-hidden="true" /> My events
+              </Link>
+            </div>
+          )}
           <button
             type="button"
             role="menuitem"

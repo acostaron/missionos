@@ -4,6 +4,8 @@ import { useOrganizationContext } from '../hooks/use-organization-context';
 import { usePermissions } from '../hooks/use-permissions';
 import { Permissions } from '../types/permissions';
 import { useMyMemberProfile } from '../features/self-service/api';
+import { useMyProfileDetails } from '../features/self-service/portal-api';
+import { MemberAvatar } from '../features/self-service/components/MemberAvatar';
 import { formatMeetingSchedule } from '../features/self-service/formatters';
 import { MyFormationCard } from '../features/formation/components/MyFormationCard';
 import { Alert, Badge, Card, EmptyState, PageHeader, Skeleton } from '../components/ui';
@@ -61,6 +63,7 @@ export default function MyProfilePage() {
 
   const orgId = activeOrganization?.id ?? null;
   const { data, isLoading, error } = useMyMemberProfile(orgId, canSelfService);
+  const { data: detailsData } = useMyProfileDetails(orgId, canSelfService);
 
   const errorCode = (error as { code?: string } | null)?.code;
   const errorMessage = (error as { message?: string } | null)?.message ?? '';
@@ -171,6 +174,47 @@ export default function MyProfilePage() {
         </div>
       ) : (
         <div className="space-y-6">
+          {/* Quick Actions & Photo Header */}
+          <Card padding="comfortable">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-4">
+                <MemberAvatar
+                  path={detailsData?.photo_path ?? null}
+                  name={detailsData?.display_name ?? data.member.display_name}
+                  size="lg"
+                />
+                <div>
+                  <h2 className="text-lg font-bold text-ink">
+                    {detailsData?.display_name ?? data.member.display_name}
+                  </h2>
+                  <p className="text-small text-ink-muted">
+                    {data.member.member_number ? `Envelope No. ${data.member.member_number}` : 'Envelope No. not yet assigned'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <Link
+                  to="/app/profile/edit"
+                  className="inline-flex h-9 items-center justify-center rounded-control bg-primary-blue px-3.5 text-small font-medium text-white hover:bg-navy-700 transition-colors shadow-sm"
+                >
+                  Edit my profile
+                </Link>
+                <Link
+                  to="/app/my-card"
+                  className="inline-flex h-9 items-center justify-center rounded-control border border-line-strong bg-surface px-3.5 text-small font-medium text-ink hover:bg-surface-muted transition-colors shadow-sm"
+                >
+                  My MFC ID
+                </Link>
+                <Link
+                  to="/app/my-events"
+                  className="inline-flex h-9 items-center justify-center rounded-control border border-line-strong bg-surface px-3.5 text-small font-medium text-ink hover:bg-surface-muted transition-colors shadow-sm"
+                >
+                  My events
+                </Link>
+              </div>
+            </div>
+          </Card>
+
           {/* Section A: Personal Information */}
           <Card padding="comfortable">
             <div className="flex items-center justify-between border-b border-line pb-4">
@@ -219,6 +263,22 @@ export default function MyProfilePage() {
                   <dt className="text-caption font-medium text-ink-muted">Preferred Name</dt>
                   <dd className="mt-1 text-small text-ink">
                     {data.details.preferred_name}
+                  </dd>
+                </div>
+              )}
+
+              <div>
+                <dt className="text-caption font-medium text-ink-muted">Birth Date</dt>
+                <dd className="mt-1 text-small text-ink">
+                  {formatDate(detailsData?.birth_date) || 'Not provided'}
+                </dd>
+              </div>
+
+              {detailsData?.spouse && (
+                <div>
+                  <dt className="text-caption font-medium text-ink-muted">Wedding Date</dt>
+                  <dd className="mt-1 text-small text-ink">
+                    {formatDate(detailsData.spouse.wedding_date) || 'Not provided'}
                   </dd>
                 </div>
               )}
