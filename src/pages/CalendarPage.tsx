@@ -343,9 +343,13 @@ export default function CalendarPage() {
                             ? 'bg-danger-50 text-danger-700 line-through'
                             : evt.event_type === 'assembly'
                               ? 'bg-navy-50 text-navy-800'
-                              : evt.event_type === 'formation_talk'
-                                ? 'bg-success-50 text-success-800'
-                                : 'bg-surface-muted text-ink'
+                              : evt.event_type === 'chapter_assembly'
+                                ? 'bg-warning-50 text-warning-800'
+                                : evt.event_type === 'section_assembly'
+                                  ? 'bg-surface-muted text-ink'
+                                  : evt.event_type === 'formation_talk'
+                                    ? 'bg-success-50 text-success-800'
+                                    : 'bg-surface-muted text-ink'
                         }`}
                         title={`${formatNyTime(evt.starts_at)} - ${evt.title}`}
                       >
@@ -407,7 +411,18 @@ export default function CalendarPage() {
                               <span>· {evt.location_text}</span>
                             )}
                             {evt.audience_name && (
-                              <span>· {evt.audience_name}</span>
+                              <span>
+                                ·{' '}
+                                {evt.audience_type === 'chapter'
+                                  ? (evt.audience_name.toLowerCase().startsWith('chapter ')
+                                      ? evt.audience_name
+                                      : `Chapter ${evt.audience_name}`)
+                                  : evt.audience_type === 'section'
+                                    ? (evt.audience_name.toLowerCase().startsWith('section ')
+                                        ? evt.audience_name
+                                        : `Section ${evt.audience_name}`)
+                                    : evt.audience_name}
+                              </span>
                             )}
                           </div>
                         </div>

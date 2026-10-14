@@ -7640,6 +7640,10 @@ export type Database = {
           status_id: string
         }[]
       }
+      get_my_event_access: {
+        Args: { p_organization_id: string }
+        Returns: Json
+      }
       get_my_formation_transcript: {
         Args: { p_organization_id?: string }
         Returns: Json
@@ -7737,6 +7741,10 @@ export type Database = {
           p_verification_method: string
           p_verification_summary?: string
         }
+        Returns: Json
+      }
+      list_event_audience_options: {
+        Args: { p_organization_id: string }
         Returns: Json
       }
       list_event_formation_talks: {

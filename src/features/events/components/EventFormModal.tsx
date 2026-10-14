@@ -1,4 +1,4 @@
-import { useState, useEffect, useId } from 'react';
+import { useState, useEffect, useId, useMemo } from 'react';
 import {
   Modal,
   Button,
@@ -8,8 +8,13 @@ import {
   Textarea,
   Alert,
 } from '../../../components/ui';
-import { AUDIENCE_OPTIONS, EVENT_TYPE_LABELS } from '../labels';
-import { useCreateEvent, useEventFormationTalks, useUpdateEvent } from '../queries';
+import { EVENT_TYPE_LABELS } from '../labels';
+import {
+  useCreateEvent,
+  useEventAudienceOptions,
+  useEventFormationTalks,
+  useUpdateEvent,
+} from '../queries';
 import { getEventErrorMessage } from '../error-message';
 import { getTodayNyDate, isoToNyLocal, nyLocalToIso } from '../../../lib/ny-time';
 import type { EventDetail, EventSummary, EventType } from '../types';
@@ -32,6 +37,7 @@ export function EventFormModal({
 }: EventFormModalProps) {
   const isEditing = !!event;
   const { data: formationTalks = [] } = useEventFormationTalks(organizationId, open);
+  const { data: audienceData } = useEventAudienceOptions(organizationId, open);
 
   const [eventType, setEventType] = useState<EventType>('assembly');
   const [title, setTitle] = useState('');
@@ -58,6 +64,21 @@ export function EventFormModal({
   const talkId = useId();
   const descriptionId = useId();
 
+  // Categorize audience options
+  const areaOptions = useMemo(
+    () => audienceData?.options.filter((o) => o.type === 'area_state') ?? [],
+    [audienceData?.options]
+  );
+  const chapterOptions = useMemo(
+    () => audienceData?.options.filter((o) => o.type === 'chapter') ?? [],
+    [audienceData?.options]
+  );
+  const sectionOptions = useMemo(
+    () => audienceData?.options.filter((o) => o.type === 'section') ?? [],
+    [audienceData?.options]
+  );
+  const allowAllMembers = audienceData?.allow_all_members ?? false;
+
   // Reset or initialize form fields when opened or event changes
   useEffect(() => {
     if (!open) {
@@ -75,7 +96,7 @@ export function EventFormModal({
       setStartTime(startNy.time);
       setEndTime(endNy ? endNy.time : '');
       setLocationText(event.location_text || '');
-      setAudienceCode(event.audience_code ?? 'mfc_ny');
+      setAudienceCode(event.audience_code ?? '');
       setFormationTalkId(event.formation_talk_id || '');
       setDescription(event.description || '');
       setErrorMessage(null);
@@ -93,12 +114,71 @@ export function EventFormModal({
     }
   }, [open, event]);
 
+  // Ensure valid audience selection when audience data arrives in create mode
+  useEffect(() => {
+    if (!open || isEditing || !audienceData) return;
+    if (eventType === 'assembly') {
+      const hasMfcNy = areaOptions.some((a) => a.code === 'mfc_ny');
+      if (hasMfcNy) {
+        if (!audienceCode || !areaOptions.some((a) => a.code === audienceCode)) {
+          setAudienceCode('mfc_ny');
+        }
+      } else if (areaOptions.length > 0) {
+        if (!areaOptions.some((a) => a.code === audienceCode)) {
+          setAudienceCode(areaOptions[0].code);
+        }
+      }
+    }
+  }, [open, isEditing, audienceData, eventType, areaOptions, audienceCode]);
+
   const handleTypeChange = (newType: EventType) => {
     setEventType(newType);
-    if (newType === 'assembly' && (!title.trim() || title === 'Teaching' || title === 'Course Talk')) {
-      setTitle('Monthly Assembly');
-    } else if (newType !== 'assembly' && title === 'Monthly Assembly') {
+
+    if (newType === 'chapter_assembly') {
+      // Pick first chapter option if current is not a chapter
+      const currentIsChapter = chapterOptions.some((c) => c.code === audienceCode);
+      if (!currentIsChapter && chapterOptions.length > 0) {
+        setAudienceCode(chapterOptions[0].code);
+      }
+      if (!title.trim() || title === 'Monthly Assembly' || title.endsWith(' Assembly')) {
+        setTitle('Chapter Assembly');
+      }
+    } else if (newType === 'section_assembly') {
+      // Pick first section option if current is not a section
+      const currentIsSection = sectionOptions.some((s) => s.code === audienceCode);
+      const chosenSection = currentIsSection
+        ? sectionOptions.find((s) => s.code === audienceCode)
+        : sectionOptions[0];
+
+      if (!currentIsSection && chosenSection) {
+        setAudienceCode(chosenSection.code);
+      }
+      const sectionName = chosenSection ? chosenSection.name : '';
+      if (!title.trim() || title === 'Monthly Assembly' || title === 'Chapter Assembly' || title.endsWith(' Assembly')) {
+        setTitle(sectionName ? `${sectionName} Assembly` : 'Section Assembly');
+      }
+    } else if (newType === 'assembly') {
+      const hasMfcNy = areaOptions.some((a) => a.code === 'mfc_ny');
+      if (hasMfcNy) {
+        setAudienceCode('mfc_ny');
+      } else if (areaOptions.length > 0) {
+        setAudienceCode(areaOptions[0].code);
+      }
+      if (!title.trim() || title === 'Chapter Assembly' || title.endsWith(' Assembly')) {
+        setTitle('Monthly Assembly');
+      }
+    } else if (newType === 'formation_talk') {
       setTitle('');
+    }
+  };
+
+  const handleSectionAudienceChange = (code: string) => {
+    setAudienceCode(code);
+    if (eventType === 'section_assembly') {
+      const sec = sectionOptions.find((s) => s.code === code);
+      if (sec && (!title.trim() || title === 'Section Assembly' || title.endsWith(' Assembly'))) {
+        setTitle(`${sec.name} Assembly`);
+      }
     }
   };
 
@@ -106,10 +186,19 @@ export function EventFormModal({
     e.preventDefault();
     setErrorMessage(null);
 
-    const trimmedTitle = title.trim();
-    if (trimmedTitle.length < 3) {
-      setErrorMessage('Event title must be at least 3 characters.');
-      return;
+    // Pastoral formation talk uses talk's title
+    let resolvedTitle = title.trim();
+    if (eventType === 'formation_talk') {
+      resolvedTitle = '';
+      if (!formationTalkId) {
+        setErrorMessage('Please select a pastoral formation talk.');
+        return;
+      }
+    } else {
+      if (resolvedTitle.length < 3) {
+        setErrorMessage('Event title must be at least 3 characters.');
+        return;
+      }
     }
 
     if (!date) {
@@ -127,8 +216,13 @@ export function EventFormModal({
       return;
     }
 
-    if (eventType === 'formation_talk' && !formationTalkId) {
-      setErrorMessage('Please select a course talk.');
+    if (eventType === 'chapter_assembly' && !audienceCode) {
+      setErrorMessage('Please select a chapter audience.');
+      return;
+    }
+
+    if (eventType === 'section_assembly' && !audienceCode) {
+      setErrorMessage('Please select a section audience.');
       return;
     }
 
@@ -141,7 +235,7 @@ export function EventFormModal({
           organizationId,
           eventId: event.id,
           eventType,
-          title: trimmedTitle,
+          title: resolvedTitle,
           startsAt,
           endsAt,
           locationText: locationText.trim() || null,
@@ -155,7 +249,7 @@ export function EventFormModal({
         const result = await createMutation.mutateAsync({
           organizationId,
           eventType,
-          title: trimmedTitle,
+          title: resolvedTitle,
           startsAt,
           endsAt,
           locationText: locationText.trim() || null,
@@ -179,6 +273,118 @@ export function EventFormModal({
     }
     talksByProgram[t.program_name].push(t);
   }
+
+  // Render Audience select or message based on event type
+  const renderAudienceInput = () => {
+    if (eventType === 'chapter_assembly') {
+      if (chapterOptions.length === 0) {
+        return (
+          <p className="rounded-control border border-line bg-surface-muted p-2.5 text-small text-ink-muted">
+            No chapter audience options are available for your role.
+          </p>
+        );
+      }
+      return (
+        <Select
+          id={audienceId}
+          value={audienceCode}
+          onChange={(e) => setAudienceCode(e.target.value)}
+          disabled={isSubmitting}
+          required
+        >
+          {chapterOptions.map((opt) => (
+            <option key={opt.code} value={opt.code}>
+              {opt.sub_area_name ? `${opt.sub_area_name} · ` : ''}{opt.name}
+            </option>
+          ))}
+        </Select>
+      );
+    }
+
+    if (eventType === 'section_assembly') {
+      if (sectionOptions.length === 0) {
+        return (
+          <p className="rounded-control border border-line bg-surface-muted p-2.5 text-small text-ink-muted">
+            No section audience options are available for your role.
+          </p>
+        );
+      }
+      return (
+        <Select
+          id={audienceId}
+          value={audienceCode}
+          onChange={(e) => handleSectionAudienceChange(e.target.value)}
+          disabled={isSubmitting}
+          required
+        >
+          {sectionOptions.map((opt) => (
+            <option key={opt.code} value={opt.code}>
+              {opt.sub_area_name ? `${opt.sub_area_name} · ` : ''}{opt.name}
+            </option>
+          ))}
+        </Select>
+      );
+    }
+
+    if (eventType === 'assembly') {
+      return (
+        <Select
+          id={audienceId}
+          value={audienceCode}
+          onChange={(e) => setAudienceCode(e.target.value)}
+          disabled={isSubmitting}
+        >
+          {areaOptions.map((opt) => (
+            <option key={opt.code} value={opt.code}>
+              {opt.code === 'mfc_ny' ? 'MFC New York (FMC welcome as guests)' : opt.name}
+            </option>
+          ))}
+        </Select>
+      );
+    }
+
+    // Generic types: teaching, formation_talk, other
+    return (
+      <Select
+        id={audienceId}
+        value={audienceCode}
+        onChange={(e) => setAudienceCode(e.target.value)}
+        disabled={isSubmitting}
+      >
+        {allowAllMembers && <option value="">All members</option>}
+
+        {areaOptions.length > 0 && (
+          <optgroup label="Area">
+            {areaOptions.map((opt) => (
+              <option key={opt.code} value={opt.code}>
+                {opt.code === 'mfc_ny' ? 'MFC New York (FMC welcome as guests)' : opt.name}
+              </option>
+            ))}
+          </optgroup>
+        )}
+
+        {chapterOptions.length > 0 && (
+          <optgroup label="Chapters">
+            {chapterOptions.map((opt) => (
+              <option key={opt.code} value={opt.code}>
+                {opt.sub_area_name ? `${opt.sub_area_name} · ` : ''}{opt.name}
+              </option>
+            ))}
+          </optgroup>
+        )}
+
+        {sectionOptions.length > 0 && (
+          <optgroup label="Sections">
+            {sectionOptions.map((opt) => (
+              <option key={opt.code} value={opt.code}>
+                {opt.sub_area_name ? `${opt.sub_area_name} · ` : ''}{opt.name}
+              </option>
+            ))}
+          </optgroup>
+        )}
+      </Select>
+    );
+  };
 
   return (
     <Modal
@@ -225,14 +431,15 @@ export function EventFormModal({
         </FormField>
 
         {eventType === 'formation_talk' && (
-          <FormField label="Course talk" required>
+          <FormField label="Pastoral Formation Talk" required>
             <Select
               id={talkId}
               value={formationTalkId}
               onChange={(e) => setFormationTalkId(e.target.value)}
               disabled={isSubmitting}
+              required
             >
-              <option value="">Select a course talk...</option>
+              <option value="">Select a talk...</option>
               {Object.entries(talksByProgram).map(([progName, talks]) => (
                 <optgroup key={progName} label={progName}>
                   {talks.map((t) => (
@@ -246,17 +453,20 @@ export function EventFormModal({
           </FormField>
         )}
 
-        <FormField label="Title" required>
-          <Input
-            id={titleId}
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g. Monthly Assembly"
-            disabled={isSubmitting}
-            maxLength={200}
-            required
-          />
-        </FormField>
+        {/* Title is hidden for Pastoral Formation Talk */}
+        {eventType !== 'formation_talk' && (
+          <FormField label="Title" required>
+            <Input
+              id={titleId}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g. Monthly Assembly"
+              disabled={isSubmitting}
+              maxLength={200}
+              required
+            />
+          </FormField>
+        )}
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <FormField label="Date" required>
@@ -303,19 +513,11 @@ export function EventFormModal({
           />
         </FormField>
 
-        <FormField label="Audience">
-          <Select
-            id={audienceId}
-            value={audienceCode}
-            onChange={(e) => setAudienceCode(e.target.value)}
-            disabled={isSubmitting}
-          >
-            {AUDIENCE_OPTIONS.map((opt) => (
-              <option key={opt.code} value={opt.code}>
-                {opt.label}
-              </option>
-            ))}
-          </Select>
+        <FormField
+          label="Audience"
+          required={eventType === 'chapter_assembly' || eventType === 'section_assembly'}
+        >
+          {renderAudienceInput()}
         </FormField>
 
         <FormField label="Description (optional)">

@@ -206,21 +206,11 @@ export default function EventAttendancePage() {
             </span>
           </div>
 
-          {/* Big Counter: Present X · Guests Z */}
+          {/* Counter: Present X of Y · Guests Z */}
           <div className="flex items-baseline justify-between border-t border-line/60 pt-2">
-            <div>
-              <span className="text-h2 font-black tracking-tight text-ink">
-                Present {event.present_count}
-              </span>
-              <span className="ml-2 text-small text-ink-muted">
-                / {event.expected_count} expected
-              </span>
-            </div>
-            {event.guest_count > 0 && (
-              <Badge variant="neutral" className="text-small font-semibold">
-                Guests: {event.guest_count}
-              </Badge>
-            )}
+            <span className="text-h2 font-black tracking-tight text-ink">
+              Present {event.present_count} of {event.expected_count} · Guests {event.guest_count}
+            </span>
           </div>
         </div>
       </div>

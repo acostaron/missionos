@@ -5,7 +5,9 @@ import type {
   EventRosterResponse,
   EventSummary,
   FormationTalkOption,
+  ListEventAudienceOptionsResponse,
   ListEventsResponse,
+  MyEventAccessResponse,
   PostAttendanceToFormationParams,
   PostAttendanceToFormationResult,
   SetEventAttendanceParams,
@@ -154,3 +156,26 @@ export async function listEventFormationTalks(
   if (error) throw error;
   return data as unknown as FormationTalkOption[];
 }
+
+export async function listEventAudienceOptions(
+  organizationId: string
+): Promise<ListEventAudienceOptionsResponse> {
+  const { data, error } = await supabase.rpc('list_event_audience_options', {
+    p_organization_id: organizationId,
+  });
+
+  if (error) throw error;
+  return data as unknown as ListEventAudienceOptionsResponse;
+}
+
+export async function getMyEventAccess(
+  organizationId: string
+): Promise<MyEventAccessResponse> {
+  const { data, error } = await supabase.rpc('get_my_event_access', {
+    p_organization_id: organizationId,
+  });
+
+  if (error) throw error;
+  return data as unknown as MyEventAccessResponse;
+}
+

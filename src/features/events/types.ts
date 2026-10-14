@@ -1,4 +1,11 @@
-export type EventType = 'assembly' | 'teaching' | 'formation_talk' | 'other';
+export type EventType =
+  | 'assembly'
+  | 'chapter_assembly'
+  | 'section_assembly'
+  | 'formation_talk'
+  | 'teaching'
+  | 'other';
+
 export type EventStatus = 'scheduled' | 'held' | 'cancelled';
 
 export interface EventSummary {
@@ -14,6 +21,7 @@ export interface EventSummary {
   audience_node_id: string | null;
   audience_code: string | null;
   audience_name: string;
+  audience_type?: 'area_state' | 'chapter' | 'section' | null;
   formation_program_id: string | null;
   formation_program_name: string | null;
   formation_talk_id: string | null;
@@ -71,6 +79,32 @@ export interface FormationTalkOption {
   sequence_order: number;
   program_id: string;
   program_name: string;
+}
+
+export interface EventAudienceOption {
+  code: string;
+  name: string;
+  type: 'area_state' | 'chapter' | 'section';
+  sub_area_code: string | null;
+  sub_area_name: string | null;
+}
+
+export interface ListEventAudienceOptionsResponse {
+  allow_all_members: boolean;
+  options: EventAudienceOption[];
+}
+
+export interface CoordinatedSection {
+  code: string;
+  name: string;
+  sub_area_code: string | null;
+  sub_area_name: string | null;
+}
+
+export interface MyEventAccessResponse {
+  can_view_calendar: boolean;
+  can_create_events: boolean;
+  coordinated_sections: CoordinatedSection[];
 }
 
 export interface CreateEventParams {

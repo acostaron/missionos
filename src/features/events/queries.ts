@@ -3,6 +3,8 @@ import {
   createEvent,
   getEvent,
   getEventAttendanceRoster,
+  getMyEventAccess,
+  listEventAudienceOptions,
   listEventFormationTalks,
   listEvents,
   postEventAttendanceToFormation,
@@ -16,7 +18,9 @@ import type {
   EventDetail,
   EventRosterResponse,
   FormationTalkOption,
+  ListEventAudienceOptionsResponse,
   ListEventsResponse,
+  MyEventAccessResponse,
   PostAttendanceToFormationParams,
   PostAttendanceToFormationResult,
   SetEventAttendanceParams,
@@ -36,6 +40,10 @@ export const eventKeys = {
     [...eventKeys.all, 'roster', orgId, eventId] as const,
   formationTalks: (orgId: string | null) =>
     [...eventKeys.all, 'formationTalks', orgId] as const,
+  audienceOptions: (orgId: string | null) =>
+    [...eventKeys.all, 'audienceOptions', orgId] as const,
+  myAccess: (orgId: string | null) =>
+    [...eventKeys.all, 'myAccess', orgId] as const,
 };
 
 export function useEventsList(
@@ -82,6 +90,28 @@ export function useEventFormationTalks(organizationId: string | null, enabled: b
     queryFn: async (): Promise<FormationTalkOption[]> => {
       if (!organizationId) throw new Error('Organization ID is required');
       return listEventFormationTalks(organizationId);
+    },
+    enabled: enabled && !!organizationId,
+  });
+}
+
+export function useEventAudienceOptions(organizationId: string | null, enabled: boolean = true) {
+  return useQuery({
+    queryKey: eventKeys.audienceOptions(organizationId),
+    queryFn: async (): Promise<ListEventAudienceOptionsResponse> => {
+      if (!organizationId) throw new Error('Organization ID is required');
+      return listEventAudienceOptions(organizationId);
+    },
+    enabled: enabled && !!organizationId,
+  });
+}
+
+export function useMyEventAccess(organizationId: string | null, enabled: boolean = true) {
+  return useQuery({
+    queryKey: eventKeys.myAccess(organizationId),
+    queryFn: async (): Promise<MyEventAccessResponse> => {
+      if (!organizationId) throw new Error('Organization ID is required');
+      return getMyEventAccess(organizationId);
     },
     enabled: enabled && !!organizationId,
   });

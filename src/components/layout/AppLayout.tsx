@@ -3,6 +3,8 @@ import { Outlet } from 'react-router-dom';
 import { useAuth } from '../../hooks/use-auth';
 import { usePermissions } from '../../hooks/use-permissions';
 import { useOrganizationContext } from '../../hooks/use-organization-context';
+import { Permissions } from '../../types/permissions';
+import { useMyEventAccess } from '../../features/events/queries';
 import { NAV_ITEMS } from './navigation';
 import AppSidebar from './AppSidebar';
 import AppHeader from './AppHeader';
@@ -29,11 +31,21 @@ export default function AppLayout() {
   const { user, signOut } = useAuth();
   const { hasPermission, isLoading: isPermLoading } = usePermissions();
   const { activeOrganization } = useOrganizationContext();
+  const { data: eventAccess } = useMyEventAccess(
+    activeOrganization?.id ?? null,
+    !!activeOrganization?.id
+  );
   const [collapsed, setCollapsed] = useState<boolean>(readCollapsed);
 
-  const items = NAV_ITEMS.filter(
-    (item) => !item.permission || (!isPermLoading && hasPermission(item.permission)),
-  );
+  const items = NAV_ITEMS.filter((item) => {
+    if (item.id === 'nav-calendar') {
+      return (
+        (!isPermLoading && hasPermission(Permissions.EventsView)) ||
+        eventAccess?.can_view_calendar === true
+      );
+    }
+    return !item.permission || (!isPermLoading && hasPermission(item.permission));
+  });
 
   const toggle = () => {
     setCollapsed((c) => {

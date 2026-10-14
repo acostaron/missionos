@@ -326,7 +326,15 @@ export default function EventPage() {
             <div>
               <p className="text-caption font-medium text-ink-muted">Audience</p>
               <p className="text-body font-medium text-ink">
-                {event.audience_name}
+                {event.audience_type === 'chapter'
+                  ? (event.audience_name.toLowerCase().startsWith('chapter ')
+                      ? event.audience_name
+                      : `Chapter ${event.audience_name}`)
+                  : event.audience_type === 'section'
+                    ? (event.audience_name.toLowerCase().startsWith('section ')
+                        ? event.audience_name
+                        : `Section ${event.audience_name}`)
+                    : event.audience_name}
               </p>
             </div>
           </div>
@@ -381,7 +389,7 @@ export default function EventPage() {
                 : isFuture
                   ? 'Attendance can be recorded on or after the day of the event.'
                   : !event.can_record
-                    ? 'Only administrators and assigned greeters can record attendance.'
+                    ? 'You do not have permission to record attendance for this event.'
                     : ''}
             </p>
           )}

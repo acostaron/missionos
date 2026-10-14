@@ -3,8 +3,10 @@ import type { BadgeVariant } from '../../components/ui';
 
 export const EVENT_TYPE_LABELS: Record<EventType, string> = {
   assembly: 'Assembly',
-  teaching: 'Teaching',
-  formation_talk: 'Course talk',
+  chapter_assembly: 'Chapter Assembly',
+  section_assembly: 'Section Assembly',
+  formation_talk: 'Pastoral Formation Talk',
+  teaching: 'Programs & Retreat',
   other: 'Other',
 };
 
@@ -14,20 +16,18 @@ export const EVENT_STATUS_LABELS: Record<EventStatus, string> = {
   cancelled: 'Cancelled',
 };
 
-export const AUDIENCE_OPTIONS: Array<{ code: string; label: string }> = [
-  { code: 'mfc_ny', label: 'MFC New York (FMC welcome as guests)' },
-  { code: 'fmc_ny', label: 'FMC New York' },
-  { code: '', label: 'All members' },
-];
-
 export function getEventTypeBadgeVariant(type: EventType): BadgeVariant {
   switch (type) {
     case 'assembly':
       return 'info';
+    case 'chapter_assembly':
+      return 'warning';
+    case 'section_assembly':
+      return 'neutral';
     case 'formation_talk':
       return 'success';
     case 'teaching':
-      return 'neutral';
+      return 'info';
     case 'other':
       return 'neutral';
   }
