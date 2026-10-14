@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       addresses: {
@@ -3387,6 +3412,108 @@ export type Database = {
           {
             foreignKeyName: "fk_member_addresses__verified_by"
             columns: ["verified_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      member_claim_code_failures: {
+        Row: {
+          client_key: string
+          failed_at: string
+          id: number
+        }
+        Insert: {
+          client_key: string
+          failed_at?: string
+          id?: number
+        }
+        Update: {
+          client_key?: string
+          failed_at?: string
+          id?: number
+        }
+        Relationships: []
+      }
+      member_claim_codes: {
+        Row: {
+          code_hash: string
+          code_hint: string
+          code_status: string
+          expires_at: string
+          id: string
+          issued_at: string
+          issued_by_profile_id: string
+          member_id: string
+          organization_id: string
+          redeemed_at: string | null
+          redeemed_profile_id: string | null
+          revoked_at: string | null
+          revoked_by_profile_id: string | null
+        }
+        Insert: {
+          code_hash: string
+          code_hint: string
+          code_status?: string
+          expires_at?: string
+          id?: string
+          issued_at?: string
+          issued_by_profile_id: string
+          member_id: string
+          organization_id: string
+          redeemed_at?: string | null
+          redeemed_profile_id?: string | null
+          revoked_at?: string | null
+          revoked_by_profile_id?: string | null
+        }
+        Update: {
+          code_hash?: string
+          code_hint?: string
+          code_status?: string
+          expires_at?: string
+          id?: string
+          issued_at?: string
+          issued_by_profile_id?: string
+          member_id?: string
+          organization_id?: string
+          redeemed_at?: string | null
+          redeemed_profile_id?: string | null
+          revoked_at?: string | null
+          revoked_by_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_claim_codes_issued_by_profile_id_fkey"
+            columns: ["issued_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_claim_codes_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_claim_codes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_claim_codes_redeemed_profile_id_fkey"
+            columns: ["redeemed_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_claim_codes_revoked_by_profile_id_fkey"
+            columns: ["revoked_by_profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -7523,6 +7650,11 @@ export type Database = {
         }
         Returns: Json
       }
+      check_member_claim_code: {
+        Args: { p_client_key: string; p_code: string }
+        Returns: Json
+      }
+      claim_email_has_login: { Args: { p_email: string }; Returns: boolean }
       close_governance_node: {
         Args: {
           p_actor_profile_id?: string
@@ -8034,6 +8166,10 @@ export type Database = {
         }
         Returns: Json
       }
+      issue_member_claim_codes: {
+        Args: { p_member_ids: string[]; p_organization_id: string }
+        Returns: Json
+      }
       issue_member_qr_token: {
         Args: {
           p_actor_profile_id?: string
@@ -8067,6 +8203,10 @@ export type Database = {
       }
       list_events: {
         Args: { p_from: string; p_organization_id: string; p_to: string }
+        Returns: Json
+      }
+      list_member_login_status: {
+        Args: { p_organization_id: string }
         Returns: Json
       }
       list_program_runs: {
@@ -8203,6 +8343,15 @@ export type Database = {
         }
         Returns: Json
       }
+      redeem_member_claim_code: {
+        Args: {
+          p_auth_user_id: string
+          p_client_key: string
+          p_code: string
+          p_email: string
+        }
+        Returns: Json
+      }
       register_user_device: {
         Args: {
           p_app_version?: string
@@ -8267,6 +8416,10 @@ export type Database = {
           p_user_device_id: string
         }
         Returns: undefined
+      }
+      revoke_member_claim_code: {
+        Args: { p_member_id: string; p_organization_id: string }
+        Returns: Json
       }
       revoke_member_qr_token: {
         Args: {
@@ -8743,6 +8896,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {},
   },

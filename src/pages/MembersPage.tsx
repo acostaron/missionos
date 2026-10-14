@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { KeyRound } from 'lucide-react';
 import { useOrganizationContext } from '../hooks/use-organization-context';
 import { usePermissions } from '../hooks/use-permissions';
 import { Permissions } from '../types/permissions';
@@ -216,6 +217,7 @@ export default function MembersPage() {
   const canCreateMember = !isPermLoading && hasPermission(Permissions.MembersRecordsCreate);
   const canCreateFamily = !isPermLoading && hasPermission(Permissions.FamiliesRecordsCreate);
   const canPlaceMembers = !isPermLoading && hasPermission(Permissions.MembersPlacementsManage);
+  const canIssueCodes = !isPermLoading && hasPermission(Permissions.MembersAccountsIssueCodes);
 
   const [isCreateFamilyOpen, setIsCreateFamilyOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -278,6 +280,17 @@ export default function MembersPage() {
         </div>
 
         <div className="flex items-center gap-3">
+          {canIssueCodes && (
+            <Link
+              to="/app/members/logins"
+              id="member-logins-button"
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-line bg-surface-muted px-4 py-2 text-sm font-medium text-ink shadow-sm hover:bg-line hover:text-white focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 focus:ring-offset-slate-900 transition-colors"
+            >
+              <KeyRound className="h-4 w-4 text-ink-muted" />
+              Member logins
+            </Link>
+          )}
+
           {canPlaceMembers && (
             <Link
               to="/app/members/place"

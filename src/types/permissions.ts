@@ -22,6 +22,7 @@ export const Permissions = {
   MembersSelfServiceView: 'members.self_service.view',
   MembersAccountLinksManage: 'members.account_links.manage',
   MembersAccountsProvision: 'members.accounts.provision',
+  MembersAccountsIssueCodes: 'members.accounts.issue_codes',
 
   MembersPlacementsView: 'members.placements.view',
   MembersPlacementsManage: 'members.placements.manage',

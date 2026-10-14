@@ -24,6 +24,8 @@ import {
   EventPage,
   EventAttendancePage,
   ProgramPage,
+  MemberLoginsPage,
+  ClaimAccountPage,
 } from './lazy-pages';
 
 
@@ -86,6 +88,14 @@ export const router = createBrowserRouter([
     element: <LoginPage />,
   },
   {
+    path: '/claim',
+    element: (
+      <Suspense fallback={<PageLoadingFallback />}>
+        <ClaimAccountPage />
+      </Suspense>
+    ),
+  },
+  {
     path: '/invite/accept',
     element: <InviteAcceptPage />,
   },
@@ -113,6 +123,14 @@ export const router = createBrowserRouter([
             element: (
               <Suspense fallback={<PageLoadingFallback />}>
                 <NewMemberPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'members/logins',
+            element: (
+              <Suspense fallback={<PageLoadingFallback />}>
+                <MemberLoginsPage />
               </Suspense>
             ),
           },

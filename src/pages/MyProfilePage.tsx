@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ExternalLink, House, Mail, Phone, ShieldAlert, User, Users } from 'lucide-react';
 import { useOrganizationContext } from '../hooks/use-organization-context';
 import { usePermissions } from '../hooks/use-permissions';
@@ -6,7 +6,7 @@ import { Permissions } from '../types/permissions';
 import { useMyMemberProfile } from '../features/self-service/api';
 import { formatMeetingSchedule } from '../features/self-service/formatters';
 import { MyFormationCard } from '../features/formation/components/MyFormationCard';
-import { Badge, Card, EmptyState, PageHeader, Skeleton } from '../components/ui';
+import { Alert, Badge, Card, EmptyState, PageHeader, Skeleton } from '../components/ui';
 
 function formatDate(dateStr: string | null | undefined): string | null {
   if (!dateStr) return null;
@@ -66,6 +66,10 @@ export default function MyProfilePage() {
   const errorMessage = (error as { message?: string } | null)?.message ?? '';
   const notLinked = errorCode === 'P0002' || errorMessage.toLowerCase().includes('not linked');
 
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const isWelcome = Boolean((location.state as { welcome?: boolean } | null)?.welcome) || searchParams.get('welcome') === 'true';
+
   return (
     <div className="mx-auto max-w-5xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
       <PageHeader
@@ -85,6 +89,12 @@ export default function MyProfilePage() {
           </nav>
         }
       />
+
+      {isWelcome && (
+        <Alert variant="success" title="Welcome to MissionOS!">
+          Your member account has been successfully claimed and linked to your profile.
+        </Alert>
+      )}
 
       {/* Permission guard / loading / error / content states */}
       {!isPermLoading && !canSelfService ? (

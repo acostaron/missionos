@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Navigate, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase/client';
 import { normalizeError } from '../lib/supabase/errors';
 import { useAuth } from '../hooks/use-auth';
@@ -14,7 +14,7 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Validate internal relative paths only, strictly preventing open redirects
-  const rawTarget = searchParams.get('returnTo') || searchParams.get('redirect');
+  const rawTarget = searchParams.get('next') || searchParams.get('returnTo') || searchParams.get('redirect');
   const isValidInternalRedirect = (url: string | null): url is string => {
     if (!url) return false;
     return url.startsWith('/') && !url.startsWith('//') && !url.startsWith('/\\');
@@ -89,6 +89,15 @@ export default function LoginPage() {
             {isSubmitting ? 'Signing in…' : 'Sign In'}
           </Button>
         </form>
+
+        <div className="mt-6 border-t border-line pt-4 text-center">
+          <p className="text-small text-ink-secondary">
+            Have a code from your chapter servant?{' '}
+            <Link to="/claim" className="font-medium text-primary hover:underline">
+              Create your login
+            </Link>
+          </p>
+        </div>
       </Card>
     </div>
   );

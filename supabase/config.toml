@@ -1,0 +1,2 @@
+[functions.claim-member-account]
+verify_jwt = false
