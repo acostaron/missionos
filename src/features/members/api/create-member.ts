@@ -13,7 +13,7 @@ export interface CreateMemberInput {
   joinedOn?: string | null;
   homeCountryCode?: string | null;
   governanceNodeId?: string | null;
-  allocateMemberNumber?: boolean;
+  memberNumber?: string | null;
   email?: string | null;
   phone?: string | null;
   phoneCountryCode?: string | null;
@@ -57,8 +57,8 @@ export async function createMember(
     p_home_country_code: cleanOrNull(input.homeCountryCode) || 'US',
     // Only pass governance_node_id if authorized, otherwise undefined
     p_governance_node_id: permissions.canManagePlacements ? (cleanOrNull(input.governanceNodeId) ?? undefined) : undefined,
-    // Explicit booleans
-    p_allocate_member_number: permissions.canManageIdentifiers ? (input.allocateMemberNumber ?? true) : false,
+    // Explicit booleans — ALWAYS send false (Finance member numbers are managed manually)
+    p_allocate_member_number: false,
     p_allow_potential_duplicate: input.allowPotentialDuplicate ?? false,
     // Only pass email/phone if authorized, otherwise undefined
     p_email: permissions.canManageContacts ? (cleanOrNull(input.email) ?? undefined) : undefined,
@@ -79,5 +79,42 @@ export async function createMember(
     throw error;
   }
 
-  return data as unknown as CreateMemberRpcResponse;
+  const response = data as unknown as CreateMemberRpcResponse;
+
+  if (response.status === 'success') {
+    const rawNumber = input.memberNumber?.trim();
+    if (rawNumber) {
+      try {
+        const { data: setNumData, error: setNumError } = await (supabase.rpc as any)('set_member_number', {
+          p_organization_id: input.organizationId,
+          p_member_id: response.member_id,
+          p_member_number: rawNumber,
+          p_reason: null,
+        });
+
+        if (setNumError) {
+          return {
+            ...response,
+            member_number: null,
+            memberNumberWarning: `Member created, but the member number was not saved: ${setNumError.message}. Add it from the member's profile.`,
+          };
+        }
+
+        const numResult = setNumData as { member_number?: string } | null;
+        return {
+          ...response,
+          member_number: numResult?.member_number || rawNumber,
+        };
+      } catch (err: unknown) {
+        const msg = (err as Error)?.message || 'Unknown error';
+        return {
+          ...response,
+          member_number: null,
+          memberNumberWarning: `Member created, but the member number was not saved: ${msg}. Add it from the member's profile.`,
+        };
+      }
+    }
+  }
+
+  return response;
 }

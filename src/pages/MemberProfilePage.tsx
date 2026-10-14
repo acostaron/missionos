@@ -14,6 +14,7 @@ import { RecordMemberDeceasedModal } from '../features/members/components/Record
 import { ArchiveMemberRecordModal } from '../features/members/components/ArchiveMemberRecordModal';
 import { RevertMemberDeceasedModal } from '../features/members/components/RevertMemberDeceasedModal';
 import { RestoreMemberRecordModal } from '../features/members/components/RestoreMemberRecordModal';
+import { SetMemberNumberModal } from '../features/members/components/SetMemberNumberModal';
 import { MemberStatusTimeline } from '../features/members/components/MemberStatusTimeline';
 import { MemberFamilyCard } from '../features/members/components/MemberFamilyCard';
 import { MemberAccountCard } from '../features/members/components/MemberAccountCard';
@@ -109,7 +110,15 @@ function StatusBadge({ name, isActive }: { name: string; isActive: boolean }) {
 // Section-specific components
 // ---------------------------------------------------------------------------
 
-function OverviewSection({ profile }: { profile: MemberProfile }) {
+function OverviewSection({
+  profile,
+  canManageIdentifiers,
+  onOpenSetMemberNumber,
+}: {
+  profile: MemberProfile;
+  canManageIdentifiers?: boolean;
+  onOpenSetMemberNumber?: () => void;
+}) {
   return (
     <Section
       title="Overview"
@@ -143,11 +152,25 @@ function OverviewSection({ profile }: { profile: MemberProfile }) {
         <DataRow
           label="Member #"
           value={
-            profile.member_number !== null ? (
-              <span className="font-mono">{profile.member_number}</span>
-            ) : (
-              <span className="text-ink-muted italic text-xs">restricted</span>
-            )
+            <div className="flex items-center justify-end gap-2">
+              {profile.member_number ? (
+                <span className="font-mono">{profile.member_number}</span>
+              ) : (
+                <span className="text-ink-muted italic text-xs">
+                  {canManageIdentifiers ? 'none' : 'restricted'}
+                </span>
+              )}
+              {canManageIdentifiers && onOpenSetMemberNumber && (
+                <button
+                  type="button"
+                  id="set-member-number-button"
+                  onClick={onOpenSetMemberNumber}
+                  className="rounded px-2 py-0.5 text-xs font-semibold text-primary-blue hover:bg-navy-100 hover:text-primary-blue transition-colors border border-navy-100"
+                >
+                  {profile.member_number ? 'Change member number' : 'Set member number'}
+                </button>
+              )}
+            </div>
           }
         />
         {profile.is_deceased && (
@@ -746,6 +769,9 @@ export default function MemberProfilePage() {
   // Placement modal state
   const [isChangePlacementModalOpen, setIsChangePlacementModalOpen] = useState(false);
 
+  // Set member number modal state
+  const [isSetMemberNumberModalOpen, setIsSetMemberNumberModalOpen] = useState(false);
+
   // Section modal state
   const [isChangeSectionModalOpen, setIsChangeSectionModalOpen] = useState(false);
 
@@ -782,6 +808,7 @@ export default function MemberProfilePage() {
   });
 
   const canEditProfile = !isPermLoading && hasPermission(Permissions.MembersRecordsUpdate);
+  const canManageIdentifiers = !isPermLoading && hasPermission(Permissions.MembersIdentifiersManage);
   const canManageContacts = !isPermLoading && hasPermission(Permissions.MembersContactsManage);
   const canManageAddresses = !isPermLoading && hasPermission(Permissions.MembersAddressesManage);
   const canManagePlacements = !isPermLoading && hasPermission(Permissions.MembersPlacementsManage);
@@ -1052,7 +1079,11 @@ export default function MemberProfilePage() {
       </div>
 
       {/* Sections */}
-      <OverviewSection profile={profile} />
+      <OverviewSection
+        profile={profile}
+        canManageIdentifiers={canManageIdentifiers}
+        onOpenSetMemberNumber={() => setIsSetMemberNumberModalOpen(true)}
+      />
       <MemberAccountCard
         organizationId={orgId}
         memberId={profile.id}
@@ -1339,6 +1370,18 @@ export default function MemberProfilePage() {
           label={removeModalState.label}
           isPrimary={removeModalState.isPrimary}
           hasSecondaryContacts={removeModalState.hasSecondaryContacts}
+          onSuccessToast={triggerToast}
+        />
+      )}
+
+      {/* Set / Change Member Number Modal */}
+      {canManageIdentifiers && orgId && isSetMemberNumberModalOpen && (
+        <SetMemberNumberModal
+          isOpen={isSetMemberNumberModalOpen}
+          onClose={() => setIsSetMemberNumberModalOpen(false)}
+          organizationId={orgId}
+          memberId={profile.id}
+          currentMemberNumber={profile.member_number}
           onSuccessToast={triggerToast}
         />
       )}

@@ -285,3 +285,11 @@ export function useMemberProfile(
     },
   });
 }
+
+export {
+  setMemberNumber,
+  useSetMemberNumber,
+  type SetMemberNumberInput,
+  type SetMemberNumberResponse,
+} from './api/set-member-number';
+

@@ -19,6 +19,7 @@ export interface CreateMemberSuccessResponse {
   display_name: string;
   governance_node_id: string | null;
   duplicate_override_applied: boolean;
+  memberNumberWarning?: string | null;
 }
 
 export type CreateMemberRpcResponse = CreateMemberSuccessResponse | DuplicateWarningResponse;

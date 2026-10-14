@@ -83,7 +83,7 @@ export function MemberOnboardingWizard({
       civilStatus: '',
       joinedOn: new Date().toISOString().split('T')[0],
       homeCountryCode: 'US',
-      allocateMemberNumber: canManageIdentifiers,
+      memberNumber: '',
       governanceNodeId: '',
       email: '',
       phone: '',
@@ -110,7 +110,7 @@ export function MemberOnboardingWizard({
     if (currentStep === 1) {
       fieldsToValidate = ['givenNames', 'familyName', 'birthDate', 'sex', 'civilStatus'];
     } else if (currentStep === 2) {
-      fieldsToValidate = ['joinedOn', 'homeCountryCode', 'allocateMemberNumber'];
+      fieldsToValidate = ['joinedOn', 'homeCountryCode', 'memberNumber'];
     } else if (currentStep === 3) {
       fieldsToValidate = ['governanceNodeId'];
     } else if (currentStep === 4) {
@@ -156,7 +156,7 @@ export function MemberOnboardingWizard({
           joinedOn: formData.joinedOn,
           homeCountryCode: formData.homeCountryCode,
           governanceNodeId: formData.governanceNodeId,
-          allocateMemberNumber: formData.allocateMemberNumber,
+          memberNumber: formData.memberNumber,
           email: formData.email,
           phone: formData.phone,
           phoneCountryCode: formData.phoneCountryCode,
@@ -235,6 +235,13 @@ export function MemberOnboardingWizard({
             {successResult.display_name} has been enrolled into MissionOS.
           </p>
         </div>
+
+        {successResult.memberNumberWarning && (
+          <div className="rounded-xl border border-amber-500/40 bg-amber-950/40 p-4 text-amber-200 text-sm text-left">
+            <p className="font-semibold text-amber-300">Notice</p>
+            <p className="mt-0.5">{successResult.memberNumberWarning}</p>
+          </div>
+        )}
 
         {successResult.member_number ? (
           <div className="inline-block rounded-xl border border-indigo-500/30 bg-indigo-950/40 px-6 py-4">

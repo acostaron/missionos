@@ -13,7 +13,7 @@ interface StepProps {
 export function Step5Review({
   formData,
   placementNodes,
-  canManageIdentifiers,
+  canManageIdentifiers: _canManageIdentifiers,
   canManagePlacements,
   canManageContacts,
   canManageAddresses,
@@ -93,16 +93,13 @@ export function Step5Review({
               <dd className="text-slate-200">{formData.homeCountryCode}</dd>
             </div>
             <div className="sm:col-span-2">
-              <dt className="text-xs text-slate-500">Member Number Allocation</dt>
+              <dt className="text-xs text-slate-500">Member Number</dt>
               <dd className="text-slate-200">
-                {canManageIdentifiers && formData.allocateMemberNumber ? (
-                  <span className="inline-flex items-center gap-1.5 text-emerald-400 font-medium text-xs">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                    Next available number will be automatically allocated
-                  </span>
+                {formData.memberNumber && formData.memberNumber.trim() ? (
+                  <span>Member number: {formData.memberNumber.trim()} (from Finance)</span>
                 ) : (
                   <span className="text-slate-400 text-xs italic">
-                    No member number will be assigned at onboarding
+                    Member number: none yet
                   </span>
                 )}
               </dd>

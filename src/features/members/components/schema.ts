@@ -23,7 +23,14 @@ export const createMemberSchema = z.object({
     .min(1, 'Joined date is required')
     .refine((date) => !isNaN(new Date(date).getTime()), 'Valid joined date is required'),
   homeCountryCode: z.string().length(2, 'Country code must be 2 letters'),
-  allocateMemberNumber: z.boolean(),
+  memberNumber: z
+    .string()
+    .optional()
+    .refine((val) => {
+      if (!val || val.trim() === '') return true;
+      const clean = val.replace(/\s+/g, '');
+      return /^NY\d{5}$/i.test(clean);
+    }, 'Use NY followed by 5 digits, e.g. NY10560'),
 
   // Step 3: Placement
   governanceNodeId: z.string().optional(),
