@@ -7594,6 +7594,14 @@ export type Database = {
         }
         Returns: string
       }
+      can_read_member_photo: {
+        Args: { p_object_name: string }
+        Returns: boolean
+      }
+      can_write_member_photo: {
+        Args: { p_object_name: string }
+        Returns: boolean
+      }
       cancel_household_meeting: {
         Args: {
           p_meeting_id: string
@@ -8086,6 +8094,7 @@ export type Database = {
         Args: { p_organization_id?: string }
         Returns: Json
       }
+      get_my_member_card: { Args: { p_organization_id: string }; Returns: Json }
       get_my_member_context: {
         Args: { p_organization_id: string }
         Returns: Json
@@ -8095,6 +8104,10 @@ export type Database = {
         Returns: Json
       }
       get_my_pending_account_invitations: { Args: never; Returns: Json }
+      get_my_profile_details: {
+        Args: { p_organization_id: string }
+        Returns: Json
+      }
       get_pastoral_household_roster: {
         Args: { p_household_id: string; p_organization_id: string }
         Returns: Json
@@ -8207,6 +8220,14 @@ export type Database = {
       }
       list_member_login_status: {
         Args: { p_organization_id: string }
+        Returns: Json
+      }
+      list_my_attendance: {
+        Args: { p_from?: string; p_organization_id: string; p_to?: string }
+        Returns: Json
+      }
+      list_my_events: {
+        Args: { p_from: string; p_organization_id: string; p_to: string }
         Returns: Json
       }
       list_program_runs: {
@@ -8363,6 +8384,14 @@ export type Database = {
         }
         Returns: string
       }
+      reissue_member_card: {
+        Args: {
+          p_member_id?: string
+          p_organization_id: string
+          p_reason?: string
+        }
+        Returns: Json
+      }
       repair_family_relationship_reciprocal: {
         Args: {
           p_organization_id: string
@@ -8388,6 +8417,10 @@ export type Database = {
           p_organization_id: string
           p_planned_for_date: string
         }
+        Returns: Json
+      }
+      resolve_member_qr: {
+        Args: { p_organization_id: string; p_payload: string }
         Returns: Json
       }
       restore_member_record: {
@@ -8553,6 +8586,29 @@ export type Database = {
         }
         Returns: Json
       }
+      set_member_photo: {
+        Args: {
+          p_member_id?: string
+          p_organization_id: string
+          p_storage_path?: string
+        }
+        Returns: Json
+      }
+      set_my_contact_point: {
+        Args: {
+          p_address_data?: Json
+          p_contact_type: string
+          p_operation: string
+          p_organization_id: string
+          p_target_id?: string
+          p_value?: string
+        }
+        Returns: Json
+      }
+      set_my_wedding_date: {
+        Args: { p_organization_id: string; p_wedding_date: string }
+        Returns: Json
+      }
       set_program_participant_attendance: {
         Args: {
           p_event_id: string
@@ -8688,6 +8744,18 @@ export type Database = {
           p_middle_names?: string
           p_organization_id: string
           p_preferred_language_code?: string
+          p_preferred_name?: string
+          p_sex?: string
+        }
+        Returns: Json
+      }
+      update_my_basic_profile: {
+        Args: {
+          p_birth_date?: string
+          p_family_name: string
+          p_given_names: string
+          p_middle_names?: string
+          p_organization_id: string
           p_preferred_name?: string
           p_sex?: string
         }
