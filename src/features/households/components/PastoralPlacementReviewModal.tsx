@@ -349,7 +349,7 @@ export function PastoralPlacementReviewModal({
                               </span>
                               <span className="text-slate-500 block text-[11px] mt-0.5">
                                 {dest.current_member_count}
-                                {dest.maximum_member_count !== null ? ` / ${dest.maximum_member_count}` : ''} members
+                                {dest.current_member_count === 1 ? ' member' : ' members'}
                               </span>
                             </div>
                           </div>

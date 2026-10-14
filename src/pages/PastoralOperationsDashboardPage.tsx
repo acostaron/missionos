@@ -705,9 +705,6 @@ export default function PastoralOperationsDashboardPage() {
 
                       <td className="px-4 py-3 text-[11px]">
                         <span className="font-semibold text-ink">{hh.member_count}</span>
-                        {hh.target_member_count && (
-                          <span className="text-ink-muted"> / {hh.target_member_count}</span>
-                        )}
                       </td>
 
                       <td className="px-4 py-3 text-[11px]">

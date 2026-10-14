@@ -271,11 +271,11 @@ export default function HouseholdsPage() {
                       <p className="text-ink font-medium">
                         {hh.active_member_count}{' '}
                         <span className="text-ink-muted font-normal">
-                          {hh.target_member_count ? `/ ${hh.target_member_count}` : ''} members
+                          {hh.active_member_count === 1 ? 'member' : 'members'}
                         </span>
                       </p>
                       <p className="text-[10px] text-ink-muted">
-                        {hh.accepts_new_members ? 'Accepting members' : 'Capacity full'}
+                        {hh.accepts_new_members ? 'Accepting members' : 'Not accepting members'}
                       </p>
                     </div>
                     <Link
