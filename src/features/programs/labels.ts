@@ -40,3 +40,23 @@ export function getProgramStatusBadgeVariant(status: ProgramRunStatus): BadgeVar
       return 'danger';
   }
 }
+
+export function getProgramSessionBadgeLabel(evt: {
+  program_code?: string | null;
+  session_number?: number | null;
+  session_count?: number | null;
+}): string {
+  let base = 'Program';
+  if (evt.program_code === 'cls') {
+    base = 'CLS';
+  } else if (evt.program_code === 'youth_camp') {
+    base = 'Youth Camp';
+  } else if (evt.program_code === 'discovery_camp') {
+    base = 'Discovery Camp';
+  }
+
+  if (evt.session_count === 1 || !evt.session_number) {
+    return base;
+  }
+  return `${base} · S${evt.session_number}`;
+}

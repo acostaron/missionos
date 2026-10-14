@@ -1,70 +1,31 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, GraduationCap, Calendar, Users, Award } from 'lucide-react';
+import { GraduationCap, Calendar, Users, Award } from 'lucide-react';
 import {
   Badge,
-  Button,
   Card,
-  PageHeader,
   Skeleton,
-} from '../components/ui';
-import { useOrganizationContext } from '../hooks/use-organization-context';
-import { useProgramRunsList } from '../features/programs/queries';
+} from '../../../components/ui';
+import { useProgramRunsList } from '../queries';
 import {
   PROGRAM_CODE_LABELS,
   PROGRAM_STATUS_LABELS,
   getProgramCodeBadgeVariant,
   getProgramStatusBadgeVariant,
-} from '../features/programs/labels';
-import { NewProgramModal } from '../features/programs/components/NewProgramModal';
+} from '../labels';
 
-export default function ProgramsPage() {
+export interface ProgramsListProps {
+  organizationId: string | null;
+  includeClosed: boolean;
+}
+
+export function ProgramsList({ organizationId, includeClosed }: ProgramsListProps) {
   const navigate = useNavigate();
-  const { activeOrganization } = useOrganizationContext();
-  const orgId = activeOrganization?.id ?? null;
+  const { data, isLoading } = useProgramRunsList(organizationId, includeClosed);
 
-  const [includeClosed, setIncludeClosed] = useState(false);
-  const [isNewProgramOpen, setIsNewProgramOpen] = useState(false);
-
-  const { data, isLoading } = useProgramRunsList(orgId, includeClosed);
-
-  const canCreate = data?.can_create ?? false;
   const runs = data?.runs ?? [];
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Programs"
-        description="Youth Camp, Discovery Camp, Christian Life Seminar and community programs."
-        actions={
-          canCreate ? (
-            <Button
-              variant="primary"
-              icon={<Plus className="h-4 w-4" />}
-              onClick={() => setIsNewProgramOpen(true)}
-            >
-              New program
-            </Button>
-          ) : undefined
-        }
-      />
-
-      {/* Filter Row: Switch "Show completed & cancelled" */}
-      <div className="flex items-center justify-between border-b border-line pb-4">
-        <label className="flex cursor-pointer items-center gap-2 text-small text-ink-secondary">
-          <input
-            type="checkbox"
-            checked={includeClosed}
-            onChange={(e) => setIncludeClosed(e.target.checked)}
-            className="h-4 w-4 rounded border-line text-primary focus:ring-focus"
-          />
-          Show completed & cancelled
-        </label>
-        <span className="text-caption text-ink-muted">
-          {runs.length} program{runs.length === 1 ? '' : 's'}
-        </span>
-      </div>
-
       {/* Loading state */}
       {isLoading && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -82,19 +43,8 @@ export default function ProgramsPage() {
           <p className="text-small text-ink-muted max-w-md mx-auto">
             {includeClosed
               ? 'No active, completed or cancelled programs found for this organization.'
-              : 'There are currently no active programs. Check "Show completed & cancelled" or create a new program.'}
+              : 'There are currently no active programs. Check "Show completed & cancelled" or use New to create a program.'}
           </p>
-          {canCreate && (
-            <Button
-              variant="primary"
-              size="sm"
-              icon={<Plus className="h-4 w-4" />}
-              onClick={() => setIsNewProgramOpen(true)}
-              className="mt-2"
-            >
-              New program
-            </Button>
-          )}
         </Card>
       )}
 
@@ -170,18 +120,6 @@ export default function ProgramsPage() {
             </div>
           ))}
         </div>
-      )}
-
-      {/* New Program Modal */}
-      {orgId && (
-        <NewProgramModal
-          open={isNewProgramOpen}
-          onClose={() => setIsNewProgramOpen(false)}
-          organizationId={orgId}
-          onSuccess={(newRun) => {
-            navigate(`/app/programs/${newRun.id}`);
-          }}
-        />
       )}
     </div>
   );

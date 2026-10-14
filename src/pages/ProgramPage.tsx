@@ -147,11 +147,11 @@ export default function ProgramPage() {
       {/* Top back navigation */}
       <div className="flex items-center gap-2">
         <Link
-          to="/app/programs"
+          to="/app/calendar?tab=programs"
           className="inline-flex items-center gap-1.5 text-small font-medium text-ink-muted hover:text-ink transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
-          <span>Programs</span>
+          <span>Calendar · Programs</span>
         </Link>
       </div>
 

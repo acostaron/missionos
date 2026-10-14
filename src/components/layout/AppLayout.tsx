@@ -38,7 +38,7 @@ export default function AppLayout() {
   const [collapsed, setCollapsed] = useState<boolean>(readCollapsed);
 
   const items = NAV_ITEMS.filter((item) => {
-    if (item.id === 'nav-calendar' || item.id === 'nav-programs') {
+    if (item.id === 'nav-calendar') {
       return (
         (!isPermLoading && hasPermission(Permissions.EventsView)) ||
         eventAccess?.can_view_calendar === true
