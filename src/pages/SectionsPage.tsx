@@ -116,7 +116,23 @@ export default function SectionsPage() {
           {sortedSubAreas.length > 0 ? (
             sortedSubAreas.map((subArea) => (
               <div key={subArea.code} className="space-y-4">
-                <h2 className="text-lg font-semibold text-ink">{subArea.name}</h2>
+                <div>
+                  <h2 className="text-lg font-semibold text-ink">{subArea.name}</h2>
+                  {subArea.code === 'fmc_ny' && (
+                    <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-ink-muted [&>div]:mt-0">
+                      <span>FMC Coordinator:</span>
+                      {data.fmc.coordinator ? (
+                        <CoordinatorDisplay
+                          coordinator={data.fmc.coordinator}
+                          isException={data.fmc.is_exception}
+                          exceptionReason={data.fmc.exception_reason}
+                        />
+                      ) : (
+                        <span>Vacant</span>
+                      )}
+                    </div>
+                  )}
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {subArea.sections.map((section) => (
                     <Card key={section.code} className="flex flex-col justify-between p-6">
@@ -173,42 +189,6 @@ export default function SectionsPage() {
               ))}
             </div>
           )}
-
-          {/* FMC Card at the bottom */}
-          <div>
-            <h3 className="text-small font-semibold uppercase tracking-wider text-ink-muted mb-3">
-              Special Ministry Group
-            </h3>
-            <Card className="p-6">
-              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-3">
-                    <h2 className="text-base font-semibold text-ink">
-                      FMC — Familias Misioneras de Cristo
-                    </h2>
-                    <span className="inline-flex items-center rounded-full bg-navy-50 px-2.5 py-0.5 text-xs font-semibold text-navy-800">
-                      {data.fmc.tagged_member_count} tagged{' '}
-                      {data.fmc.tagged_member_count === 1 ? 'member' : 'members'}
-                    </span>
-                  </div>
-                  <p className="mt-1 text-caption text-ink-secondary">
-                    Spanish-speaking community. FMC is a label on top of a member's section, not a section of its own.
-                  </p>
-                </div>
-
-                <div className="sm:text-right min-w-[200px] border-t sm:border-t-0 pt-3 sm:pt-0 border-line">
-                  <span className="text-caption font-medium uppercase tracking-wider text-ink-muted">
-                    FMC Coordinator
-                  </span>
-                  <CoordinatorDisplay
-                    coordinator={data.fmc.coordinator}
-                    isException={data.fmc.is_exception}
-                    exceptionReason={data.fmc.exception_reason}
-                  />
-                </div>
-              </div>
-            </Card>
-          </div>
         </div>
       ) : null}
     </div>
