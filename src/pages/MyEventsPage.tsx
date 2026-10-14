@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowLeft, Calendar, CalendarCheck2, Clock, MapPin, QrCode } from 'lucide-react';
+import { Calendar, CalendarCheck2, Clock, MapPin, QrCode } from 'lucide-react';
 import { useOrganizationContext } from '../hooks/use-organization-context';
 import { useListMyEvents, useListMyAttendance, type MyEvent } from '../features/self-service/portal-api';
 import {
@@ -76,19 +75,6 @@ export default function MyEventsPage() {
       <PageHeader
         title="My Events"
         description="View your upcoming community assemblies and personal attendance record."
-        breadcrumb={
-          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-ink-muted">
-            <Link
-              to="/app/profile"
-              className="inline-flex items-center gap-1 hover:text-ink transition-colors"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-              My Profile
-            </Link>
-            <span aria-hidden="true">/</span>
-            <span className="font-medium text-ink">My Events</span>
-          </nav>
-        }
       />
 
       {/* Tabs */}

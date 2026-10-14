@@ -1,7 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
 import {
-  ArrowLeft,
   Check,
   Copy,
   Printer,
@@ -315,14 +313,6 @@ export default function MemberLoginsPage() {
             icon={<ShieldAlert />}
             title="Access Restricted"
             message="You do not have permission to issue or manage member login codes. Contact your organization administrator."
-            action={
-              <Link
-                to="/app/members"
-                className="inline-flex h-9 items-center rounded-control border border-line-strong bg-surface px-4 text-small font-medium text-ink hover:bg-surface-muted"
-              >
-                Back to Members
-              </Link>
-            }
           />
         </Card>
       </div>
@@ -334,19 +324,6 @@ export default function MemberLoginsPage() {
       <PageHeader
         title="Member Logins"
         description="Issue one-time personal claim codes so members can create or link their MissionOS login."
-        breadcrumb={
-          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-ink-muted">
-            <Link
-              to="/app/members"
-              className="inline-flex items-center gap-1 hover:text-ink transition-colors"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-              Members
-            </Link>
-            <span aria-hidden="true">/</span>
-            <span className="font-medium text-ink">Member Logins</span>
-          </nav>
-        }
       />
 
       {actionError && (

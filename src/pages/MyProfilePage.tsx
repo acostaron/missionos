@@ -1,5 +1,5 @@
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, ExternalLink, House, Mail, Phone, ShieldAlert, User, Users } from 'lucide-react';
+import { ExternalLink, House, Mail, Phone, ShieldAlert, User, Users } from 'lucide-react';
 import { useOrganizationContext } from '../hooks/use-organization-context';
 import { usePermissions } from '../hooks/use-permissions';
 import { Permissions } from '../types/permissions';
@@ -78,19 +78,6 @@ export default function MyProfilePage() {
       <PageHeader
         title="My Profile"
         description="Your personal information, household details, and community context in MissionOS."
-        breadcrumb={
-          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-ink-muted">
-            <Link
-              to="/app/dashboard"
-              className="inline-flex items-center gap-1 hover:text-ink transition-colors"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-              Back to Home
-            </Link>
-            <span aria-hidden="true">/</span>
-            <span className="font-medium text-ink">My Profile</span>
-          </nav>
-        }
       />
 
       {isWelcome && (

@@ -1,6 +1,5 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import {
-  ArrowLeft,
   BookOpen,
   Calendar,
   ExternalLink,
@@ -45,14 +44,6 @@ export default function FormationProgramDetailPage() {
             icon={<ShieldAlert className="h-8 w-8 text-warning-600" />}
             title="Access Restricted"
             message="You do not have permission to view curriculum program details."
-            action={
-              <Link
-                to="/app/formation"
-                className="inline-flex h-9 items-center rounded-control border border-line-strong bg-surface px-4 text-small font-medium text-ink hover:bg-surface-muted"
-              >
-                Back to Formation Catalog
-              </Link>
-            }
           />
         </Card>
       </div>
@@ -67,37 +58,6 @@ export default function FormationProgramDetailPage() {
           program
             ? `${program.code} • ${formatProgramCategory(program.program_category)} • Edition: ${program.edition}`
             : 'Formation curriculum course detail'
-        }
-        breadcrumb={
-          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-ink-muted">
-            <Link
-              to="/app/dashboard"
-              className="inline-flex items-center gap-1 hover:text-ink transition-colors"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-              Home
-            </Link>
-            <span aria-hidden="true">/</span>
-            <Link
-              to="/app/formation"
-              className="hover:text-ink transition-colors"
-            >
-              Formation
-            </Link>
-            <span aria-hidden="true">/</span>
-            <span className="font-medium text-ink">
-              {program ? program.code : 'Details'}
-            </span>
-          </nav>
-        }
-        actions={
-          <Link
-            to="/app/formation"
-            className="inline-flex h-9 items-center gap-1.5 rounded-control border border-line-strong bg-surface px-3.5 text-xs font-medium text-ink hover:bg-surface-muted transition-colors"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-            Back to Catalog
-          </Link>
         }
       />
 
@@ -124,14 +84,6 @@ export default function FormationProgramDetailPage() {
             icon={<BookOpen className="h-8 w-8 text-ink-muted" />}
             title="Program Not Found"
             message="The requested formation program could not be found or is not accessible."
-            action={
-              <Link
-                to="/app/formation"
-                className="inline-flex h-9 items-center rounded-control border border-line-strong bg-surface px-4 text-small font-medium text-ink hover:bg-surface-muted"
-              >
-                Back to Formation Catalog
-              </Link>
-            }
           />
         </Card>
       ) : (

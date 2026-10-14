@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import QRCode from 'qrcode';
-import { ArrowLeft, Download, RefreshCw, Sun, User, ShieldAlert } from 'lucide-react';
+import { Download, RefreshCw, Sun, User, ShieldAlert } from 'lucide-react';
 import { useOrganizationContext } from '../hooks/use-organization-context';
 import { useMyMemberCard, useReissueMemberCard, type MemberCard } from '../features/self-service/portal-api';
 import { MemberAvatar } from '../features/self-service/components/MemberAvatar';
@@ -246,19 +246,6 @@ export default function MyCardPage() {
       <PageHeader
         title="My MFC ID"
         description="Show this digital ID card to check in at assemblies and community gatherings."
-        breadcrumb={
-          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-ink-muted">
-            <Link
-              to="/app/profile"
-              className="inline-flex items-center gap-1 hover:text-ink transition-colors"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-              My Profile
-            </Link>
-            <span aria-hidden="true">/</span>
-            <span className="font-medium text-ink">My Card</span>
-          </nav>
-        }
       />
 
       {offlineData && !card && (

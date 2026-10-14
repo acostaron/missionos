@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import {
-  ArrowLeft,
   CheckCircle2,
   Circle,
   Loader2,
@@ -274,13 +273,6 @@ export default function EventAttendancePage() {
   if (error || !event || !eventId) {
     return (
       <div className="p-4 space-y-4">
-        <Link
-          to={`/app/calendar/${eventId || ''}`}
-          className="inline-flex items-center gap-1.5 text-small font-medium text-ink-secondary hover:text-ink"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Event
-        </Link>
         <Alert variant="danger" title="Unable to load attendance roster">
           {error ? getEventErrorMessage(error) : 'Event not found.'}
         </Alert>
@@ -293,15 +285,8 @@ export default function EventAttendancePage() {
       {/* Sticky Top Bar (Phone-Optimized) */}
       <div className="sticky top-0 z-20 border-b border-line bg-surface/95 backdrop-blur-sm px-4 py-3 shadow-xs">
         <div className="mx-auto max-w-2xl space-y-2">
-          {/* Top row: Back link + Title */}
+          {/* Top row: Title */}
           <div className="flex items-center justify-between gap-2">
-            <Link
-              to={`/app/calendar/${eventId}`}
-              className="inline-flex items-center gap-1 text-small font-medium text-ink-secondary hover:text-ink transition-colors"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              <span>Back</span>
-            </Link>
             <span className="truncate text-small font-semibold text-ink">
               {event.title}
             </span>

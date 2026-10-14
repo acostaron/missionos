@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, Link, Navigate } from 'react-router-dom';
+import { useParams, Navigate } from 'react-router-dom';
 import { useOrganizationContext } from '../hooks/use-organization-context';
 import { usePermissions } from '../hooks/use-permissions';
 import { Permissions } from '../types/permissions';
@@ -76,17 +76,6 @@ export default function FamilyProfilePage() {
   if (!canViewFamilies) {
     return (
       <div className="space-y-6">
-        <Link
-          to="/app/members"
-          id="family-profile-back"
-          className="inline-flex items-center gap-1.5 text-sm text-ink-muted hover:text-ink"
-        >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-          Member Directory
-        </Link>
-
         <div className="rounded-xl border border-danger-600 bg-danger-50 p-6">
           <h2 className="mb-2 text-base font-semibold text-danger-700">
             Access Denied
@@ -103,17 +92,6 @@ export default function FamilyProfilePage() {
   if (error || !profile) {
     return (
       <div className="space-y-6">
-        <Link
-          to="/app/members"
-          id="family-profile-back"
-          className="inline-flex items-center gap-1.5 text-sm text-ink-muted hover:text-ink"
-        >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-          Member Directory
-        </Link>
-
         <div className="rounded-xl border border-danger-600 bg-danger-50 p-6">
           <h2 className="mb-2 text-base font-semibold text-danger-700">
             Family Record Unavailable
@@ -155,19 +133,6 @@ export default function FamilyProfilePage() {
 
   return (
     <div className="space-y-6">
-      {/* Navigation / Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-ink-muted">
-        <Link
-          to="/app/members"
-          id="family-profile-back"
-          className="hover:text-ink transition-colors"
-        >
-          Members
-        </Link>
-        <span className="text-ink-muted">/</span>
-        <span className="text-ink font-medium">{familyName}</span>
-      </nav>
-
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-line bg-surface-muted p-5 shadow-sm">
         <div className="flex items-center gap-5">

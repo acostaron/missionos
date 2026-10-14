@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom';
 import { useOrganizationContext } from '../hooks/use-organization-context';
 import { usePermissions } from '../hooks/use-permissions';
 import { Permissions } from '../types/permissions';
@@ -21,16 +20,6 @@ export default function NewMemberPage() {
   if (!canCreateRecord) {
     return (
       <div className="space-y-6">
-        <Link
-          to="/app/members"
-          className="inline-flex items-center gap-1.5 text-sm text-ink-muted hover:text-ink"
-        >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-          Member Directory
-        </Link>
-
         <div className="rounded-xl border border-danger-600 bg-danger-50 p-6">
           <h2 className="mb-2 text-base font-semibold text-danger-700">Access Denied</h2>
           <p className="text-sm text-danger-700">
@@ -58,19 +47,8 @@ export default function NewMemberPage() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      {/* Header & Back Link */}
+      {/* Header */}
       <div>
-        <Link
-          to="/app/members"
-          id="back-to-directory"
-          className="inline-flex items-center gap-1.5 text-sm text-ink-muted hover:text-ink transition-colors mb-3"
-        >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-          Member Directory
-        </Link>
-
         <h1 className="text-2xl font-bold tracking-tight text-ink">
           Onboard New Member
         </h1>

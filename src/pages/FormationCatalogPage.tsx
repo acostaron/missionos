@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowLeft, BookOpen, Layers, ShieldAlert, Sparkles } from 'lucide-react';
+import { BookOpen, Layers, ShieldAlert, Sparkles } from 'lucide-react';
 import { useOrganizationContext } from '../hooks/use-organization-context';
 import { usePermissions } from '../hooks/use-permissions';
 import { Permissions } from '../types/permissions';
@@ -76,19 +76,6 @@ export default function FormationCatalogPage() {
       <PageHeader
         title="Formation Curriculum"
         description="Canonical pastoral formation courses, retreats, and leadership training."
-        breadcrumb={
-          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-ink-muted">
-            <Link
-              to="/app/dashboard"
-              className="inline-flex items-center gap-1 hover:text-ink transition-colors"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-              Home
-            </Link>
-            <span aria-hidden="true">/</span>
-            <span className="font-medium text-ink">Formation</span>
-          </nav>
-        }
       />
 
       {error ? (

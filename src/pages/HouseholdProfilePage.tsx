@@ -122,15 +122,6 @@ export default function HouseholdProfilePage() {
   if (error || !data) {
     return (
       <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8 space-y-4">
-        <Link
-          to="/app/households"
-          className="inline-flex items-center gap-1.5 text-xs text-ink-muted hover:text-ink transition-colors"
-        >
-          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          Back to Households
-        </Link>
         <div className="rounded-xl border border-line bg-surface p-10 text-center">
           <h2 className="text-base font-semibold text-ink">
             Household Not Found or Inaccessible
@@ -179,18 +170,6 @@ export default function HouseholdProfilePage() {
         </div>
       )}
 
-      {/* Navigation Breadcrumb */}
-      <div>
-        <Link
-          to="/app/households"
-          className="inline-flex items-center gap-1.5 text-xs text-ink-muted hover:text-ink transition-colors"
-        >
-          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          Back to Households
-        </Link>
-      </div>
 
       {/* Header Banner */}
       <div className="rounded-xl border border-line bg-surface-muted p-6 shadow-sm">

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
-  ArrowLeft,
   Calendar,
   Clock,
   MapPin,
@@ -87,13 +86,6 @@ export default function EventPage() {
   if (error || !event || !orgId || !eventId) {
     return (
       <div className="space-y-6">
-        <Link
-          to="/app/calendar"
-          className="inline-flex items-center gap-1.5 text-small font-medium text-ink-secondary hover:text-ink"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Calendar
-        </Link>
         <Alert variant="danger" title="Event not found">
           {error ? getEventErrorMessage(error) : 'The requested event could not be found.'}
         </Alert>
@@ -169,17 +161,6 @@ export default function EventPage() {
 
   return (
     <div className="space-y-6">
-      {/* Top back link */}
-      <div>
-        <Link
-          to="/app/calendar"
-          className="inline-flex items-center gap-1.5 text-small font-medium text-ink-secondary hover:text-ink transition-colors"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Calendar
-        </Link>
-      </div>
-
       {actionError && (
         <Alert variant="danger">
           {actionError}

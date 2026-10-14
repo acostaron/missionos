@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link, Navigate } from 'react-router-dom';
+import { useParams, Navigate } from 'react-router-dom';
 import { useOrganizationContext } from '../hooks/use-organization-context';
 import { usePermissions } from '../hooks/use-permissions';
 import { Permissions } from '../types/permissions';
@@ -872,16 +872,6 @@ export default function MemberProfilePage() {
 
     return (
       <div className="space-y-6">
-        <Link
-          to="/app/members"
-          className="inline-flex items-center gap-1.5 text-sm text-ink-muted hover:text-ink"
-        >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-          Member Directory
-        </Link>
-
         <div className="rounded-xl border border-danger-600 bg-danger-50 p-6">
           <h2 className="mb-2 text-base font-semibold text-danger-700">
             {isNotFound ? 'Member Not Found' : 'Error Loading Profile'}
@@ -939,18 +929,6 @@ export default function MemberProfilePage() {
           </button>
         </div>
       )}
-
-      {/* Back */}
-      <Link
-        to="/app/members"
-        id="member-profile-back"
-        className="inline-flex items-center gap-1.5 text-sm text-ink-muted hover:text-ink"
-      >
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-        </svg>
-        Member Directory
-      </Link>
 
       {/* Archived Record Banner */}
       {profile.record_status === 'archived' && (

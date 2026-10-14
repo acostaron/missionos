@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, User, Mail, Phone, Home, Heart, ShieldAlert } from 'lucide-react';
+import { User, Mail, Phone, Home, Heart, ShieldAlert } from 'lucide-react';
 import { useOrganizationContext } from '../hooks/use-organization-context';
 import {
   useMyProfileDetails,
@@ -150,14 +150,6 @@ export default function EditMyProfilePage() {
             icon={<ShieldAlert />}
             title="Unable to load profile"
             message={error ? getEventErrorMessage(error) : 'Please select an active organization.'}
-            action={
-              <Link
-                to="/app/profile"
-                className="inline-flex h-9 items-center rounded-control border border-line-strong bg-surface px-4 text-small font-medium text-ink hover:bg-surface-muted"
-              >
-                Back to My Profile
-              </Link>
-            }
           />
         </Card>
       </div>
@@ -360,19 +352,6 @@ export default function EditMyProfilePage() {
       <PageHeader
         title="Edit My Profile"
         description="Update your personal details, contact points, and photo."
-        breadcrumb={
-          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-ink-muted">
-            <Link
-              to="/app/profile"
-              className="inline-flex items-center gap-1 hover:text-ink transition-colors"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-              My Profile
-            </Link>
-            <span aria-hidden="true">/</span>
-            <span className="font-medium text-ink">Edit</span>
-          </nav>
-        }
       />
 
       {!canEdit && (

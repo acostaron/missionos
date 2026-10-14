@@ -84,19 +84,8 @@ export default function MembersWithoutHouseholdPage() {
         </div>
       )}
 
-      {/* Breadcrumb & Header */}
+      {/* Header */}
       <div>
-        <nav className="mb-2">
-          <Link
-            to="/app/households"
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-ink-muted hover:text-ink transition-colors"
-          >
-            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to Households Directory
-          </Link>
-        </nav>
 
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
