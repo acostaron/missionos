@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { useOrganizationContext } from '../hooks/use-organization-context';
 import { usePermissions } from '../hooks/use-permissions';
 import { Permissions } from '../types/permissions';
 import { useHouseholdProfile } from '../features/households/api/get-household-profile';
+import { householdKeys } from '../features/households/queries';
 import { EditHouseholdModal } from '../features/households/components/EditHouseholdModal';
 import { ArchiveHouseholdModal } from '../features/households/components/ArchiveHouseholdModal';
 import { AssignHouseholdMemberModal } from '../features/households/components/AssignHouseholdMemberModal';
@@ -35,6 +37,7 @@ function formatRole(role: string | null): string {
 }
 
 export default function HouseholdProfilePage() {
+  const queryClient = useQueryClient();
   const { householdId } = useParams<{ householdId: string }>();
   const { activeOrganization } = useOrganizationContext();
   const { hasPermission, isLoading: isPermLoading } = usePermissions();
@@ -44,6 +47,7 @@ export default function HouseholdProfilePage() {
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
   const [isEndModalOpen, setIsEndModalOpen] = useState(false);
   const [isAppointLeaderModalOpen, setIsAppointLeaderModalOpen] = useState(false);
+  const [isAppointParentLeaderModalOpen, setIsAppointParentLeaderModalOpen] = useState(false);
   const [isReplaceLeaderModalOpen, setIsReplaceLeaderModalOpen] = useState(false);
   const [isConcludeLeaderModalOpen, setIsConcludeLeaderModalOpen] = useState(false);
   const [isPlacementModalOpen, setIsPlacementModalOpen] = useState(false);
@@ -81,6 +85,7 @@ export default function HouseholdProfilePage() {
     data,
     isLoading,
     error,
+    refetch,
   } = useHouseholdProfile(
     orgId,
     householdId ?? null,
@@ -144,6 +149,19 @@ export default function HouseholdProfilePage() {
   const isArchivable = ['planned', 'active', 'temporarily_inactive'].includes(household.lifecycle_status);
   const meetingDay = formatDayOfWeek(household.meeting_day_of_week);
   const meetingFreq = formatFrequency(household.meeting_frequency);
+  const isParentPastoralLevel = ['unit', 'chapter', 'area'].includes(household.pastoral_level);
+  const parentRoleCode: ServantLeaderRoleCode =
+    household.pastoral_level === 'unit'
+      ? 'unit_servant_leader'
+      : household.pastoral_level === 'chapter'
+      ? 'chapter_servant_leader'
+      : 'area_servant_leader';
+  const parentRoleLabel =
+    household.pastoral_level === 'unit'
+      ? 'Unit'
+      : household.pastoral_level === 'chapter'
+      ? 'Chapter'
+      : 'Area';
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8 space-y-6">
@@ -225,19 +243,14 @@ export default function HouseholdProfilePage() {
               <div className="text-center sm:text-right">
                 <p className="text-xs text-ink-muted">Active Members</p>
                 <p className="text-lg font-bold text-ink">
-                  {counts.active_member_count}{' '}
-                  {counts.target_member_count && (
-                    <span className="text-xs font-normal text-ink-muted">
-                      / {counts.target_member_count}
-                    </span>
-                  )}
+                  {counts.active_member_count}
                 </p>
               </div>
               <div className="h-8 w-px bg-surface-muted" />
               <div className="text-center sm:text-left">
                 <p className="text-xs text-ink-muted">Accepting Members</p>
                 <p className={`text-xs font-semibold ${counts.accepts_new_members ? 'text-success-700' : 'text-warning-700'}`}>
-                  {counts.accepts_new_members ? 'Open' : 'Full'}
+                  {counts.accepts_new_members ? 'Yes' : 'No'}
                 </p>
               </div>
             </div>
@@ -390,7 +403,7 @@ export default function HouseholdProfilePage() {
 
               {/* Formal Office Holders */}
               {leaders.length === 0 ? (
-                <div className="py-2 flex items-center justify-between">
+                <div className="py-2 flex items-center justify-between gap-4">
                   <p className="text-xs text-ink-muted italic">
                     No formal leaders currently assigned.
                   </p>
@@ -403,6 +416,21 @@ export default function HouseholdProfilePage() {
                     >
                       + Appoint Leader
                     </button>
+                  )}
+                  {canAppointLeader && isParentPastoralLevel && isStatusActive && parent_governance && (
+                    <div className="flex flex-col items-end text-right">
+                      <button
+                        type="button"
+                        id="btn-appoint-parent-servant-leader"
+                        onClick={() => setIsAppointParentLeaderModalOpen(true)}
+                        className="inline-flex items-center gap-1 rounded-lg border border-navy-100 bg-navy-50 px-2.5 py-1 text-[11px] font-semibold text-primary-blue hover:bg-navy-100 transition-colors"
+                      >
+                        + Appoint {parentRoleLabel} Servant Leader
+                      </button>
+                      <p className="text-[10px] text-ink-muted mt-1">
+                        This leader serves {parent_governance.parent_node_name}; they will show as this household&apos;s leader.
+                      </p>
+                    </div>
                   )}
                 </div>
               ) : (
@@ -720,6 +748,25 @@ export default function HouseholdProfilePage() {
             roleCode="household_servant_leader"
             onSuccessToast={triggerToast}
           />
+          {parent_governance && (
+            <AppointServantLeaderModal
+              isOpen={isAppointParentLeaderModalOpen}
+              onClose={() => setIsAppointParentLeaderModalOpen(false)}
+              organizationId={orgId}
+              governanceNodeId={parent_governance.parent_node_id}
+              governanceNodeName={parent_governance.parent_node_name}
+              roleCode={parentRoleCode}
+              onSuccessToast={(msg) => {
+                if (orgId && householdId) {
+                  queryClient.invalidateQueries({
+                    queryKey: householdKeys.profile(orgId, householdId),
+                  });
+                }
+                refetch();
+                triggerToast(msg);
+              }}
+            />
+          )}
           {selectedLeader && (
             <>
               <ReplaceServantLeaderModal

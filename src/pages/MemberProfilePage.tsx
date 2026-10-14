@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { useOrganizationContext } from '../hooks/use-organization-context';
 import { usePermissions } from '../hooks/use-permissions';
 import { Permissions } from '../types/permissions';
-import { useMemberProfile } from '../features/members/queries';
+import { useMemberProfile, useMemberPhotoPath } from '../features/members/queries';
+import { useMemberPhotoUrl } from '../features/self-service/photo';
 import { EditMemberProfileModal } from '../features/members/components/EditMemberProfileModal';
 import { EditEmailModal } from '../features/members/components/EditEmailModal';
 import { EditPhoneModal } from '../features/members/components/EditPhoneModal';
@@ -836,6 +837,13 @@ export default function MemberProfilePage() {
   } = useMemberProfile(orgId, memberId ?? null);
 
   const { data: memberSectionData } = useMemberSection(orgId, memberId ?? null);
+  const { data: photoData } = useMemberPhotoPath(orgId, memberId ?? null);
+  const { data: photoUrl } = useMemberPhotoUrl(photoData?.photo_path);
+  const [imgError, setImgError] = useState(false);
+
+  useEffect(() => {
+    setImgError(false);
+  }, [photoData?.photo_path]);
 
   // -------------------------------------------------------------------------
   // Loading
@@ -987,8 +995,17 @@ export default function MemberProfilePage() {
       {/* Hero Header with Actions */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-5">
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-navy-50 text-xl font-bold text-primary-blue">
-            {initials}
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-navy-50 text-xl font-bold text-primary-blue overflow-hidden">
+            {photoUrl && !imgError ? (
+              <img
+                src={photoUrl}
+                alt=""
+                className="h-16 w-16 rounded-2xl object-cover"
+                onError={() => setImgError(true)}
+              />
+            ) : (
+              initials
+            )}
           </div>
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-ink">
