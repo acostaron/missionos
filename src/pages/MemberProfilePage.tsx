@@ -1097,7 +1097,6 @@ export default function MemberProfilePage() {
           organizationId={orgId}
           memberId={profile.id}
           memberName={profile.display_name}
-          initialPhotoPath={null}
         />
       )}
       <IdentifiersSection identifiers={profile.identifiers} />

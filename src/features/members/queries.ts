@@ -12,6 +12,7 @@
  */
 
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
+import { z } from 'zod';
 import { supabase } from '../../lib/supabase/client';
 
 // ---------------------------------------------------------------------------
@@ -283,6 +284,34 @@ export function useMemberProfile(
       if (supabaseError?.code === 'P0002') return false;
       return failureCount < 2;
     },
+  });
+}
+
+export const memberPhotoPathSchema = z.object({
+  member_id: z.string(),
+  photo_path: z.string().nullable(),
+});
+export type MemberPhotoPath = z.infer<typeof memberPhotoPathSchema>;
+
+export function useMemberPhotoPath(
+  organizationId: string | null,
+  memberId: string | null,
+) {
+  return useQuery({
+    queryKey: ['members', 'photo-path', organizationId, memberId] as const,
+    queryFn: async (): Promise<MemberPhotoPath> => {
+      if (!organizationId || !memberId) throw new Error('organizationId and memberId are required');
+
+      const { data, error } = await supabase.rpc('get_member_photo_path', {
+        p_organization_id: organizationId,
+        p_member_id: memberId,
+      });
+
+      if (error) throw error;
+      return memberPhotoPathSchema.parse(data);
+    },
+    enabled: !!organizationId && !!memberId,
+    staleTime: 60_000,
   });
 }
 

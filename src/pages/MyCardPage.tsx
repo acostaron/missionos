@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import QRCode from 'qrcode';
 import { ArrowLeft, Download, RefreshCw, Sun, User, ShieldAlert } from 'lucide-react';
@@ -36,6 +36,67 @@ export default function MyCardPage() {
   const [isReplaceModalOpen, setIsReplaceModalOpen] = useState(false);
   const [replaceError, setReplaceError] = useState<string | null>(null);
   const [replaceSuccess, setReplaceSuccess] = useState<string | null>(null);
+  const [isEnlarged, setIsEnlarged] = useState(false);
+
+  const qrButtonRef = useRef<HTMLButtonElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const prevEnlargedRef = useRef(false);
+
+  // Focus management between button and overlay
+  useEffect(() => {
+    if (isEnlarged) {
+      overlayRef.current?.focus();
+    } else if (prevEnlargedRef.current) {
+      qrButtonRef.current?.focus();
+    }
+    prevEnlargedRef.current = isEnlarged;
+  }, [isEnlarged]);
+
+  // Close overlay on Escape
+  useEffect(() => {
+    if (!isEnlarged) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsEnlarged(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isEnlarged]);
+
+  // Keep screen awake while QR overlay is enlarged
+  useEffect(() => {
+    if (!isEnlarged) return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let wakeLock: any = null;
+    let isCancelled = false;
+
+    const requestLock = async () => {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const nav = navigator as any;
+        if ('wakeLock' in nav && nav.wakeLock?.request) {
+          const lock = await nav.wakeLock.request('screen');
+          if (isCancelled) {
+            await lock.release();
+          } else {
+            wakeLock = lock;
+          }
+        }
+      } catch {
+        // ignore wake lock errors
+      }
+    };
+
+    requestLock();
+
+    return () => {
+      isCancelled = true;
+      if (wakeLock) {
+        wakeLock.release().catch(() => undefined);
+      }
+    };
+  }, [isEnlarged]);
 
   const localStorageKey = orgId ? `missionos.myCard.${orgId}` : null;
 
@@ -238,10 +299,10 @@ export default function MyCardPage() {
 
           <div className="rounded-md bg-slate-50 px-3 py-1.5 border border-slate-200">
             <p className="text-[11px] font-medium uppercase tracking-wider text-slate-500">
-              Envelope No.
+              Member No.
             </p>
             <p className="font-mono text-lg font-bold tracking-wider text-slate-900">
-              {activeCard.member_number || 'Envelope No. not yet assigned'}
+              {activeCard.member_number || 'Member No. not yet assigned'}
             </p>
           </div>
 
@@ -261,11 +322,19 @@ export default function MyCardPage() {
         {/* QR Code Container */}
         <div className="flex flex-col items-center justify-center p-3 rounded-xl bg-white border border-slate-200 shadow-inner">
           {qrDataUrl ? (
-            <img
-              src={qrDataUrl}
-              alt="Your member QR code"
-              className="h-56 w-56 object-contain"
-            />
+            <button
+              ref={qrButtonRef}
+              type="button"
+              aria-label="Enlarge QR code"
+              onClick={() => setIsEnlarged(true)}
+              className="cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-blue rounded-lg"
+            >
+              <img
+                src={qrDataUrl}
+                alt="Your member QR code"
+                className="h-56 w-56 object-contain"
+              />
+            </button>
           ) : (
             <div className="flex h-56 w-56 items-center justify-center text-xs text-slate-400">
               Generating QR…
@@ -344,10 +413,45 @@ export default function MyCardPage() {
             Your old QR code (including any screenshots or printed copies) will stop working immediately.
           </p>
           <p className="text-small text-ink-secondary">
-            A new QR code will be generated and linked to your envelope number.
+            A new QR code will be generated and linked to your member number.
           </p>
         </div>
       </Modal>
+
+      {/* Full-screen Enlarged QR Overlay */}
+      {isEnlarged && qrDataUrl && activeCard && (
+        <div
+          ref={overlayRef}
+          tabIndex={-1}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Enlarged QR code"
+          onClick={() => setIsEnlarged(false)}
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white p-4 cursor-pointer select-none outline-none"
+        >
+          <img
+            src={qrDataUrl}
+            alt="Your member QR code"
+            style={{
+              width: 'min(92vw, 92vh)',
+              height: 'min(92vw, 92vh)',
+              imageRendering: 'pixelated',
+            }}
+            className="max-w-none object-contain"
+          />
+          <div className="mt-4 text-2xl font-bold text-slate-900 text-center">
+            {activeCard.display_name}
+          </div>
+          <div className="mt-1 font-mono text-xl font-bold text-slate-700 text-center">
+            {activeCard.member_number
+              ? `Member No. ${activeCard.member_number}`
+              : 'Member No. not yet assigned'}
+          </div>
+          <div className="mt-3 text-sm text-slate-400 text-center">
+            Tap anywhere to close
+          </div>
+        </div>
+      )}
     </div>
   );
 }

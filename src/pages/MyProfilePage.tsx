@@ -188,7 +188,7 @@ export default function MyProfilePage() {
                     {detailsData?.display_name ?? data.member.display_name}
                   </h2>
                   <p className="text-small text-ink-muted">
-                    {data.member.member_number ? `Envelope No. ${data.member.member_number}` : 'Envelope No. not yet assigned'}
+                    {data.member.member_number ? `Member No. ${data.member.member_number}` : 'Member No. not yet assigned'}
                   </p>
                 </div>
               </div>

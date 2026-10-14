@@ -3,6 +3,9 @@ import { Link } from 'react-router-dom';
 import { CalendarDays, CircleUser, LogOut, QrCode, User } from 'lucide-react';
 import { usePermissions } from '../../hooks/use-permissions';
 import { Permissions } from '../../types/permissions';
+import { useOrganizationContext } from '../../hooks/use-organization-context';
+import { useMyProfileDetails } from '../../features/self-service/portal-api';
+import { MemberAvatar } from '../../features/self-service/components/MemberAvatar';
 
 type Props = {
   email?: string | null;
@@ -16,6 +19,11 @@ export default function UserMenu({ email, organizationName, onSignOut }: Props) 
   const ref = useRef<HTMLDivElement>(null);
   const { hasPermission } = usePermissions();
   const canSelfService = hasPermission(Permissions.MembersSelfServiceView);
+
+  const { activeOrganization } = useOrganizationContext();
+  const orgId = activeOrganization?.id ?? null;
+  const { data: profileDetails, isLoading, error } = useMyProfileDetails(orgId, canSelfService);
+  const notLinked = (error as { code?: string } | null)?.code === 'P0002';
 
   useEffect(() => {
     if (!open) return;
@@ -41,9 +49,17 @@ export default function UserMenu({ email, organizationName, onSignOut }: Props) 
         aria-expanded={open}
         aria-haspopup="menu"
         onClick={() => setOpen((v) => !v)}
-        className="rounded-full p-1.5 text-ink-muted hover:bg-canvas focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+        className="rounded-full p-1 text-ink-muted hover:bg-canvas focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus inline-flex items-center justify-center"
       >
-        <CircleUser size={26} />
+        {canSelfService && profileDetails && !isLoading && !error && !notLinked ? (
+          <MemberAvatar
+            path={profileDetails.photo_path}
+            name={profileDetails.display_name}
+            size="sm"
+          />
+        ) : (
+          <CircleUser size={26} />
+        )}
       </button>
       {open && (
         <div

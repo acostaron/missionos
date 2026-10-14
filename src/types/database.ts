@@ -8046,6 +8046,10 @@ export type Database = {
         Args: { p_member_id: string; p_organization_id: string }
         Returns: Json
       }
+      get_member_photo_path: {
+        Args: { p_member_id: string; p_organization_id: string }
+        Returns: Json
+      }
       get_member_profile: {
         Args: { p_member_id: string; p_organization_id: string }
         Returns: Json

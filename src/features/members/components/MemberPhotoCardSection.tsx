@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Camera, QrCode } from 'lucide-react';
 import { MemberPhotoUploader } from '../../self-service/components/MemberPhotoUploader';
 import { useReissueMemberCard } from '../../self-service/portal-api';
+import { useMemberPhotoPath } from '../queries';
 import { getEventErrorMessage } from '../../events/error-message';
 import { Alert, Button, FormField, Modal, Textarea } from '../../../components/ui';
 
@@ -9,16 +11,25 @@ export interface MemberPhotoCardSectionProps {
   organizationId: string;
   memberId: string;
   memberName: string;
-  initialPhotoPath?: string | null;
 }
 
 export function MemberPhotoCardSection({
   organizationId,
   memberId,
   memberName,
-  initialPhotoPath = null,
 }: MemberPhotoCardSectionProps) {
-  const [photoPath, setPhotoPath] = useState<string | null>(initialPhotoPath);
+  const queryClient = useQueryClient();
+  const { data: photoData } = useMemberPhotoPath(organizationId, memberId);
+  const [localPhotoPath, setLocalPhotoPath] = useState<string | null | undefined>(undefined);
+
+  const photoPath = localPhotoPath !== undefined ? localPhotoPath : (photoData?.photo_path ?? null);
+
+  const handlePhotoChanged = (newPath: string | null) => {
+    setLocalPhotoPath(newPath);
+    queryClient.invalidateQueries({
+      queryKey: ['members', 'photo-path', organizationId, memberId],
+    });
+  };
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
   const [reissueReason, setReissueReason] = useState('');
   const [qrSuccessMsg, setQrSuccessMsg] = useState<string | null>(null);
@@ -81,7 +92,7 @@ export function MemberPhotoCardSection({
           effectiveMemberId={memberId}
           currentPath={photoPath}
           memberName={memberName}
-          onPhotoChanged={setPhotoPath}
+          onPhotoChanged={handlePhotoChanged}
         />
 
         {/* QR Reissue */}
