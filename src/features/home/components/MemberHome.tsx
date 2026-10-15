@@ -1,6 +1,12 @@
+import { useMemo } from 'react';
 import { CalendarDays, House, QrCode, User } from 'lucide-react';
 import { Card, EmptyState, Skeleton } from '../../../components/ui';
 import { useMyMemberContext } from '../../self-service/api';
+import {
+  useListMyHouseholdMeetings,
+  formatNextMeeting,
+} from '../../self-service/portal-api';
+import { getTodayNyDate, addDaysToDateStr } from '../../../lib/ny-time';
 import { formatMeetingSchedule } from '../../self-service/formatters';
 import { Permissions } from '../../../types/permissions';
 import { usePermissions } from '../../../hooks/use-permissions';
@@ -24,12 +30,30 @@ export default function MemberHome({ organizationId, organizationName, firstName
   const canSelfService = hasPermission(Permissions.MembersSelfServiceView);
   const { data, isLoading, error } = useMyMemberContext(organizationId, canSelfService);
 
+  const household = data?.household ?? null;
+
+  const today = useMemo(() => getTodayNyDate(), []);
+  const upcomingTo = useMemo(() => addDaysToDateStr(today, 120), [today]);
+  const { data: householdMeetings = [] } = useListMyHouseholdMeetings(
+    organizationId,
+    today,
+    upcomingTo,
+    canSelfService && !!household
+  );
+
+  const nextMeeting = useMemo(() => {
+    return (
+      householdMeetings.find(
+        (m) => m.meeting_status === 'scheduled' && m.meeting_date >= today
+      ) ?? null
+    );
+  }, [householdMeetings, today]);
+
   if (error) console.error('Member self-service context failed to load', error);
 
   const errorCode = (error as { code?: string } | null)?.code;
   const notLinked = errorCode === 'P0002';
   const unavailable = !canSelfService || (!!error && !notLinked);
-  const household = data?.household ?? null;
   const org = data?.organizational_context;
   const orgLine = [org?.unit, org?.chapter, org?.area].filter(Boolean).join(' · ');
 
@@ -101,6 +125,12 @@ export default function MemberHome({ organizationId, organizationName, firstName
                     startTime: household.meeting_start_time,
                     timezoneName: household.meeting_timezone_name,
                   })}
+                </p>
+              </div>
+              <div className="mt-2.5 border-t border-line pt-2.5">
+                <p className="text-caption font-medium text-ink-muted">Next Meeting</p>
+                <p className="mt-0.5 text-small text-ink">
+                  {formatNextMeeting(nextMeeting)}
                 </p>
               </div>
               {orgLine && <p className="mt-2 text-small text-ink-muted">{orgLine}</p>}

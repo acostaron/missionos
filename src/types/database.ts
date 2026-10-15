@@ -8238,6 +8238,10 @@ export type Database = {
         Args: { p_from: string; p_organization_id: string; p_to: string }
         Returns: Json
       }
+      list_my_household_meetings: {
+        Args: { p_from: string; p_organization_id: string; p_to: string }
+        Returns: Json
+      }
       list_program_runs: {
         Args: { p_include_closed?: boolean; p_organization_id: string }
         Returns: Json

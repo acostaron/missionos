@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { supabase } from '../../lib/supabase/client';
 import type { Json } from '../../types/database';
 import { selfServiceKeys } from './api';
+import { formatNyTime } from '../../lib/ny-time';
 
 // ---------------------------------------------------------------------------
 // Zod Schemas
@@ -105,6 +106,23 @@ export const myAttendanceSchema = z.object({
 });
 export type MyAttendance = z.infer<typeof myAttendanceSchema>;
 
+export const myHouseholdMeetingSchema = z.object({
+  household_meeting_id: z.string(),
+  household_id: z.string(),
+  household_name: z.string(),
+  meeting_date: z.string(),
+  scheduled_start_at: z.string().nullable(),
+  scheduled_end_at: z.string().nullable(),
+  meeting_status: z.string(),
+  meeting_type: z.string(),
+  location_type: z.string().nullable(),
+  location_text: z.string().nullable(),
+  host_name: z.string().nullable(),
+  facilitator_name: z.string().nullable(),
+  my_attendance_status: z.string().nullable(),
+});
+export type MyHouseholdMeeting = z.infer<typeof myHouseholdMeetingSchema>;
+
 // ---------------------------------------------------------------------------
 // Query Keys
 // ---------------------------------------------------------------------------
@@ -114,6 +132,8 @@ export const portalKeys = {
   card: (orgId: string | null) => [...selfServiceKeys.all, 'card', orgId] as const,
   events: (orgId: string | null, from: string, to: string) =>
     [...selfServiceKeys.all, 'events', orgId, from, to] as const,
+  householdMeetings: (orgId: string | null, from: string, to: string) =>
+    [...selfServiceKeys.all, 'household-meetings', orgId, from, to] as const,
   attendance: (orgId: string | null, from: string | null, to: string | null) =>
     [...selfServiceKeys.all, 'attendance', orgId, from, to] as const,
 };
@@ -175,6 +195,53 @@ export function useListMyEvents(organizationId: string | null, from: string, to:
     enabled: !!organizationId && !!from && !!to,
     staleTime: 30_000,
   });
+}
+
+export function useListMyHouseholdMeetings(
+  organizationId: string | null,
+  from: string,
+  to: string,
+  enabled: boolean = true
+) {
+  return useQuery<MyHouseholdMeeting[]>({
+    queryKey: portalKeys.householdMeetings(organizationId, from, to),
+    queryFn: async () => {
+      if (!organizationId) throw new Error('Organization ID is required');
+      const { data, error } = await supabase.rpc('list_my_household_meetings', {
+        p_organization_id: organizationId,
+        p_from: from,
+        p_to: to,
+      });
+      if (error) throw error;
+      return z.array(myHouseholdMeetingSchema).parse(data || []);
+    },
+    enabled: !!organizationId && !!from && !!to && enabled,
+    staleTime: 30_000,
+  });
+}
+
+export function formatNextMeeting(meeting: MyHouseholdMeeting | null | undefined): string {
+  if (!meeting) return 'No meeting scheduled';
+  const parts: string[] = [];
+  if (meeting.meeting_date) {
+    const d = meeting.meeting_date.includes('T')
+      ? new Date(meeting.meeting_date)
+      : new Date(`${meeting.meeting_date}T12:00:00Z`);
+    const dateStr = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+    }).format(d);
+    parts.push(dateStr);
+  }
+  if (meeting.scheduled_start_at) {
+    parts.push(formatNyTime(meeting.scheduled_start_at));
+  }
+  if (meeting.location_text && meeting.location_text.trim()) {
+    parts.push(meeting.location_text.trim());
+  }
+  return parts.length > 0 ? parts.join(' · ') : 'No meeting scheduled';
 }
 
 export function useListMyAttendance(

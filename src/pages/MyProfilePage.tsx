@@ -1,10 +1,16 @@
+import { useMemo } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { ExternalLink, House, Mail, Phone, ShieldAlert, User, Users } from 'lucide-react';
 import { useOrganizationContext } from '../hooks/use-organization-context';
 import { usePermissions } from '../hooks/use-permissions';
 import { Permissions } from '../types/permissions';
 import { useMyMemberProfile } from '../features/self-service/api';
-import { useMyProfileDetails } from '../features/self-service/portal-api';
+import {
+  useMyProfileDetails,
+  useListMyHouseholdMeetings,
+  formatNextMeeting,
+} from '../features/self-service/portal-api';
+import { getTodayNyDate, addDaysToDateStr } from '../lib/ny-time';
 import { MemberAvatar } from '../features/self-service/components/MemberAvatar';
 import { formatMeetingSchedule } from '../features/self-service/formatters';
 import { MyFormationCard } from '../features/formation/components/MyFormationCard';
@@ -64,6 +70,22 @@ export default function MyProfilePage() {
   const orgId = activeOrganization?.id ?? null;
   const { data, isLoading, error } = useMyMemberProfile(orgId, canSelfService);
   const { data: detailsData } = useMyProfileDetails(orgId, canSelfService);
+
+  const today = useMemo(() => getTodayNyDate(), []);
+  const upcomingTo = useMemo(() => addDaysToDateStr(today, 120), [today]);
+  const { data: householdMeetings = [] } = useListMyHouseholdMeetings(
+    orgId,
+    today,
+    upcomingTo
+  );
+
+  const nextMeeting = useMemo(() => {
+    return (
+      householdMeetings.find(
+        (m) => m.meeting_status === 'scheduled' && m.meeting_date >= today
+      ) ?? null
+    );
+  }, [householdMeetings, today]);
 
   const errorCode = (error as { code?: string } | null)?.code;
   const errorMessage = (error as { message?: string } | null)?.message ?? '';
@@ -384,6 +406,13 @@ export default function MyProfilePage() {
                       startTime: data.household.meeting_start_time,
                       timezoneName: data.household.meeting_timezone_name,
                     })}
+                  </dd>
+                </div>
+
+                <div>
+                  <dt className="text-caption font-medium text-ink-muted">Next Meeting</dt>
+                  <dd className="mt-1 text-small text-ink">
+                    {formatNextMeeting(nextMeeting)}
                   </dd>
                 </div>
 
