@@ -165,13 +165,22 @@ export function looksLikeSectionLabel(text: string): boolean {
 export function extractBlocks(html: string): Block[] {
   const doc = new DOMParser().parseFromString(html, "text/html");
   if (!doc) throw new Error("Could not read the topic page.");
-  const root = (doc.querySelector('[role="main"]') ?? doc.body) as Element | null;
-  if (!root) return [];
+  const body = doc.body as Element | null;
+  if (!body) return [];
   for (const sel of ["nav", "header", "footer", "script", "style", "noscript", "[role='navigation']"]) {
-    for (const n of Array.from(root.querySelectorAll(sel))) (n as Element).remove();
+    for (const n of Array.from(body.querySelectorAll(sel))) (n as Element).remove();
   }
+  // Google Sites puts the page title in [role=main] and each text box of the page body in a
+  // div.tyJCtd OUTSIDE [role=main]. Read every top-level text box in page order; fall back to
+  // [role=main] / <body> if the site layout changes.
+  const boxes = (Array.from(body.querySelectorAll(".tyJCtd")) as Element[])
+    .filter((b) => !b.parentElement?.closest(".tyJCtd"));
+  const roots: Element[] = boxes.length > 0
+    ? boxes
+    : [((body.querySelector('[role="main"]') as Element | null) ?? body)];
+  const nodes: Element[] = roots.flatMap((r) => Array.from(r.querySelectorAll("h1,h2,h3,h4,h5,h6,p,li")) as Element[]);
   const blocks: Block[] = [];
-  for (const node of Array.from(root.querySelectorAll("h1,h2,h3,h4,h5,h6,p,li"))) {
+  for (const node of nodes) {
     const el = node as Element;
     const tag = el.tagName.toLowerCase();
     // text inside a list item is taken with the list item
