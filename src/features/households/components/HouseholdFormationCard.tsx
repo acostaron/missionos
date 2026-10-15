@@ -86,10 +86,9 @@ export function HouseholdFormationCard({
     );
   }
 
-  // Backend remains authoritative; this only hides controls that cannot apply.
-  // Fraternal households have no delegated write authority.
-  const isFraternal = pastoralLevel === 'fraternal';
-  const canWrite = canManage && !isFraternal;
+  // Backend remains authoritative. Fraternal households are managed by the servant leaders of
+  // the Area/State they sit under (Pass 9.5), so the controls show for them too.
+  const canWrite = canManage;
   const canAssign = canWrite && isHouseholdActive;
 
   const status: HouseholdFormationStatus | undefined =
