@@ -30,6 +30,7 @@ export const PlaceMembersPage = lazy(() => import('../pages/PlaceMembersPage'));
 export const CalendarPage = lazy(() => import('../pages/CalendarPage'));
 export const EventPage = lazy(() => import('../pages/EventPage'));
 export const EventAttendancePage = lazy(() => import('../pages/EventAttendancePage'));
+export const EventCheckInPage = lazy(() => import('../pages/EventCheckInPage'));
 export const ProgramPage = lazy(() => import('../pages/ProgramPage'));
 export const MemberLoginsPage = lazy(() => import('../pages/MemberLoginsPage'));
 export const ClaimAccountPage = lazy(() => import('../pages/ClaimAccountPage'));

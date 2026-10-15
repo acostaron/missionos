@@ -7,6 +7,7 @@ import {
   Users,
   CheckCircle2,
   UserCheck,
+  QrCode,
   Edit,
   Trash2,
   RotateCcw,
@@ -359,14 +360,26 @@ export default function EventPage() {
           <div className="flex items-center justify-between">
             <h2 className="text-h3 font-semibold text-ink">Attendance</h2>
             {canRecordAttendance && (
-              <Button
-                variant="primary"
-                size="sm"
-                icon={<UserCheck className="h-4 w-4" />}
-                onClick={() => navigate(`/app/calendar/${event.id}/attendance`)}
-              >
-                Take attendance
-              </Button>
+              <div className="flex flex-wrap justify-end gap-2">
+                {!event.is_program_session && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    icon={<QrCode className="h-4 w-4" />}
+                    onClick={() => navigate(`/app/calendar/${event.id}/scan`)}
+                  >
+                    Scan QR
+                  </Button>
+                )}
+                <Button
+                  variant="primary"
+                  size="sm"
+                  icon={<UserCheck className="h-4 w-4" />}
+                  onClick={() => navigate(`/app/calendar/${event.id}/attendance`)}
+                >
+                  Take attendance
+                </Button>
+              </div>
             )}
           </div>
 

@@ -1021,6 +1021,68 @@ export type Database = {
           },
         ]
       }
+      event_check_ins: {
+        Row: {
+          check_in_date: string
+          check_in_method: string
+          event_id: string
+          id: string
+          member_id: string
+          organization_id: string
+          recorded_at: string
+          recorded_by_profile_id: string
+        }
+        Insert: {
+          check_in_date: string
+          check_in_method?: string
+          event_id: string
+          id?: string
+          member_id: string
+          organization_id: string
+          recorded_at?: string
+          recorded_by_profile_id: string
+        }
+        Update: {
+          check_in_date?: string
+          check_in_method?: string
+          event_id?: string
+          id?: string
+          member_id?: string
+          organization_id?: string
+          recorded_at?: string
+          recorded_by_profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_check_ins_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_check_ins_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_check_ins_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_check_ins_recorded_by_profile_id_fkey"
+            columns: ["recorded_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_greeters: {
         Row: {
           assigned_at: string
@@ -8136,6 +8198,10 @@ export type Database = {
         Args: { p_event_id: string; p_organization_id: string }
         Returns: Json
       }
+      get_event_check_in_summary: {
+        Args: { p_event_id: string; p_organization_id: string }
+        Returns: Json
+      }
       get_family_profile: {
         Args: { p_family_id: string; p_organization_id: string }
         Returns: Json
@@ -8831,6 +8897,14 @@ export type Database = {
           p_leadership_assignment_id?: string
           p_organization_id: string
           p_reason?: string
+        }
+        Returns: Json
+      }
+      scan_event_check_in: {
+        Args: {
+          p_event_id: string
+          p_organization_id: string
+          p_payload: string
         }
         Returns: Json
       }

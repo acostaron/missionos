@@ -23,6 +23,7 @@ import {
   CalendarPage,
   EventPage,
   EventAttendancePage,
+  EventCheckInPage,
   ProgramPage,
   MemberLoginsPage,
   ClaimAccountPage,
@@ -192,6 +193,14 @@ export const router = createBrowserRouter([
             element: (
               <Suspense fallback={<PageLoadingFallback />}>
                 <EventAttendancePage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'calendar/:eventId/scan',
+            element: (
+              <Suspense fallback={<PageLoadingFallback />}>
+                <EventCheckInPage />
               </Suspense>
             ),
           },
