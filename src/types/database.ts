@@ -8116,6 +8116,7 @@ export type Database = {
         Args: { p_organization_id: string }
         Returns: Json
       }
+      get_my_service: { Args: { p_organization_id: string }; Returns: Json }
       get_pastoral_household_roster: {
         Args: { p_household_id: string; p_organization_id: string }
         Returns: Json

@@ -123,6 +123,18 @@ export const myHouseholdMeetingSchema = z.object({
 });
 export type MyHouseholdMeeting = z.infer<typeof myHouseholdMeetingSchema>;
 
+export const myServiceSchema = z.object({
+  role_code: z.string(),
+  role_name: z.string(),
+  node_id: z.string(),
+  node_name: z.string(),
+  node_type: z.string().nullable(),
+  effective_from: z.string().nullable(),
+  basis: z.enum(['appointed', 'with_spouse']),
+  partner_name: z.string().nullable(),
+});
+export type MyServiceItem = z.infer<typeof myServiceSchema>;
+
 // ---------------------------------------------------------------------------
 // Query Keys
 // ---------------------------------------------------------------------------
@@ -130,6 +142,7 @@ export type MyHouseholdMeeting = z.infer<typeof myHouseholdMeetingSchema>;
 export const portalKeys = {
   details: (orgId: string | null) => [...selfServiceKeys.all, 'details', orgId] as const,
   card: (orgId: string | null) => [...selfServiceKeys.all, 'card', orgId] as const,
+  service: (orgId: string | null) => [...selfServiceKeys.all, 'service', orgId] as const,
   events: (orgId: string | null, from: string, to: string) =>
     [...selfServiceKeys.all, 'events', orgId, from, to] as const,
   householdMeetings: (orgId: string | null, from: string, to: string) =>
@@ -216,6 +229,25 @@ export function useListMyHouseholdMeetings(
       return z.array(myHouseholdMeetingSchema).parse(data || []);
     },
     enabled: !!organizationId && !!from && !!to && enabled,
+    staleTime: 30_000,
+  });
+}
+
+export function useMyService(
+  organizationId: string | null,
+  enabled: boolean = true
+) {
+  return useQuery<MyServiceItem[]>({
+    queryKey: portalKeys.service(organizationId),
+    queryFn: async () => {
+      if (!organizationId) throw new Error('Organization ID is required');
+      const { data, error } = await supabase.rpc('get_my_service', {
+        p_organization_id: organizationId,
+      });
+      if (error) throw error;
+      return z.array(myServiceSchema).parse(data || []);
+    },
+    enabled: !!organizationId && enabled,
     staleTime: 30_000,
   });
 }

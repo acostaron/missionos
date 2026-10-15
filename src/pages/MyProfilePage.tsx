@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
-import { ExternalLink, House, Mail, Phone, ShieldAlert, User, Users } from 'lucide-react';
+import { ExternalLink, HandHeart, House, Mail, Phone, ShieldAlert, User, Users } from 'lucide-react';
 import { useOrganizationContext } from '../hooks/use-organization-context';
 import { usePermissions } from '../hooks/use-permissions';
 import { Permissions } from '../types/permissions';
@@ -8,6 +8,7 @@ import { useMyMemberProfile } from '../features/self-service/api';
 import {
   useMyProfileDetails,
   useListMyHouseholdMeetings,
+  useMyService,
   formatNextMeeting,
 } from '../features/self-service/portal-api';
 import { getTodayNyDate, addDaysToDateStr } from '../lib/ny-time';
@@ -70,6 +71,10 @@ export default function MyProfilePage() {
   const orgId = activeOrganization?.id ?? null;
   const { data, isLoading, error } = useMyMemberProfile(orgId, canSelfService);
   const { data: detailsData } = useMyProfileDetails(orgId, canSelfService);
+  const { data: serviceItems = [], isLoading: isServiceLoading } = useMyService(
+    orgId,
+    canSelfService
+  );
 
   const today = useMemo(() => getTodayNyDate(), []);
   const upcomingTo = useMemo(() => addDaysToDateStr(today, 120), [today]);
@@ -431,6 +436,67 @@ export default function MyProfilePage() {
                 <p className="mt-1 text-caption text-ink-muted">
                   You are not currently placed in a household. When your servant leader or administrator assigns your household, it will appear here.
                 </p>
+              </div>
+            )}
+          </Card>
+
+          {/* Section: My Service */}
+          <Card padding="comfortable">
+            <div className="flex items-center gap-2.5 border-b border-line pb-4">
+              <div
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-navy-50 text-primary-blue"
+                aria-hidden="true"
+              >
+                <HandHeart className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="text-card-title font-semibold text-ink">My Service</h2>
+                <p className="text-caption text-ink-muted">Where you lead and serve</p>
+              </div>
+            </div>
+
+            {isServiceLoading ? (
+              <div className="py-4 space-y-3">
+                <Skeleton className="h-16" />
+              </div>
+            ) : serviceItems.length === 0 ? (
+              <div className="py-6 text-center">
+                <p className="text-small text-ink-muted">
+                  You have no current leadership or service appointments.
+                </p>
+              </div>
+            ) : (
+              <div className="divide-y divide-line">
+                {serviceItems.map((item) => {
+                  const roleTitle = item.partner_name
+                    ? item.role_name.replace(/Leader$/, 'Leaders')
+                    : item.role_name;
+                  const nodeSubtitle = item.node_type
+                    ? `${item.node_name} · ${item.node_type}`
+                    : item.node_name;
+                  const details: string[] = [];
+                  if (item.partner_name) {
+                    details.push(`with ${item.partner_name}`);
+                  }
+                  if (item.effective_from) {
+                    details.push(`Since ${item.effective_from}`);
+                  }
+
+                  return (
+                    <div
+                      key={`${item.node_id}-${item.role_code}-${item.basis}`}
+                      className="py-3 first:pt-4 last:pb-0"
+                    >
+                      <div className="font-medium text-ink">{roleTitle}</div>
+                      <div className="text-small text-ink-muted">{nodeSubtitle}</div>
+                      {details.length > 0 && (
+                        <div className="text-caption text-ink-muted">
+                          {details.join(' · ')}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </Card>
