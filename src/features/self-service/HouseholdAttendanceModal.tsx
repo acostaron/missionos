@@ -1,8 +1,9 @@
 // Record or update attendance for a household meeting from the household card (Pass 9.9, written by Claude 2026-10-16).
 // Saving also marks a scheduled meeting completed (its planned topic is then completed automatically).
+// Before the meeting day it opens read-only: the expected members, no saving (Pass 9.9A, Ron 2026-10-16).
 import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { formatNyDateShort } from '../../lib/ny-time';
+import { formatNyDateShort, getTodayNyDate } from '../../lib/ny-time';
 import { normalizeError } from '../../lib/supabase/errors';
 import { Alert, Button, Modal } from '../../components/ui';
 import {
@@ -46,6 +47,7 @@ export function HouseholdAttendanceModal({
   }, [data]);
 
   const roster = data?.roster ?? [];
+  const isEarly = meeting.meeting_date > getTodayNyDate();
   const willComplete = meeting.meeting_status === 'scheduled';
 
   const markAll = (s: AttendanceStatus) => {
@@ -77,9 +79,16 @@ export function HouseholdAttendanceModal({
       open
       onClose={onClose}
       closeOnBackdrop={false}
-      title="Attendance"
+      title={isEarly ? 'Expected members' : 'Attendance'}
       description={`${householdName} · ${formatNyDateShort(meeting.meeting_date)}`}
       footer={
+        isEarly ? (
+          <div className="flex w-full justify-end">
+            <Button variant="ghost" onClick={onClose}>
+              Close
+            </Button>
+          </div>
+        ) : (
         <div className="flex w-full justify-end gap-2">
           <Button variant="ghost" onClick={onClose} disabled={isSaving}>
             Cancel
@@ -88,6 +97,7 @@ export function HouseholdAttendanceModal({
             {willComplete ? 'Save and complete meeting' : 'Save'}
           </Button>
         </div>
+        )
       }
     >
       <div className="space-y-4">
@@ -105,6 +115,20 @@ export function HouseholdAttendanceModal({
           <p className="text-sm text-ink-muted">Loading members…</p>
         ) : roster.length === 0 ? (
           <p className="text-sm text-ink-muted">This household has no members on the meeting date.</p>
+        ) : isEarly ? (
+          <>
+            <p className="text-xs text-ink-muted">
+              Attendance opens on {formatNyDateShort(meeting.meeting_date)}. {roster.length} member
+              {roster.length === 1 ? '' : 's'} expected.
+            </p>
+            <ul className="divide-y divide-line">
+              {roster.map((m) => (
+                <li key={m.member_id} className="py-2 text-sm text-ink">
+                  {m.display_name}
+                </li>
+              ))}
+            </ul>
+          </>
         ) : (
           <>
             <div className="flex flex-wrap items-center gap-2 text-xs text-ink-secondary">

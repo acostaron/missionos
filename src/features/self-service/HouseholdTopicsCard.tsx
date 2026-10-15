@@ -1,5 +1,6 @@
 // Household card in My Events — one place to run the household (Pass 9.9, written by Claude 2026-10-16;
 // grew from the 9.6 Fraternal topics card and the 9.7 household topics card).
+// 9.9A: before the meeting day, "Attendance opens on …" and a read-only Expected members list.
 // Everyone sees their household's meetings, topics and their own attendance. can_edit (servant leaders, spouse in
 // couple leadership, administrators, any member of a Fraternal household) adds: schedule / edit / cancel / complete
 // meetings, record attendance, choose / change topics. The server decides can_edit and checks it again on save.
@@ -195,6 +196,9 @@ export function HouseholdTopicsCard({ organizationId }: { organizationId: string
                           : 'Attendance not recorded yet.'}
                       </p>
                     )}
+                    {hh.can_edit && m.meeting_status === 'scheduled' && m.meeting_date > today && (
+                      <p className="text-xs text-ink-muted">Attendance opens on {formatNyDateShort(m.meeting_date)}.</p>
+                    )}
                     {!cancelled && !hh.can_edit && m.my_attendance && (
                       <p className="text-xs text-ink-secondary">You: {ATTENDANCE_LABELS[m.my_attendance]}</p>
                     )}
@@ -227,6 +231,11 @@ export function HouseholdTopicsCard({ organizationId }: { organizationId: string
                       <p className="text-xs text-ink-muted">No topic planned yet.</p>
                     )}
                     {hh.can_edit && !cancelled && (<div className="flex flex-wrap gap-2 pt-1">
+                      {m.meeting_date > today && m.meeting_status === 'scheduled' && (
+                        <Button size="sm" variant="ghost" onClick={() => setMeetingDialog({ kind: 'attendance', household: hh, meeting: m })}>
+                          Expected members
+                        </Button>
+                      )}
                       {m.meeting_date <= today && (
                         <Button
                           size="sm"
