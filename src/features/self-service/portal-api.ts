@@ -132,6 +132,22 @@ export const myServiceSchema = z.object({
   effective_from: z.string().nullable(),
   basis: z.enum(['appointed', 'with_spouse']),
   partner_name: z.string().nullable(),
+  leader_names: z.string().nullable().optional(),
+  household: z
+    .object({
+      household_id: z.string(),
+      household_name: z.string(),
+      pastoral_level: z.string(),
+      meeting_frequency: z.string().nullable(),
+      meeting_day_of_week: z.number().nullable(),
+      meeting_start_time: z.string().nullable(),
+      meeting_timezone_name: z.string().nullable(),
+      location_type: z.string().nullable(),
+      parent_node_name: z.string().nullable(),
+      active_member_count: z.number(),
+    })
+    .nullable()
+    .optional(),
 });
 export type MyServiceItem = z.infer<typeof myServiceSchema>;
 

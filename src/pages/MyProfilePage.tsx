@@ -471,29 +471,125 @@ export default function MyProfilePage() {
                   const roleTitle = item.partner_name
                     ? item.role_name.replace(/Leader$/, 'Leaders')
                     : item.role_name;
-                  const nodeSubtitle = item.node_type
+                  const scopeDisplay = item.node_type
                     ? `${item.node_name} · ${item.node_type}`
                     : item.node_name;
-                  const details: string[] = [];
-                  if (item.partner_name) {
-                    details.push(`with ${item.partner_name}`);
-                  }
-                  if (item.effective_from) {
-                    details.push(`Since ${item.effective_from}`);
-                  }
+                  const nextHouseholdMeeting = item.household
+                    ? householdMeetings.find(
+                        (m) =>
+                          m.household_id === item.household!.household_id &&
+                          m.meeting_status === 'scheduled' &&
+                          m.meeting_date >= today
+                      ) ?? null
+                    : null;
 
                   return (
                     <div
                       key={`${item.node_id}-${item.role_code}-${item.basis}`}
-                      className="py-3 first:pt-4 last:pb-0"
+                      className="py-6 first:pt-4 last:pb-0"
                     >
-                      <div className="font-medium text-ink">{roleTitle}</div>
-                      <div className="text-small text-ink-muted">{nodeSubtitle}</div>
-                      {details.length > 0 && (
-                        <div className="text-caption text-ink-muted">
-                          {details.join(' · ')}
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-semibold text-ink">{roleTitle}</h3>
+                        {item.household && canViewHouseholdWorkspace && (
+                          <Link
+                            to={`/app/households/${item.household.household_id}`}
+                            className="inline-flex items-center gap-1.5 text-xs font-medium text-primary-blue hover:underline"
+                          >
+                            <span>View Household Workspace</span>
+                            <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                          </Link>
+                        )}
+                      </div>
+
+                      <dl className="mt-4 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
+                        <div>
+                          <dt className="text-caption font-medium text-ink-muted">Scope</dt>
+                          <dd className="mt-1 text-small text-ink">{scopeDisplay}</dd>
                         </div>
-                      )}
+
+                        {item.leader_names && (
+                          <div>
+                            <dt className="text-caption font-medium text-ink-muted">
+                              Servant Leaders
+                            </dt>
+                            <dd className="mt-1 text-small text-ink">{item.leader_names}</dd>
+                          </div>
+                        )}
+
+                        {item.household?.household_name && (
+                          <div>
+                            <dt className="text-caption font-medium text-ink-muted">
+                              Household Name
+                            </dt>
+                            <dd className="mt-1 text-small text-ink">
+                              {item.household.household_name}
+                            </dd>
+                          </div>
+                        )}
+
+                        {item.household?.pastoral_level && (
+                          <div>
+                            <dt className="text-caption font-medium text-ink-muted">
+                              Pastoral Level
+                            </dt>
+                            <dd className="mt-1 text-small text-ink">
+                              {formatPastoralLevel(item.household.pastoral_level)}
+                            </dd>
+                          </div>
+                        )}
+
+                        {item.household != null && item.household.active_member_count != null && (
+                          <div>
+                            <dt className="text-caption font-medium text-ink-muted">Members</dt>
+                            <dd className="mt-1 text-small text-ink">
+                              {item.household.active_member_count}
+                            </dd>
+                          </div>
+                        )}
+
+                        {item.household && (
+                          <div>
+                            <dt className="text-caption font-medium text-ink-muted">
+                              Meeting Schedule
+                            </dt>
+                            <dd className="mt-1 text-small text-ink">
+                              {formatMeetingSchedule({
+                                frequency: item.household.meeting_frequency,
+                                dayOfWeek: item.household.meeting_day_of_week,
+                                startTime: item.household.meeting_start_time,
+                                timezoneName: item.household.meeting_timezone_name,
+                              })}
+                            </dd>
+                          </div>
+                        )}
+
+                        {item.household && (
+                          <div>
+                            <dt className="text-caption font-medium text-ink-muted">
+                              Next Meeting
+                            </dt>
+                            <dd className="mt-1 text-small text-ink">
+                              {formatNextMeeting(nextHouseholdMeeting)}
+                            </dd>
+                          </div>
+                        )}
+
+                        {item.household?.parent_node_name && (
+                          <div>
+                            <dt className="text-caption font-medium text-ink-muted">Parent</dt>
+                            <dd className="mt-1 text-small text-ink">
+                              {item.household.parent_node_name}
+                            </dd>
+                          </div>
+                        )}
+
+                        {item.effective_from && (
+                          <div>
+                            <dt className="text-caption font-medium text-ink-muted">Since</dt>
+                            <dd className="mt-1 text-small text-ink">{item.effective_from}</dd>
+                          </div>
+                        )}
+                      </dl>
                     </div>
                   );
                 })}
