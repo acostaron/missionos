@@ -93,6 +93,7 @@ export function SyncTopicLibraryModal({
           <>
             <p className="text-sm text-ink-secondary">
               Found {shown.discovered_count} topic links. Newest month: {formatTopicMonth(`${shown.newest_month}-01`)}.
+              {shown.from_month && <> Only {formatTopicMonth(`${shown.from_month}-01`)} and later are copied.</>}
               {' '}The Personal Sharing and Chapter Assembly guides are copied for the newest month only.
             </p>
 
@@ -133,6 +134,9 @@ export function SyncTopicLibraryModal({
                       </td>
                       <td className="px-3 py-2 text-ink-secondary">
                         {r.heading_count ?? '–'}
+                        {r.block_count !== undefined && (
+                          <span className="block text-xs text-ink-muted">{r.block_count} lines</span>
+                        )}
                         {r.headings && r.headings.length > 0 && (
                           <span className="block text-xs text-ink-muted">{r.headings.join(' · ')}</span>
                         )}

@@ -57,6 +57,7 @@ export const contentBlockSchema = z.object({
   type: z.enum(['heading', 'paragraph', 'list_item']),
   text: z.string(),
   level: z.number().optional(),
+  ordered: z.boolean().optional(),
 });
 export type ContentBlock = z.infer<typeof contentBlockSchema>;
 
@@ -109,6 +110,7 @@ export const syncResultSchema = z.object({
   mode: z.enum(['dry_run', 'ingest']),
   series_code: z.string(),
   newest_month: z.string(),
+  from_month: z.string().optional(),
   discovered_count: z.number(),
   processed_count: z.number(),
   unclassified_links: z.array(z.string()),

@@ -23,20 +23,29 @@ function TopicBlocks({ blocks, skipTitle }: { blocks: ContentBlock[]; skipTitle?
 
   const out: ReactNode[] = [];
   let bullets: string[] = [];
+  let bulletsOrdered = false;
   const flush = (key: string) => {
     if (bullets.length) {
+      const items = bullets.map((b, i) => <li key={i}>{b}</li>);
       out.push(
-        <ul key={key} className="list-disc space-y-1 pl-6 text-base leading-relaxed text-ink">
-          {bullets.map((b, i) => (
-            <li key={i}>{b}</li>
-          ))}
-        </ul>,
+        bulletsOrdered ? (
+          <ol key={key} className="list-decimal space-y-1 pl-6 text-base leading-relaxed text-ink">
+            {items}
+          </ol>
+        ) : (
+          <ul key={key} className="list-disc space-y-1 pl-6 text-base leading-relaxed text-ink">
+            {items}
+          </ul>
+        ),
       );
       bullets = [];
     }
   };
   list.forEach((b, i) => {
     if (b.type === 'list_item') {
+      const ordered = b.ordered === true;
+      if (bullets.length && ordered !== bulletsOrdered) flush(`ul-${i}`);
+      bulletsOrdered = ordered;
       bullets.push(b.text);
       return;
     }

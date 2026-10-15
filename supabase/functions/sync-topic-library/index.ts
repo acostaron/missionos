@@ -20,7 +20,9 @@
 //
 // Request body:
 //   { organization_id: uuid, mode?: "dry_run" | "ingest" (default "dry_run"),
-//     months?: ["2026-10", ...], series_code?, series_title?, downloads_url? }
+//     months?: ["2026-10", ...], from_month?: "2026-10" (default: current NY month),
+//     series_code?, series_title?, downloads_url? }
+// Months before from_month are never copied.
 // The response lists, per page: month, kind, result, block and heading counts.
 // It never returns the copied text.
 // =============================================================================
@@ -73,7 +75,7 @@ const CHROME_TEXT = new Set([
   "report abuse", "page details", "page updated", "google sites", "this site uses cookies from google to deliver its services and to analyze traffic.",
 ]);
 
-export type Block = { type: "heading" | "paragraph" | "list_item"; text: string; level?: number };
+export type Block = { type: "heading" | "paragraph" | "list_item"; text: string; level?: number; ordered?: boolean };
 
 export type Discovered = {
   url: string;
@@ -141,6 +143,24 @@ export function discoverFromDownloadsHtml(html: string): { found: Discovered[]; 
   return { found, unclassified };
 }
 
+/**
+ * Google Sites section labels ("Goal", "Grab", "Grace", "Go Forth" …) are styled
+ * paragraphs, not <h*> tags. A paragraph counts as a section heading when it is a
+ * short label: 1–4 words, starts with a capital letter, no digits, no closing
+ * punctuation, and is not a quotation.
+ */
+export function looksLikeSectionLabel(text: string): boolean {
+  const t = text.trim();
+  if (t.length === 0 || t.length > 32) return false;
+  const words = t.split(/\s+/);
+  if (words.length > 4) return false;
+  if (!/^[A-Z]/.test(t)) return false;
+  if (/\d/.test(t)) return false;
+  if (/[.,;:!?"'\u201c\u201d\u2018\u2019)\]]$/.test(t)) return false;
+  if (/^[-\u2013\u2014("\u201c]/.test(t)) return false;
+  return true;
+}
+
 /** Turn a Google Sites page into plain-text blocks from its main content. */
 export function extractBlocks(html: string): Block[] {
   const doc = new DOMParser().parseFromString(html, "text/html");
@@ -163,7 +183,10 @@ export function extractBlocks(html: string): Block[] {
     if (tag.startsWith("h")) {
       blocks.push({ type: "heading", text, level: Math.min(Number(tag.slice(1)), 4) });
     } else if (tag === "li") {
-      blocks.push({ type: "list_item", text });
+      const ordered = el.parentElement?.tagName.toLowerCase() === "ol";
+      blocks.push(ordered ? { type: "list_item", text, ordered: true } : { type: "list_item", text });
+    } else if (looksLikeSectionLabel(text)) {
+      blocks.push({ type: "heading", text, level: 3 });
     } else {
       blocks.push({ type: "paragraph", text });
     }
@@ -202,6 +225,11 @@ if (import.meta.main) {
     const orgId = String(body?.organization_id ?? "");
     if (!/^[0-9a-f-]{36}$/i.test(orgId)) return json({ error: "organization_id is required." }, 400);
     const mode = body?.mode === "ingest" ? "ingest" : "dry_run";
+    // Only this month and later are copied (New York time), unless from_month says otherwise.
+    const nyMonth = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York", year: "numeric", month: "2-digit" })
+      .format(new Date()).slice(0, 7);
+    const fromMonth: string = typeof body?.from_month === "string" && /^20\d\d-(0[1-9]|1[0-2])$/.test(body.from_month)
+      ? body.from_month : nyMonth;
     const monthsFilter: string[] | null = Array.isArray(body?.months)
       ? body.months.filter((m: unknown) => typeof m === "string" && /^20\d\d-(0[1-9]|1[0-2])$/.test(m))
       : null;
@@ -245,6 +273,7 @@ if (import.meta.main) {
     const newestMonth = discovered.map((d) => d.month).sort().at(-1)!;
     const work = discovered.filter((d) =>
       (!SHARED_KINDS.includes(d.kind) || d.month === newestMonth) &&
+      d.month.slice(0, 7) >= fromMonth &&
       (!monthsFilter || monthsFilter.includes(d.month.slice(0, 7)))
     );
 
@@ -259,7 +288,7 @@ if (import.meta.main) {
         const headings = blocks.filter((b) => b.type === "heading").length;
         row.block_count = blocks.length;
         row.heading_count = headings;
-        if (blocks.length < 3 || headings < 1) {
+        if (blocks.length < 3) {
           row.result = "parse_failed";
         } else if (mode === "dry_run") {
           row.result = "dry_run";
@@ -290,6 +319,7 @@ if (import.meta.main) {
       mode,
       series_code: seriesCode,
       newest_month: newestMonth.slice(0, 7),
+      from_month: fromMonth,
       discovered_count: discovered.length,
       processed_count: results.length,
       unclassified_links: unclassified,
