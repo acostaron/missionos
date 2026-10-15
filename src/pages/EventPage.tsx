@@ -384,7 +384,7 @@ export default function EventPage() {
                     Scan QR
                   </Button>
                 )}
-                {canRecordAttendance && (
+                {canRecordAttendance && paymentAccess?.can_tick_attendance !== false && (
                   <Button
                     variant="primary"
                     size="sm"

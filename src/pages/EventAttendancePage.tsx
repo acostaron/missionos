@@ -22,6 +22,7 @@ import {
 } from '../features/programs/queries';
 import { getEventErrorMessage } from '../features/events/error-message';
 import { getTodayNyDate, isoToNyLocal } from '../lib/ny-time';
+import { useEventPaymentAccess } from '../features/events/payments';
 import { useQueryClient } from '@tanstack/react-query';
 import type { EventRosterMember, EventRosterResponse } from '../features/events/types';
 import type { ProgramSessionParticipantRosterItem, ProgramSessionRosterResponse } from '../features/programs/types';
@@ -71,7 +72,10 @@ export default function EventAttendancePage() {
   const eventDateNy = event ? isoToNyLocal(event.starts_at).date : todayNy;
   const isFuture = eventDateNy > todayNy;
   const isCancelled = event?.event_status === 'cancelled';
-  const isReadOnly = isFuture || isCancelled || !event?.can_record;
+  // Pass 9.13A: paid events — only organizers and administrators tick attendance; others use Scan QR.
+  const { data: paymentAccess } = useEventPaymentAccess(orgId, eventId ?? null);
+  const isPaidLocked = !isProgramSession && paymentAccess?.can_tick_attendance === false;
+  const isReadOnly = isFuture || isCancelled || !event?.can_record || isPaidLocked;
 
   // Extract unique section names for the section filter
   const sectionOptions = useMemo(() => {
@@ -357,7 +361,9 @@ export default function EventAttendancePage() {
               ? 'This event is cancelled. Attendance cannot be modified.'
               : isFuture
                 ? 'Attendance can only be recorded on or after the day of the event.'
-                : 'You do not have permission to record attendance for this event.'}
+                : isPaidLocked
+                  ? 'This is a paid event. Check members in with Scan QR so payment is checked. Only the organizers and administrators can tick attendance here.'
+                  : 'You do not have permission to record attendance for this event.'}
           </Alert>
         )}
 

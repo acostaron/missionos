@@ -15,6 +15,7 @@ export const PAYMENT_METHODS = [
   { value: 'cash', label: 'Cash' },
   { value: 'check', label: 'Check' },
   { value: 'zelle', label: 'Zelle' },
+  { value: 'paypal', label: 'PayPal' },
   { value: 'card', label: 'Card' },
   { value: 'other', label: 'Other' },
 ] as const;
@@ -52,6 +53,13 @@ export interface PaymentSearchRow {
   payment: PaymentState;
 }
 
+export interface PaymentAccess {
+  fee_amount: number | null;
+  can_manage_payments: boolean;
+  /** false on paid events for anyone but the organizers and administrators (use Scan QR instead) */
+  can_tick_attendance?: boolean;
+}
+
 export const paymentKeys = {
   all: ['events', 'payments'] as const,
   access: (orgId: string | null, eventId: string | null) => [...paymentKeys.all, 'access', orgId, eventId] as const,
@@ -60,7 +68,7 @@ export const paymentKeys = {
 };
 
 export function useEventPaymentAccess(orgId: string | null, eventId: string | null) {
-  return useQuery<{ fee_amount: number | null; can_manage_payments: boolean }>({
+  return useQuery<PaymentAccess>({
     queryKey: paymentKeys.access(orgId, eventId),
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_event_payment_access', {
@@ -68,7 +76,7 @@ export function useEventPaymentAccess(orgId: string | null, eventId: string | nu
         p_event_id: eventId!,
       });
       if (error) throw error;
-      return data as unknown as { fee_amount: number | null; can_manage_payments: boolean };
+      return data as unknown as PaymentAccess;
     },
     enabled: !!orgId && !!eventId,
   });
