@@ -4,7 +4,7 @@
 import { useCallback, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, ArrowLeft, CheckCircle2, ScanLine, XCircle } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, CheckCircle2, CircleDollarSign, ScanLine, XCircle } from 'lucide-react';
 import { useCurrentOrganization } from '../hooks/use-current-organization';
 import { useEvent, eventKeys } from '../features/events/queries';
 import { getEventErrorMessage } from '../features/events/error-message';
@@ -17,6 +17,8 @@ import {
   type ScanResult,
 } from '../features/events/check-in';
 import { MemberAvatar } from '../features/self-service/components/MemberAvatar';
+import { invalidatePayments, money, recordEventPayment, type PaymentMethod } from '../features/events/payments';
+import { RecordPaymentForm } from '../features/events/components/RecordPaymentForm';
 import { formatNyDateShort, formatNyTime } from '../lib/ny-time';
 import { Alert, Button, Card, Input } from '../components/ui';
 
@@ -59,6 +61,7 @@ export default function EventCheckInPage() {
   const [errorText, setErrorText] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [manual, setManual] = useState('');
+  const lastPayload = useRef('');
   const busyRef = useRef(false);
   const resumeTimer = useRef<number | undefined>(undefined);
 
@@ -66,6 +69,7 @@ export default function EventCheckInPage() {
     async (payload: string) => {
       if (!orgId || !eventId || busyRef.current || !payload.trim()) return;
       busyRef.current = true;
+      lastPayload.current = payload.trim();
       setBusy(true);
       setErrorText(null);
       window.clearTimeout(resumeTimer.current);
@@ -94,6 +98,23 @@ export default function EventCheckInPage() {
   );
 
   const waitingForTap = result !== null && result.result !== 'checked_in';
+
+  // Paid events: record the payment at the desk, then check the member in with the same QR.
+  const payAndCheckIn = async (memberId: string, amount: number, method: PaymentMethod) => {
+    if (!orgId || !eventId) return;
+    try {
+      setBusy(true);
+      setErrorText(null);
+      await recordEventPayment(orgId, eventId, memberId, amount, method);
+      await invalidatePayments(qc);
+    } catch (e) {
+      setErrorText(getEventErrorMessage(e));
+      setBusy(false);
+      return;
+    }
+    setBusy(false);
+    await submit(lastPayload.current);
+  };
 
   if (isLoading || !event) {
     return <div className="p-8 text-center text-sm text-ink-muted">Loading event…</div>;
@@ -165,7 +186,9 @@ export default function EventCheckInPage() {
                       ? 'Checked in'
                       : result.result === 'already_checked_in'
                         ? 'Already checked in'
-                        : 'Not checked in'}
+                        : result.result === 'payment_required'
+                          ? 'Not paid — not checked in'
+                          : 'Not checked in'}
                   </p>
                   {result.member && (
                     <div className="flex items-center gap-2">
@@ -190,6 +213,30 @@ export default function EventCheckInPage() {
                       This QR was already scanned today at {formatNyTime(result.checked_in_at)}.
                       {result.kit_given_at ? ` Kit already given ${when(result.kit_given_at)}.` : ''} Do not give another kit.
                     </p>
+                  )}
+                  {result.result === 'checked_in' && result.payment && ['paid', 'waived'].includes(result.payment.status) && (
+                    <p className="text-xs font-medium text-success-700">
+                      {result.payment.status === 'paid' ? `Paid ${money(result.payment.paid)}` : 'Fee waived'}
+                    </p>
+                  )}
+                  {result.result === 'payment_required' && (
+                    <div className="space-y-2">
+                      <p className="flex items-center gap-1 text-sm font-semibold text-danger-700">
+                        <CircleDollarSign className="h-4 w-4" />
+                        Balance due {money(result.payment.balance)}
+                        {result.payment.paid > 0 ? ` (paid ${money(result.payment.paid)} of ${money(result.payment.fee)})` : ''}
+                      </p>
+                      {result.can_record_payment ? (
+                        <RecordPaymentForm
+                          defaultAmount={result.payment.balance}
+                          submitLabel="Record payment & check in"
+                          busy={busy}
+                          onSubmit={(amount, method) => payAndCheckIn(result.member.member_id, amount, method)}
+                        />
+                      ) : (
+                        <p className="text-sm text-ink">Do not give the kit. Send the member to the payment table.</p>
+                      )}
+                    </div>
                   )}
                   {result.result === 'invalid' && (
                     <p className="text-sm text-ink">{INVALID_REASONS[result.reason] ?? 'This QR code cannot be used.'}</p>

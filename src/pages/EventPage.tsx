@@ -8,6 +8,7 @@ import {
   CheckCircle2,
   UserCheck,
   QrCode,
+  CircleDollarSign,
   Edit,
   Trash2,
   RotateCcw,
@@ -39,6 +40,7 @@ import {
 import { EventFormModal } from '../features/events/components/EventFormModal';
 import { CancelEventModal } from '../features/events/components/CancelEventModal';
 import { AddGreeterModal } from '../features/events/components/AddGreeterModal';
+import { money, useEventPaymentAccess } from '../features/events/payments';
 import { getEventErrorMessage } from '../features/events/error-message';
 import {
   formatNyDateLong,
@@ -56,6 +58,7 @@ export default function EventPage() {
   const orgId = organization?.id ?? null;
 
   const { data: event, isLoading: isEventLoading, error } = useEvent(orgId, eventId ?? null);
+  const { data: paymentAccess } = useEventPaymentAccess(orgId, eventId ?? null);
 
   const statusMutation = useSetEventStatus();
   const greeterMutation = useSetEventGreeter();
@@ -359,9 +362,19 @@ export default function EventPage() {
         <Card padding="comfortable" className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-h3 font-semibold text-ink">Attendance</h2>
-            {canRecordAttendance && (
+            {(canRecordAttendance || paymentAccess?.can_manage_payments) && (
               <div className="flex flex-wrap justify-end gap-2">
-                {!event.is_program_session && (
+                {paymentAccess?.can_manage_payments && !event.is_program_session && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    icon={<CircleDollarSign className="h-4 w-4" />}
+                    onClick={() => navigate(`/app/calendar/${event.id}/payments`)}
+                  >
+                    {paymentAccess.fee_amount ? `Payments · ${money(paymentAccess.fee_amount)}` : 'Payments'}
+                  </Button>
+                )}
+                {canRecordAttendance && !event.is_program_session && (
                   <Button
                     variant="outline"
                     size="sm"
@@ -371,14 +384,16 @@ export default function EventPage() {
                     Scan QR
                   </Button>
                 )}
-                <Button
-                  variant="primary"
-                  size="sm"
-                  icon={<UserCheck className="h-4 w-4" />}
-                  onClick={() => navigate(`/app/calendar/${event.id}/attendance`)}
-                >
-                  Take attendance
-                </Button>
+                {canRecordAttendance && (
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    icon={<UserCheck className="h-4 w-4" />}
+                    onClick={() => navigate(`/app/calendar/${event.id}/attendance`)}
+                  >
+                    Take attendance
+                  </Button>
+                )}
               </div>
             )}
           </div>

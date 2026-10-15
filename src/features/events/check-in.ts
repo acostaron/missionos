@@ -1,6 +1,7 @@
 // QR check-in at the event desk (Pass 9.12, written by Claude 2026-10-16).
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase/client';
+import type { PaymentState } from './payments';
 
 export interface CheckInMember {
   member_id: string;
@@ -17,7 +18,9 @@ export type ScanResult =
       first_check_in: boolean;
       kit_given_at: string | null;
       multi_day: boolean;
+      payment?: PaymentState;
     }
+  | { result: 'payment_required'; member: CheckInMember; payment: PaymentState; can_record_payment: boolean }
   | { result: 'already_checked_in'; member: CheckInMember; checked_in_at: string; kit_given_at: string | null }
   | { result: 'invalid'; reason: string; member: CheckInMember | null };
 

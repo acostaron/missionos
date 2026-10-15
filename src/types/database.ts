@@ -1083,6 +1083,75 @@ export type Database = {
           },
         ]
       }
+      event_fee_waivers: {
+        Row: {
+          event_id: string
+          id: string
+          member_id: string
+          organization_id: string
+          removed_at: string | null
+          removed_by_profile_id: string | null
+          waived_at: string
+          waived_by_profile_id: string
+        }
+        Insert: {
+          event_id: string
+          id?: string
+          member_id: string
+          organization_id: string
+          removed_at?: string | null
+          removed_by_profile_id?: string | null
+          waived_at?: string
+          waived_by_profile_id: string
+        }
+        Update: {
+          event_id?: string
+          id?: string
+          member_id?: string
+          organization_id?: string
+          removed_at?: string | null
+          removed_by_profile_id?: string | null
+          waived_at?: string
+          waived_by_profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_fee_waivers_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_fee_waivers_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_fee_waivers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_fee_waivers_removed_by_profile_id_fkey"
+            columns: ["removed_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_fee_waivers_waived_by_profile_id_fkey"
+            columns: ["waived_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_greeters: {
         Row: {
           assigned_at: string
@@ -1152,6 +1221,81 @@ export type Database = {
           },
         ]
       }
+      event_payments: {
+        Row: {
+          amount: number
+          event_id: string
+          id: string
+          member_id: string
+          organization_id: string
+          payment_method: string
+          recorded_at: string
+          recorded_by_profile_id: string
+          voided_at: string | null
+          voided_by_profile_id: string | null
+        }
+        Insert: {
+          amount: number
+          event_id: string
+          id?: string
+          member_id: string
+          organization_id: string
+          payment_method: string
+          recorded_at?: string
+          recorded_by_profile_id: string
+          voided_at?: string | null
+          voided_by_profile_id?: string | null
+        }
+        Update: {
+          amount?: number
+          event_id?: string
+          id?: string
+          member_id?: string
+          organization_id?: string
+          payment_method?: string
+          recorded_at?: string
+          recorded_by_profile_id?: string
+          voided_at?: string | null
+          voided_by_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_payments_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_payments_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_payments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_payments_recorded_by_profile_id_fkey"
+            columns: ["recorded_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_payments_voided_by_profile_id_fkey"
+            columns: ["voided_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           audience_node_id: string | null
@@ -1162,6 +1306,7 @@ export type Database = {
           ends_at: string | null
           event_status: string
           event_type: string
+          fee_amount: number | null
           formation_posted_at: string | null
           formation_posted_by_profile_id: string | null
           formation_program_id: string | null
@@ -1185,6 +1330,7 @@ export type Database = {
           ends_at?: string | null
           event_status?: string
           event_type: string
+          fee_amount?: number | null
           formation_posted_at?: string | null
           formation_posted_by_profile_id?: string | null
           formation_program_id?: string | null
@@ -1208,6 +1354,7 @@ export type Database = {
           ends_at?: string | null
           event_status?: string
           event_type?: string
+          fee_amount?: number | null
           formation_posted_at?: string | null
           formation_posted_by_profile_id?: string | null
           formation_program_id?: string | null
@@ -1609,6 +1756,68 @@ export type Database = {
             columns: ["verified_by_profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      finance_coordinators: {
+        Row: {
+          appointed_at: string
+          appointed_by_profile_id: string
+          ended_at: string | null
+          ended_by_profile_id: string | null
+          id: string
+          member_id: string
+          organization_id: string
+          role_title: string
+        }
+        Insert: {
+          appointed_at?: string
+          appointed_by_profile_id: string
+          ended_at?: string | null
+          ended_by_profile_id?: string | null
+          id?: string
+          member_id: string
+          organization_id: string
+          role_title: string
+        }
+        Update: {
+          appointed_at?: string
+          appointed_by_profile_id?: string
+          ended_at?: string | null
+          ended_by_profile_id?: string | null
+          id?: string
+          member_id?: string
+          organization_id?: string
+          role_title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "finance_coordinators_appointed_by_profile_id_fkey"
+            columns: ["appointed_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finance_coordinators_ended_by_profile_id_fkey"
+            columns: ["ended_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finance_coordinators_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finance_coordinators_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -8202,6 +8411,14 @@ export type Database = {
         Args: { p_event_id: string; p_organization_id: string }
         Returns: Json
       }
+      get_event_payment_access: {
+        Args: { p_event_id: string; p_organization_id: string }
+        Returns: Json
+      }
+      get_event_payments: {
+        Args: { p_event_id: string; p_organization_id: string }
+        Returns: Json
+      }
       get_family_profile: {
         Args: { p_family_id: string; p_organization_id: string }
         Returns: Json
@@ -8707,6 +8924,16 @@ export type Database = {
         }
         Returns: string
       }
+      record_event_payment: {
+        Args: {
+          p_amount: number
+          p_event_id: string
+          p_member_id: string
+          p_organization_id: string
+          p_payment_method: string
+        }
+        Returns: Json
+      }
       record_household_meeting_attendance: {
         Args: {
           p_attendance: Json
@@ -8941,6 +9168,10 @@ export type Database = {
         }
         Returns: Json
       }
+      search_members_for_event_payment: {
+        Args: { p_event_id: string; p_organization_id: string; p_query: string }
+        Returns: Json
+      }
       search_members_without_household: {
         Args: {
           p_limit?: number
@@ -8973,6 +9204,23 @@ export type Database = {
         }
         Returns: Json
       }
+      set_event_fee: {
+        Args: {
+          p_event_id: string
+          p_fee_amount?: number
+          p_organization_id: string
+        }
+        Returns: Json
+      }
+      set_event_fee_waiver: {
+        Args: {
+          p_event_id: string
+          p_member_id: string
+          p_organization_id: string
+          p_waived: boolean
+        }
+        Returns: Json
+      }
       set_event_greeter: {
         Args: {
           p_assign?: boolean
@@ -8988,6 +9236,15 @@ export type Database = {
           p_organization_id: string
           p_reason?: string
           p_status: string
+        }
+        Returns: Json
+      }
+      set_finance_coordinator: {
+        Args: {
+          p_active: boolean
+          p_member_id: string
+          p_organization_id: string
+          p_role_title: string
         }
         Returns: Json
       }
@@ -9250,6 +9507,10 @@ export type Database = {
         Returns: string
       }
       verify_topic_sync_secret: { Args: { p_secret: string }; Returns: boolean }
+      void_event_payment: {
+        Args: { p_organization_id: string; p_payment_id: string }
+        Returns: Json
+      }
       void_member_formation_program_record: {
         Args: {
           p_organization_id: string
