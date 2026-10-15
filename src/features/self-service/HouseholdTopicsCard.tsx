@@ -1,61 +1,38 @@
-// Household topics for members (all households) — Pass 9.7, written by Claude 2026-10-16 (from 9.6 Fraternal card).
-// Everyone sees their household's meetings and topics; can_edit (leaders, or any member of a Fraternal household)
-// controls Choose topic / Change topic used. The server decides can_edit and checks it again on save.
+// Household card in My Events — one place to run the household (Pass 9.9, written by Claude 2026-10-16;
+// grew from the 9.6 Fraternal topics card and the 9.7 household topics card).
+// Everyone sees their household's meetings, topics and their own attendance. can_edit (servant leaders, spouse in
+// couple leadership, administrators, any member of a Fraternal household) adds: schedule / edit / cancel / complete
+// meetings, record attendance, choose / change topics. The server decides can_edit and checks it again on save.
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { BookOpenText, MapPin } from 'lucide-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { BookOpenText, CalendarPlus, MapPin } from 'lucide-react';
 import { supabase } from '../../lib/supabase/client';
 import { formatNyDateShort, formatNyTime, getTodayNyDate } from '../../lib/ny-time';
 import { normalizeError } from '../../lib/supabase/errors';
 import { formatTopicMonth, materialKindLabel, useTopicLibrary } from '../library/api';
 import { CHANGE_REASONS, changeReasonLabel, type ChangeReasonCode } from '../households/api/meeting-topics';
 import { Alert, Badge, Button, Card, Input, Modal, Select } from '../../components/ui';
+import {
+  ATTENDANCE_LABELS,
+  LOCATION_TYPES,
+  invalidateHouseholdCards,
+  setMeetingStatus,
+  useMyHouseholdCards,
+  type CardHousehold,
+  type CardMeeting,
+} from './household-card-api';
+import { HouseholdMeetingFormModal } from './HouseholdMeetingFormModal';
+import { HouseholdAttendanceModal } from './HouseholdAttendanceModal';
 
-interface FraternalTopic {
-  assignment_id: string;
-  topic_id: string;
-  title: string;
-  is_library_topic: boolean;
-  assignment_status: 'planned' | 'completed' | 'skipped';
-  change_reason_code: string | null;
-  replaced_by_title: string | null;
-  replaces_title: string | null;
-}
-interface FraternalMeeting {
-  household_meeting_id: string;
-  meeting_date: string;
-  scheduled_start_at: string | null;
-  meeting_status: 'scheduled' | 'completed' | 'cancelled';
-  location_type: string | null;
-  location_text: string | null;
-  host_name: string | null;
-  topics: FraternalTopic[];
-}
-interface FraternalHousehold {
-  household_id: string;
-  household_name: string;
-  pastoral_level: string;
-  can_edit: boolean;
-  meetings: FraternalMeeting[];
-}
+type FraternalMeeting = CardMeeting;
 
-const LOCATION_TYPES: Record<string, string> = { in_person: 'In person', virtual: 'Virtual', hybrid: 'Hybrid' };
-
-const fraternalKey = (orgId: string | null) => ['self-service', 'household-topics', orgId] as const;
-
-function useMyFraternalTopics(orgId: string | null) {
-  return useQuery<FraternalHousehold[]>({
-    queryKey: fraternalKey(orgId),
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc('list_my_household_topics', { p_organization_id: orgId! });
-      if (error) throw error;
-      return (data ?? []) as unknown as FraternalHousehold[];
-    },
-    enabled: !!orgId,
-    staleTime: 30_000,
-  });
-}
+type MeetingDialog =
+  | { kind: 'schedule'; household: CardHousehold }
+  | { kind: 'edit'; household: CardHousehold; meeting: CardMeeting }
+  | { kind: 'attendance'; household: CardHousehold; meeting: CardMeeting }
+  | { kind: 'complete' | 'cancel'; household: CardHousehold; meeting: CardMeeting }
+  | null;
 
 type Dialog =
   | { kind: 'assign'; meeting: FraternalMeeting }
@@ -64,7 +41,8 @@ type Dialog =
 
 export function HouseholdTopicsCard({ organizationId }: { organizationId: string | null }) {
   const qc = useQueryClient();
-  const { data: households = [] } = useMyFraternalTopics(organizationId);
+  const { data: households = [] } = useMyHouseholdCards(organizationId);
+  const [meetingDialog, setMeetingDialog] = useState<MeetingDialog>(null);
   const { data: library } = useTopicLibrary(households.length > 0 ? organizationId : null);
   const [dialog, setDialog] = useState<Dialog>(null);
   const [topicId, setTopicId] = useState('');
@@ -107,13 +85,28 @@ export function HouseholdTopicsCard({ organizationId }: { organizationId: string
       }
     },
     onSuccess: async () => {
-      await qc.invalidateQueries({ queryKey: fraternalKey(organizationId) });
+      await invalidateHouseholdCards(qc);
       setDialog(null);
     },
     onError: (e) => setErrorText(normalizeError(e).message),
   });
 
-  if (households.length === 0) return null;
+  const statusChange = useMutation({
+    mutationFn: async () => {
+      if (!organizationId || !meetingDialog || (meetingDialog.kind !== 'complete' && meetingDialog.kind !== 'cancel')) return;
+      await setMeetingStatus(
+        organizationId,
+        meetingDialog.meeting.household_meeting_id,
+        meetingDialog.kind === 'complete' ? 'completed' : 'cancelled',
+      );
+    },
+    onSuccess: async () => {
+      await invalidateHouseholdCards(qc);
+      setMeetingDialog(null);
+    },
+  });
+
+  if (households.length === 0 || !organizationId) return null;
 
   const open = (d: Exclude<Dialog, null>) => {
     setDialog(d);
@@ -136,15 +129,27 @@ export function HouseholdTopicsCard({ organizationId }: { organizationId: string
     <>
       {households.map((hh) => (
         <Card key={hh.household_id} padding="compact" className="space-y-3">
-          <div>
-            <h2 className="text-base font-semibold text-ink">{hh.household_name} — Topics</h2>
-            <p className="text-xs text-ink-secondary">
-              {hh.pastoral_level === 'fraternal'
-                ? 'Fraternal household: members take turns facilitating. Plan the topic for a meeting, or record the topic used.'
-                : hh.can_edit
-                  ? 'You lead this household: plan the topic for a meeting, or record the topic used.'
-                  : 'Topics planned by your household servant leaders. Open a topic to read it during the meeting.'}
-            </p>
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <div>
+              <h2 className="text-base font-semibold text-ink">{hh.household_name}</h2>
+              <p className="text-xs text-ink-secondary">
+                {hh.pastoral_level === 'fraternal'
+                  ? 'Fraternal household: members take turns facilitating. Schedule meetings, plan topics and record attendance here.'
+                  : hh.can_edit
+                    ? 'You lead this household: schedule meetings, plan topics and record attendance here.'
+                    : 'Your household meetings and topics. Open a topic to read it during the meeting.'}
+              </p>
+            </div>
+            {hh.can_edit && (
+              <Button
+                size="sm"
+                variant="outline"
+                icon={<CalendarPlus className="h-4 w-4" />}
+                onClick={() => setMeetingDialog({ kind: 'schedule', household: hh })}
+              >
+                Schedule meeting
+              </Button>
+            )}
           </div>
           {hh.meetings.length === 0 ? (
             <p className="text-sm text-ink-muted">No meetings scheduled yet.</p>
@@ -154,6 +159,8 @@ export function HouseholdTopicsCard({ organizationId }: { organizationId: string
                 const active = m.topics.filter((t) => t.assignment_status !== 'skipped');
                 const replaced = m.topics.filter((t) => t.assignment_status === 'skipped');
                 const upcoming = m.meeting_status === 'scheduled' && m.meeting_date >= today;
+                const dueOrPast = m.meeting_status === 'scheduled' && m.meeting_date <= today;
+                const sum = m.attendance_summary;
                 const cancelled = m.meeting_status === 'cancelled';
                 const place = [m.location_type ? (LOCATION_TYPES[m.location_type] ?? m.location_type) : null, m.location_text]
                   .filter(Boolean)
@@ -179,6 +186,17 @@ export function HouseholdTopicsCard({ organizationId }: { organizationId: string
                         )}
                         {m.host_name && <span className="text-ink-muted">Host: {m.host_name}</span>}
                       </div>
+                    )}
+                    {!cancelled && hh.can_edit && sum && (sum.recorded_attendance_count > 0 || m.meeting_status === 'completed') && (
+                      <p className="text-xs text-ink-secondary">
+                        {sum.recorded_attendance_count > 0
+                          ? `Attendance: ${sum.present_count} present · ${sum.absent_count} absent · ${sum.excused_count} excused` +
+                            (sum.attendance_complete ? '' : ` (${sum.expected_member_count - sum.recorded_attendance_count} not marked)`)
+                          : 'Attendance not recorded yet.'}
+                      </p>
+                    )}
+                    {!cancelled && !hh.can_edit && m.my_attendance && (
+                      <p className="text-xs text-ink-secondary">You: {ATTENDANCE_LABELS[m.my_attendance]}</p>
                     )}
                     {active.map((t) => (
                       <div key={t.assignment_id} className="text-sm text-ink">
@@ -209,6 +227,20 @@ export function HouseholdTopicsCard({ organizationId }: { organizationId: string
                       <p className="text-xs text-ink-muted">No topic planned yet.</p>
                     )}
                     {hh.can_edit && !cancelled && (<div className="flex flex-wrap gap-2 pt-1">
+                      {m.meeting_date <= today && (
+                        <Button
+                          size="sm"
+                          variant={dueOrPast ? 'primary' : 'outline'}
+                          onClick={() => setMeetingDialog({ kind: 'attendance', household: hh, meeting: m })}
+                        >
+                          {sum && sum.recorded_attendance_count > 0 ? 'Update attendance' : 'Record attendance'}
+                        </Button>
+                      )}
+                      {dueOrPast && (
+                        <Button size="sm" variant="outline" onClick={() => { statusChange.reset(); setMeetingDialog({ kind: 'complete', household: hh, meeting: m }); }}>
+                          Mark completed
+                        </Button>
+                      )}
                       {upcoming && active.length === 0 && (
                         <Button size="sm" variant="outline" onClick={() => open({ kind: 'assign', meeting: m })}>
                           Choose topic
@@ -219,6 +251,16 @@ export function HouseholdTopicsCard({ organizationId }: { organizationId: string
                           {active.length > 0 ? 'Change topic used' : 'Record topic used'}
                         </Button>
                       )}
+                      {m.meeting_status === 'scheduled' && (
+                        <>
+                          <Button size="sm" variant="ghost" onClick={() => setMeetingDialog({ kind: 'edit', household: hh, meeting: m })}>
+                            Edit / reschedule
+                          </Button>
+                          <Button size="sm" variant="ghost" onClick={() => { statusChange.reset(); setMeetingDialog({ kind: 'cancel', household: hh, meeting: m }); }}>
+                            Cancel meeting
+                          </Button>
+                        </>
+                      )}
                     </div>)}
                   </li>
                 );
@@ -227,6 +269,61 @@ export function HouseholdTopicsCard({ organizationId }: { organizationId: string
           )}
         </Card>
       ))}
+
+      {(meetingDialog?.kind === 'schedule' || meetingDialog?.kind === 'edit') && (
+        <HouseholdMeetingFormModal
+          organizationId={organizationId}
+          householdId={meetingDialog.household.household_id}
+          householdName={meetingDialog.household.household_name}
+          meeting={meetingDialog.kind === 'edit' ? meetingDialog.meeting : null}
+          onClose={() => setMeetingDialog(null)}
+        />
+      )}
+
+      {meetingDialog?.kind === 'attendance' && (
+        <HouseholdAttendanceModal
+          organizationId={organizationId}
+          householdName={meetingDialog.household.household_name}
+          meeting={meetingDialog.meeting}
+          onClose={() => setMeetingDialog(null)}
+        />
+      )}
+
+      {(meetingDialog?.kind === 'complete' || meetingDialog?.kind === 'cancel') && (
+        <Modal
+          open
+          onClose={() => setMeetingDialog(null)}
+          title={meetingDialog.kind === 'complete' ? 'Mark meeting completed?' : 'Cancel this meeting?'}
+          description={`${meetingDialog.household.household_name} · ${formatNyDateShort(meetingDialog.meeting.meeting_date)}`}
+          footer={
+            <div className="flex w-full justify-end gap-2">
+              <Button variant="ghost" onClick={() => setMeetingDialog(null)} disabled={statusChange.isPending}>
+                Back
+              </Button>
+              <Button
+                variant={meetingDialog.kind === 'cancel' ? 'danger' : 'primary'}
+                onClick={() => statusChange.mutate()}
+                loading={statusChange.isPending}
+              >
+                {meetingDialog.kind === 'complete' ? 'Mark completed' : 'Cancel meeting'}
+              </Button>
+            </div>
+          }
+        >
+          <div className="space-y-3">
+            {statusChange.error && (
+              <Alert variant="danger" title="Could not save">
+                {normalizeError(statusChange.error).message}
+              </Alert>
+            )}
+            <p className="text-sm text-ink-secondary">
+              {meetingDialog.kind === 'complete'
+                ? 'Its planned topic is marked as used. You can still record attendance afterwards.'
+                : 'Members will see it as cancelled. A planned topic stays planned and can be chosen for another meeting.'}
+            </p>
+          </div>
+        </Modal>
+      )}
 
       {dialog && (
         <Modal

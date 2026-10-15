@@ -8522,6 +8522,55 @@ export type Database = {
         }
         Returns: Json
       }
+      member_get_household_attendance: {
+        Args: { p_meeting_id: string; p_organization_id: string }
+        Returns: Json
+      }
+      member_household_roster: {
+        Args: { p_household_id: string; p_organization_id: string }
+        Returns: Json
+      }
+      member_record_household_attendance: {
+        Args: {
+          p_attendance: Json
+          p_complete_meeting?: boolean
+          p_meeting_id: string
+          p_organization_id: string
+        }
+        Returns: Json
+      }
+      member_schedule_household_meeting: {
+        Args: {
+          p_host_member_id?: string
+          p_household_id: string
+          p_location_text?: string
+          p_location_type?: string
+          p_meeting_date: string
+          p_organization_id: string
+          p_scheduled_start_at?: string
+        }
+        Returns: Json
+      }
+      member_set_household_meeting_status: {
+        Args: {
+          p_meeting_id: string
+          p_new_status: string
+          p_organization_id: string
+        }
+        Returns: Json
+      }
+      member_update_household_meeting: {
+        Args: {
+          p_host_member_id?: string
+          p_location_text?: string
+          p_location_type?: string
+          p_meeting_date: string
+          p_meeting_id: string
+          p_organization_id: string
+          p_scheduled_start_at?: string
+        }
+        Returns: Json
+      }
       move_governance_node: {
         Args: {
           p_actor_profile_id?: string
