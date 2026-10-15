@@ -8460,6 +8460,10 @@ export type Database = {
         Args: { p_from: string; p_organization_id: string; p_to: string }
         Returns: Json
       }
+      list_my_fraternal_topics: {
+        Args: { p_organization_id: string }
+        Returns: Json
+      }
       list_my_household_meetings: {
         Args: { p_from: string; p_organization_id: string; p_to: string }
         Returns: Json
@@ -8474,6 +8478,25 @@ export type Database = {
       }
       lookup_auth_user_for_invitation: {
         Args: { p_email: string; p_organization_id: string }
+        Returns: Json
+      }
+      member_assign_fraternal_topic: {
+        Args: {
+          p_meeting_id: string
+          p_organization_id: string
+          p_topic_id: string
+        }
+        Returns: Json
+      }
+      member_change_fraternal_meeting_topic: {
+        Args: {
+          p_meeting_id: string
+          p_new_topic_id?: string
+          p_organization_id: string
+          p_other_title?: string
+          p_reason_code: string
+          p_replaced_assignment_id?: string
+        }
         Returns: Json
       }
       move_governance_node: {
