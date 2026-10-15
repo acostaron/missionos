@@ -1,4 +1,6 @@
-// Fraternal household topics for members (rotating facilitation) — Pass 9.6, written by Claude 2026-10-16
+// Household topics for members (all households) — Pass 9.7, written by Claude 2026-10-16 (from 9.6 Fraternal card).
+// Everyone sees their household's meetings and topics; can_edit (leaders, or any member of a Fraternal household)
+// controls Choose topic / Change topic used. The server decides can_edit and checks it again on save.
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -30,16 +32,18 @@ interface FraternalMeeting {
 interface FraternalHousehold {
   household_id: string;
   household_name: string;
+  pastoral_level: string;
+  can_edit: boolean;
   meetings: FraternalMeeting[];
 }
 
-const fraternalKey = (orgId: string | null) => ['self-service', 'fraternal-topics', orgId] as const;
+const fraternalKey = (orgId: string | null) => ['self-service', 'household-topics', orgId] as const;
 
 function useMyFraternalTopics(orgId: string | null) {
   return useQuery<FraternalHousehold[]>({
     queryKey: fraternalKey(orgId),
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('list_my_fraternal_topics', { p_organization_id: orgId! });
+      const { data, error } = await supabase.rpc('list_my_household_topics', { p_organization_id: orgId! });
       if (error) throw error;
       return (data ?? []) as unknown as FraternalHousehold[];
     },
@@ -53,7 +57,7 @@ type Dialog =
   | { kind: 'change'; meeting: FraternalMeeting }
   | null;
 
-export function FraternalTopicsCard({ organizationId }: { organizationId: string | null }) {
+export function HouseholdTopicsCard({ organizationId }: { organizationId: string | null }) {
   const qc = useQueryClient();
   const { data: households = [] } = useMyFraternalTopics(organizationId);
   const { data: library } = useTopicLibrary(households.length > 0 ? organizationId : null);
@@ -79,14 +83,14 @@ export function FraternalTopicsCard({ organizationId }: { organizationId: string
     mutationFn: async () => {
       if (!dialog || !organizationId) return;
       if (dialog.kind === 'assign') {
-        const { error } = await supabase.rpc('member_assign_fraternal_topic', {
+        const { error } = await supabase.rpc('member_assign_household_topic', {
           p_organization_id: organizationId,
           p_meeting_id: dialog.meeting.household_meeting_id,
           p_topic_id: topicId,
         });
         if (error) throw error;
       } else {
-        const { error } = await supabase.rpc('member_change_fraternal_meeting_topic', {
+        const { error } = await supabase.rpc('member_change_household_meeting_topic', {
           p_organization_id: organizationId,
           p_meeting_id: dialog.meeting.household_meeting_id,
           p_reason_code: reason as ChangeReasonCode,
@@ -130,7 +134,11 @@ export function FraternalTopicsCard({ organizationId }: { organizationId: string
           <div>
             <h2 className="text-base font-semibold text-ink">{hh.household_name} — Topics</h2>
             <p className="text-xs text-ink-secondary">
-              Fraternal household: members take turns facilitating. Plan the topic for a meeting, or record the topic used.
+              {hh.pastoral_level === 'fraternal'
+                ? 'Fraternal household: members take turns facilitating. Plan the topic for a meeting, or record the topic used.'
+                : hh.can_edit
+                  ? 'You lead this household: plan the topic for a meeting, or record the topic used.'
+                  : 'Topics planned by your household servant leaders. Open a topic to read it during the meeting.'}
             </p>
           </div>
           {hh.meetings.length === 0 ? (
@@ -177,7 +185,10 @@ export function FraternalTopicsCard({ organizationId }: { organizationId: string
                         {t.change_reason_code ? ` (${changeReasonLabel(t.change_reason_code)})` : ''}
                       </div>
                     ))}
-                    <div className="flex flex-wrap gap-2 pt-1">
+                    {!hh.can_edit && active.length === 0 && (
+                      <p className="text-xs text-ink-muted">No topic planned yet.</p>
+                    )}
+                    {hh.can_edit && (<div className="flex flex-wrap gap-2 pt-1">
                       {upcoming && active.length === 0 && (
                         <Button size="sm" variant="outline" onClick={() => open({ kind: 'assign', meeting: m })}>
                           Choose topic
@@ -188,7 +199,7 @@ export function FraternalTopicsCard({ organizationId }: { organizationId: string
                           {active.length > 0 ? 'Change topic used' : 'Record topic used'}
                         </Button>
                       )}
-                    </div>
+                    </div>)}
                   </li>
                 );
               })}

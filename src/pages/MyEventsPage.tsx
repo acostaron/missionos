@@ -19,7 +19,7 @@ import {
 import { EVENT_TYPE_LABELS, getEventTypeBadgeVariant } from '../features/events/labels';
 import type { EventType } from '../features/events/types';
 import { Badge, Card, EmptyState, PageHeader } from '../components/ui';
-import { FraternalTopicsCard } from '../features/self-service/FraternalTopicsCard';
+import { HouseholdTopicsCard } from '../features/self-service/HouseholdTopicsCard';
 
 type UpcomingItem =
   | { kind: 'event'; sortKey: string; event: MyEvent }
@@ -117,7 +117,7 @@ export default function MyEventsPage() {
         description="View your upcoming community assemblies and personal attendance record."
       />
 
-      <FraternalTopicsCard organizationId={orgId} />
+      <HouseholdTopicsCard organizationId={orgId} />
 
       {/* Tabs */}
       <div className="flex border-b border-line gap-4">
