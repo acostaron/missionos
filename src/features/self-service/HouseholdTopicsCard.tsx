@@ -4,9 +4,9 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { BookOpenText } from 'lucide-react';
+import { BookOpenText, MapPin } from 'lucide-react';
 import { supabase } from '../../lib/supabase/client';
-import { formatNyDateShort, formatNyTime } from '../../lib/ny-time';
+import { formatNyDateShort, formatNyTime, getTodayNyDate } from '../../lib/ny-time';
 import { normalizeError } from '../../lib/supabase/errors';
 import { formatTopicMonth, materialKindLabel, useTopicLibrary } from '../library/api';
 import { CHANGE_REASONS, changeReasonLabel, type ChangeReasonCode } from '../households/api/meeting-topics';
@@ -26,7 +26,10 @@ interface FraternalMeeting {
   household_meeting_id: string;
   meeting_date: string;
   scheduled_start_at: string | null;
-  meeting_status: 'scheduled' | 'completed';
+  meeting_status: 'scheduled' | 'completed' | 'cancelled';
+  location_type: string | null;
+  location_text: string | null;
+  host_name: string | null;
   topics: FraternalTopic[];
 }
 interface FraternalHousehold {
@@ -36,6 +39,8 @@ interface FraternalHousehold {
   can_edit: boolean;
   meetings: FraternalMeeting[];
 }
+
+const LOCATION_TYPES: Record<string, string> = { in_person: 'In person', virtual: 'Virtual', hybrid: 'Hybrid' };
 
 const fraternalKey = (orgId: string | null) => ['self-service', 'household-topics', orgId] as const;
 
@@ -120,7 +125,7 @@ export function HouseholdTopicsCard({ organizationId }: { organizationId: string
     setReplacedId(d.kind === 'change' ? (active[0]?.assignment_id ?? '') : '');
   };
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = getTodayNyDate();
   const canSave =
     !save.isPending &&
     (dialog?.kind === 'assign'
@@ -149,17 +154,32 @@ export function HouseholdTopicsCard({ organizationId }: { organizationId: string
                 const active = m.topics.filter((t) => t.assignment_status !== 'skipped');
                 const replaced = m.topics.filter((t) => t.assignment_status === 'skipped');
                 const upcoming = m.meeting_status === 'scheduled' && m.meeting_date >= today;
+                const cancelled = m.meeting_status === 'cancelled';
+                const place = [m.location_type ? (LOCATION_TYPES[m.location_type] ?? m.location_type) : null, m.location_text]
+                  .filter(Boolean)
+                  .join(' · ');
                 return (
-                  <li key={m.household_meeting_id} className="space-y-1.5 py-3">
+                  <li key={m.household_meeting_id} className={`space-y-1.5 py-3 ${cancelled ? 'opacity-70' : ''}`}>
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-sm font-medium text-ink">
+                      <span className={`text-sm font-medium ${cancelled ? 'text-ink-muted line-through' : 'text-ink'}`}>
                         {formatNyDateShort(m.meeting_date)}
                         {m.scheduled_start_at ? ` · ${formatNyTime(m.scheduled_start_at)}` : ''}
                       </span>
-                      <Badge variant={m.meeting_status === 'completed' ? 'success' : 'info'}>
-                        {m.meeting_status === 'completed' ? 'Completed' : 'Scheduled'}
+                      <Badge variant={cancelled ? 'danger' : m.meeting_status === 'completed' ? 'success' : 'info'}>
+                        {cancelled ? 'Cancelled' : m.meeting_status === 'completed' ? 'Completed' : 'Scheduled'}
                       </Badge>
                     </div>
+                    {(place || m.host_name) && (
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-secondary">
+                        {place && (
+                          <span className="flex items-center gap-1">
+                            <MapPin className="h-3.5 w-3.5 text-ink-muted" />
+                            {place}
+                          </span>
+                        )}
+                        {m.host_name && <span className="text-ink-muted">Host: {m.host_name}</span>}
+                      </div>
+                    )}
                     {active.map((t) => (
                       <div key={t.assignment_id} className="text-sm text-ink">
                         <span className="text-ink-secondary">
@@ -185,10 +205,10 @@ export function HouseholdTopicsCard({ organizationId }: { organizationId: string
                         {t.change_reason_code ? ` (${changeReasonLabel(t.change_reason_code)})` : ''}
                       </div>
                     ))}
-                    {!hh.can_edit && active.length === 0 && (
+                    {!hh.can_edit && !cancelled && active.length === 0 && (
                       <p className="text-xs text-ink-muted">No topic planned yet.</p>
                     )}
-                    {hh.can_edit && (<div className="flex flex-wrap gap-2 pt-1">
+                    {hh.can_edit && !cancelled && (<div className="flex flex-wrap gap-2 pt-1">
                       {upcoming && active.length === 0 && (
                         <Button size="sm" variant="outline" onClick={() => open({ kind: 'assign', meeting: m })}>
                           Choose topic

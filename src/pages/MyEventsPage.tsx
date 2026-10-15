@@ -3,10 +3,8 @@ import { Calendar, CalendarCheck2, Clock, MapPin, QrCode } from 'lucide-react';
 import { useOrganizationContext } from '../hooks/use-organization-context';
 import {
   useListMyEvents,
-  useListMyHouseholdMeetings,
   useListMyAttendance,
   type MyEvent,
-  type MyHouseholdMeeting,
 } from '../features/self-service/portal-api';
 import {
   getTodayNyDate,
@@ -21,9 +19,9 @@ import type { EventType } from '../features/events/types';
 import { Badge, Card, EmptyState, PageHeader } from '../components/ui';
 import { HouseholdTopicsCard } from '../features/self-service/HouseholdTopicsCard';
 
-type UpcomingItem =
-  | { kind: 'event'; sortKey: string; event: MyEvent }
-  | { kind: 'meeting'; sortKey: string; meeting: MyHouseholdMeeting };
+// Household meetings are shown in the household topic cards above, so Upcoming lists other events only
+// (assemblies, teachings, retreats, …). Pass 9.8, Claude 2026-10-16.
+type UpcomingItem = { kind: 'event'; sortKey: string; event: MyEvent };
 
 export default function MyEventsPage() {
   const { activeOrganization, isLoading: isOrgLoading } = useOrganizationContext();
@@ -41,19 +39,13 @@ export default function MyEventsPage() {
     upcomingTo
   );
 
-  const { data: householdMeetings = [], isLoading: isMeetingsLoading } = useListMyHouseholdMeetings(
-    orgId,
-    today,
-    upcomingTo
-  );
-
   const { data: attendanceList = [], isLoading: isAttendanceLoading } = useListMyAttendance(
     orgId,
     pastFrom,
     today
   );
 
-  // Group upcoming events and meetings by month ('YYYY-MM')
+  // Group upcoming events by month ('YYYY-MM')
   const groupedUpcoming = useMemo(() => {
     const groups: { monthKey: string; monthLabel: string; items: UpcomingItem[] }[] = [];
     const map = new Map<string, UpcomingItem[]>();
@@ -71,23 +63,6 @@ export default function MyEventsPage() {
       });
     });
 
-    householdMeetings
-      .filter((m) => m.meeting_date >= today)
-      .forEach((m) => {
-        const key = m.meeting_date.slice(0, 7); // 'YYYY-MM'
-        if (!map.has(key)) {
-          map.set(key, []);
-        }
-        const timePart = m.scheduled_start_at
-          ? isoToNyLocal(m.scheduled_start_at).time
-          : '99:99';
-        map.get(key)!.push({
-          kind: 'meeting',
-          sortKey: `${m.meeting_date}T${timePart}`,
-          meeting: m,
-        });
-      });
-
     Array.from(map.keys()).sort().forEach((key) => {
       const [y, m] = key.split('-').map(Number);
       const items = map.get(key)!;
@@ -100,7 +75,7 @@ export default function MyEventsPage() {
     });
 
     return groups;
-  }, [upcomingEvents, householdMeetings, today]);
+  }, [upcomingEvents]);
 
   if (isOrgLoading) {
     return (
@@ -147,17 +122,17 @@ export default function MyEventsPage() {
         </button>
       </div>
 
-      {/* Tab 1: Upcoming Events */}
+      {/* Tab 1: Upcoming Events (household meetings are in the household cards above) */}
       {activeTab === 'upcoming' && (
         <div className="space-y-6">
-          {isEventsLoading || isMeetingsLoading ? (
+          {isEventsLoading ? (
             <div className="p-8 text-center text-sm text-ink-muted">Loading upcoming events…</div>
           ) : groupedUpcoming.length === 0 ? (
             <Card padding="comfortable">
               <EmptyState
                 icon={<Calendar />}
-                title="No upcoming events for you yet."
-                message="Check back later for assemblies, teachings, and formation gatherings."
+                title="No upcoming assemblies, teachings or retreats yet."
+                message="Your household meetings are listed in your household card above."
               />
             </Card>
           ) : (
@@ -168,73 +143,14 @@ export default function MyEventsPage() {
                 </h3>
                 <div className="space-y-2">
                   {group.items.map((item) => {
-                    if (item.kind === 'event') {
-                      const e = item.event;
-                      const isCancelled = e.event_status === 'cancelled';
-                      const typeLabel = EVENT_TYPE_LABELS[e.event_type as EventType] || e.event_type;
-                      const typeBadgeVariant = getEventTypeBadgeVariant(e.event_type as EventType);
-
-                      return (
-                        <div
-                          key={`event-${e.event_id}`}
-                          className={`rounded-card border border-line bg-surface p-4 transition-colors ${
-                            isCancelled ? 'opacity-70' : ''
-                          }`}
-                        >
-                          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
-                            <div className="space-y-1">
-                              <div className="flex flex-wrap items-center gap-2">
-                                <Badge variant={typeBadgeVariant}>{typeLabel}</Badge>
-                                {isCancelled && <Badge variant="danger">Cancelled</Badge>}
-                                {e.attended && <Badge variant="success">Attended</Badge>}
-                              </div>
-
-                              <h4
-                                className={`text-base font-semibold text-ink pt-1 ${
-                                  isCancelled ? 'line-through text-ink-muted' : ''
-                                }`}
-                              >
-                                {e.title}
-                              </h4>
-
-                              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-secondary pt-1">
-                                <span className="flex items-center gap-1 font-medium">
-                                  <Clock className="h-3.5 w-3.5 text-ink-muted" />
-                                  {formatNyDateShort(e.starts_at)} · {formatNyTime(e.starts_at)}
-                                </span>
-
-                                {e.location_text && (
-                                  <span className="flex items-center gap-1">
-                                    <MapPin className="h-3.5 w-3.5 text-ink-muted" />
-                                    {e.location_text}
-                                  </span>
-                                )}
-
-                                {e.audience_name && (
-                                  <span className="rounded bg-surface-muted px-1.5 py-0.5 text-[11px] text-ink-muted">
-                                    {e.audience_name}
-                                  </span>
-                                )}
-                              </div>
-
-                              {e.program_title && (
-                                <p className="text-xs font-medium text-primary pt-1">
-                                  Session {e.session_number || 1}
-                                  {e.session_count ? ` of ${e.session_count}` : ''} · {e.program_title}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    }
-
-                    const m = item.meeting;
-                    const isCancelled = m.meeting_status === 'cancelled';
+                    const e = item.event;
+                    const isCancelled = e.event_status === 'cancelled';
+                    const typeLabel = EVENT_TYPE_LABELS[e.event_type as EventType] || e.event_type;
+                    const typeBadgeVariant = getEventTypeBadgeVariant(e.event_type as EventType);
 
                     return (
                       <div
-                        key={`meeting-${m.household_meeting_id}`}
+                        key={`event-${e.event_id}`}
                         className={`rounded-card border border-line bg-surface p-4 transition-colors ${
                           isCancelled ? 'opacity-70' : ''
                         }`}
@@ -242,8 +158,9 @@ export default function MyEventsPage() {
                         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
                           <div className="space-y-1">
                             <div className="flex flex-wrap items-center gap-2">
-                              <Badge variant="neutral">Household</Badge>
+                              <Badge variant={typeBadgeVariant}>{typeLabel}</Badge>
                               {isCancelled && <Badge variant="danger">Cancelled</Badge>}
+                              {e.attended && <Badge variant="success">Attended</Badge>}
                             </div>
 
                             <h4
@@ -251,31 +168,35 @@ export default function MyEventsPage() {
                                 isCancelled ? 'line-through text-ink-muted' : ''
                               }`}
                             >
-                              {m.household_name} — Household Meeting
+                              {e.title}
                             </h4>
 
                             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-secondary pt-1">
                               <span className="flex items-center gap-1 font-medium">
                                 <Clock className="h-3.5 w-3.5 text-ink-muted" />
-                                {formatNyDateShort(m.meeting_date)} ·{' '}
-                                {m.scheduled_start_at
-                                  ? formatNyTime(m.scheduled_start_at)
-                                  : 'Time to be confirmed'}
+                                {formatNyDateShort(e.starts_at)} · {formatNyTime(e.starts_at)}
                               </span>
 
-                              {m.location_text && (
+                              {e.location_text && (
                                 <span className="flex items-center gap-1">
                                   <MapPin className="h-3.5 w-3.5 text-ink-muted" />
-                                  {m.location_text}
+                                  {e.location_text}
                                 </span>
                               )}
 
-                              {m.host_name && (
-                                <span className="text-ink-muted">
-                                  Host: {m.host_name}
+                              {e.audience_name && (
+                                <span className="rounded bg-surface-muted px-1.5 py-0.5 text-[11px] text-ink-muted">
+                                  {e.audience_name}
                                 </span>
                               )}
                             </div>
+
+                            {e.program_title && (
+                              <p className="text-xs font-medium text-primary pt-1">
+                                Session {e.session_number || 1}
+                                {e.session_count ? ` of ${e.session_count}` : ''} · {e.program_title}
+                              </p>
+                            )}
                           </div>
                         </div>
                       </div>
