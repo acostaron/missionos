@@ -395,18 +395,18 @@ export function EditHouseholdModal({
                 <input
                   type="checkbox"
                   {...register('accepts_new_members')}
-                  className="rounded border-line text-primary-blue focus:ring-focus"
+                  className="h-5 w-5 rounded border-slate-600 bg-slate-800 text-indigo-500 accent-indigo-500 focus:ring-indigo-500"
                 />
-                <span className="text-sm text-ink">Accepting new members</span>
+                <span className="text-sm font-medium text-slate-100">Accepting new members</span>
               </label>
 
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
                   {...register('is_couple_household')}
-                  className="rounded border-line text-primary-blue focus:ring-focus"
+                  className="h-5 w-5 rounded border-slate-600 bg-slate-800 text-indigo-500 accent-indigo-500 focus:ring-indigo-500"
                 />
-                <span className="text-sm text-ink">Couple Household</span>
+                <span className="text-sm font-medium text-slate-100">Couple Household</span>
               </label>
             </div>
           </div>
