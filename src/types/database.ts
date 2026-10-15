@@ -1731,6 +1731,76 @@ export type Database = {
           },
         ]
       }
+      formation_topic_content_versions: {
+        Row: {
+          content_blocks: Json
+          content_hash: string
+          created_at: string
+          id: string
+          organization_id: string
+          review_notes: string | null
+          review_status: string
+          reviewed_at: string | null
+          reviewed_by_profile_id: string | null
+          source_fetched_at: string
+          source_url: string
+          topic_id: string
+          version_number: number
+        }
+        Insert: {
+          content_blocks: Json
+          content_hash: string
+          created_at?: string
+          id?: string
+          organization_id: string
+          review_notes?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by_profile_id?: string | null
+          source_fetched_at: string
+          source_url: string
+          topic_id: string
+          version_number: number
+        }
+        Update: {
+          content_blocks?: Json
+          content_hash?: string
+          created_at?: string
+          id?: string
+          organization_id?: string
+          review_notes?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by_profile_id?: string | null
+          source_fetched_at?: string
+          source_url?: string
+          topic_id?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "formation_topic_content_versions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "formation_topic_content_versions_reviewed_by_profile_id_fkey"
+            columns: ["reviewed_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "formation_topic_content_versions_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "formation_topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       formation_topics: {
         Row: {
           created_at: string
@@ -1740,16 +1810,21 @@ export type Database = {
           effective_to: string | null
           id: string
           is_active: boolean
+          material_kind: string | null
           objectives: string | null
           organization_id: string | null
           recommended_duration_minutes: number | null
           recommended_pastoral_level: string | null
           scripture_reference: string | null
+          series_code: string | null
+          series_title: string | null
           short_title: string | null
           sort_order: number | null
           source_type: string
+          source_url: string | null
           title: string
           topic_code: string | null
+          topic_month: string | null
           updated_at: string
           updated_by_profile_id: string | null
         }
@@ -1761,16 +1836,21 @@ export type Database = {
           effective_to?: string | null
           id?: string
           is_active?: boolean
+          material_kind?: string | null
           objectives?: string | null
           organization_id?: string | null
           recommended_duration_minutes?: number | null
           recommended_pastoral_level?: string | null
           scripture_reference?: string | null
+          series_code?: string | null
+          series_title?: string | null
           short_title?: string | null
           sort_order?: number | null
           source_type?: string
+          source_url?: string | null
           title: string
           topic_code?: string | null
+          topic_month?: string | null
           updated_at?: string
           updated_by_profile_id?: string | null
         }
@@ -1782,16 +1862,21 @@ export type Database = {
           effective_to?: string | null
           id?: string
           is_active?: boolean
+          material_kind?: string | null
           objectives?: string | null
           organization_id?: string | null
           recommended_duration_minutes?: number | null
           recommended_pastoral_level?: string | null
           scripture_reference?: string | null
+          series_code?: string | null
+          series_title?: string | null
           short_title?: string | null
           sort_order?: number | null
           source_type?: string
+          source_url?: string | null
           title?: string
           topic_code?: string | null
+          topic_month?: string | null
           updated_at?: string
           updated_by_profile_id?: string | null
         }
@@ -7594,6 +7679,10 @@ export type Database = {
         }
         Returns: string
       }
+      can_manage_topic_library: {
+        Args: { p_organization_id: string }
+        Returns: boolean
+      }
       can_read_member_photo: {
         Args: { p_object_name: string }
         Returns: boolean
@@ -8180,11 +8269,29 @@ export type Database = {
         Args: { p_organization_id: string; p_sub_area_node_id: string }
         Returns: Json
       }
+      get_topic_library_item: {
+        Args: { p_organization_id: string; p_topic_id: string }
+        Returns: Json
+      }
       grant_servant_leader_access: {
         Args: {
           p_leadership_assignment_id: string
           p_organization_id: string
           p_profile_id?: string
+        }
+        Returns: Json
+      }
+      ingest_topic_library_page: {
+        Args: {
+          p_content_blocks: Json
+          p_fetched_at?: string
+          p_material_kind: string
+          p_organization_id: string
+          p_series_code: string
+          p_series_title: string
+          p_source_url: string
+          p_title: string
+          p_topic_month: string
         }
         Returns: Json
       }
@@ -8245,6 +8352,10 @@ export type Database = {
       }
       list_program_runs: {
         Args: { p_include_closed?: boolean; p_organization_id: string }
+        Returns: Json
+      }
+      list_topic_library: {
+        Args: { p_organization_id: string; p_series_code?: string }
         Returns: Json
       }
       lookup_auth_user_for_invitation: {
@@ -8450,6 +8561,15 @@ export type Database = {
           p_member_id: string
           p_organization_id: string
           p_reason?: string
+        }
+        Returns: Json
+      }
+      review_topic_content_version: {
+        Args: {
+          p_decision: string
+          p_notes?: string
+          p_organization_id: string
+          p_version_id: string
         }
         Returns: Json
       }
