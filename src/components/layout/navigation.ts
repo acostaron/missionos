@@ -1,4 +1,4 @@
-import { Home, Users, Layers, CalendarDays, House, HeartHandshake, BookOpen } from 'lucide-react';
+import { Home, Users, Layers, CalendarDays, House, HeartHandshake, BookOpen, Library } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { Permissions } from '../../types/permissions';
 import type { PermissionCode } from '../../types/permissions';
@@ -52,6 +52,13 @@ export const NAV_ITEMS: NavItem[] = [
     to: '/app/households',
     icon: House,
     permission: Permissions.HouseholdsRecordsView,
+  },
+  {
+    id: 'nav-library',
+    label: 'Household Library',
+    shortLabel: 'Library',
+    to: '/app/library',
+    icon: Library,
   },
   {
     id: 'nav-formation',

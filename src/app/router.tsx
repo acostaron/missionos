@@ -29,6 +29,8 @@ import {
   EditMyProfilePage,
   MyCardPage,
   MyEventsPage,
+  LibraryPage,
+  LibraryTopicPage,
 } from './lazy-pages';
 
 
@@ -274,6 +276,22 @@ export const router = createBrowserRouter([
             element: (
               <Suspense fallback={<PageLoadingFallback />}>
                 <MyCardPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'library',
+            element: (
+              <Suspense fallback={<PageLoadingFallback />}>
+                <LibraryPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'library/:topicId',
+            element: (
+              <Suspense fallback={<PageLoadingFallback />}>
+                <LibraryTopicPage />
               </Suspense>
             ),
           },

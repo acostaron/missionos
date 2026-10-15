@@ -36,3 +36,5 @@ export const ClaimAccountPage = lazy(() => import('../pages/ClaimAccountPage'));
 export const EditMyProfilePage = lazy(() => import('../pages/EditMyProfilePage'));
 export const MyCardPage = lazy(() => import('../pages/MyCardPage'));
 export const MyEventsPage = lazy(() => import('../pages/MyEventsPage'));
+export const LibraryPage = lazy(() => import('../pages/LibraryPage'));
+export const LibraryTopicPage = lazy(() => import('../pages/LibraryTopicPage'));
