@@ -172,7 +172,7 @@ export default function PastoralOperationsDashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-line pb-5">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-ink">
-            Pastoral Operations
+            Dashboard
           </h1>
           <p className="text-xs text-ink-muted mt-1">
             Operational visibility, leader nourishment structure, and echelon care responsibilities.

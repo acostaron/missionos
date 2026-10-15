@@ -86,7 +86,7 @@ export default function HouseholdsPage() {
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-ink">
-            Pastoral Households
+            Households
           </h1>
           <p className="text-sm text-ink-muted mt-1">
             Browse pastoral household groupings and placements across units and chapters.

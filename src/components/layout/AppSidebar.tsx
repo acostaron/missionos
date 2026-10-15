@@ -1,6 +1,6 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { LogOut, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
-import type { NavItem } from './navigation';
+import { isNavItemActive, type NavItem } from './navigation';
 
 type Props = {
   items: NavItem[];
@@ -19,6 +19,7 @@ export default function AppSidebar({
   organizationName,
   onSignOut,
 }: Props) {
+  const { pathname } = useLocation();
   const focus =
     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus';
   return (
@@ -47,18 +48,21 @@ export default function AppSidebar({
       </div>
 
       <nav aria-label="Primary navigation" className="flex-1 space-y-1 overflow-y-auto p-3">
-        {items.map(({ id, label, to, icon: Icon }) => (
+        {items.map((item) => {
+          const { id, label, to, icon: Icon } = item;
+          const active = isNavItemActive(item, pathname);
+          return (
           <NavLink
             key={id}
             to={to}
             id={id}
             title={label}
             aria-label={label}
-            className={({ isActive }) =>
+            className={() =>
               `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${focus} ${
                 collapsed ? 'justify-center' : ''
               } ${
-                isActive
+                active
                   ? 'bg-primary/10 text-primary shadow-[inset_3px_0_0_var(--color-primary)]'
                   : 'text-ink-muted hover:bg-canvas hover:text-ink'
               }`
@@ -67,7 +71,8 @@ export default function AppSidebar({
             <Icon size={20} aria-hidden="true" className="shrink-0" />
             {!collapsed && <span className="truncate">{label}</span>}
           </NavLink>
-        ))}
+          );
+        })}
       </nav>
 
       <div className="border-t border-line p-3">
