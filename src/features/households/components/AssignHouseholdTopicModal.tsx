@@ -1,9 +1,11 @@
-import { useState, useId, useEffect } from 'react';
+import { useState, useId, useEffect, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useFormationTopics } from '../api/search-formation-topics';
 import { assignHouseholdTopic } from '../api/assign-household-topic';
+import { useHouseholdMeetingHistory } from '../api/get-household-meeting-history';
+import { assignTopicToMeeting, invalidateMeetingTopicQueries, useTopicChoices } from '../api/meeting-topics';
 import { invalidateFormationQueries } from './formation-labels';
 import { normalizeError } from '../../../lib/supabase/errors';
+import { formatNyTime } from '../../../lib/ny-time';
 
 interface AssignHouseholdTopicModalProps {
   isOpen: boolean;
@@ -13,6 +15,16 @@ interface AssignHouseholdTopicModalProps {
   householdName: string;
   pastoralLevel?: string | null;
   onSuccessToast?: (msg: string) => void;
+}
+
+const NO_MEETING = 'none';
+
+function formatMeetingOption(date: string, startAt: string | null) {
+  const [y, m, d] = date.split('-').map(Number);
+  const label = new Intl.DateTimeFormat('en-US', {
+    weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC',
+  }).format(new Date(Date.UTC(y, m - 1, d, 12)));
+  return startAt ? `${label} · ${formatNyTime(startAt)}` : label;
 }
 
 export function AssignHouseholdTopicModal({
@@ -27,34 +39,41 @@ export function AssignHouseholdTopicModal({
   const queryClient = useQueryClient();
   const titleId = useId();
 
-  const [search, setSearch] = useState('');
   const [topicId, setTopicId] = useState('');
-  const [plannedDate, setPlannedDate] = useState('');
-  const [sequence, setSequence] = useState('');
+  const [meetingId, setMeetingId] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const { data, isLoading, error } = useFormationTopics(
-    organizationId,
-    search,
-    pastoralLevel ?? null,
-    isOpen
+  const { data: choices, isLoading, error } = useTopicChoices(organizationId, pastoralLevel ?? null, isOpen);
+  const { data: history, isLoading: isMeetingsLoading } = useHouseholdMeetingHistory(
+    organizationId, householdId, 0, 50, isOpen,
+  );
+
+  const today = new Date().toISOString().slice(0, 10);
+  const upcoming = useMemo(
+    () =>
+      (history?.meetings ?? [])
+        .filter((m) => m.meeting_status === 'scheduled' && m.meeting_date >= today)
+        .sort((a, b) => a.meeting_date.localeCompare(b.meeting_date)),
+    [history, today],
   );
 
   useEffect(() => {
     if (isOpen) {
-      setSearch('');
       setTopicId('');
-      setPlannedDate('');
-      setSequence('');
+      setMeetingId('');
       setErrorMessage(null);
     }
   }, [isOpen]);
 
+  // Default to the next scheduled meeting once meetings load.
+  const selectedMeeting = meetingId || (upcoming[0]?.household_meeting_id ?? NO_MEETING);
+
   if (!isOpen) return null;
 
-  const topics = data?.topics ?? [];
-  const noCatalog = !isLoading && !error && topics.length === 0 && search.trim() === '';
+  const libraryGroups = choices?.library ?? [];
+  const otherTopics = choices?.other ?? [];
+  const noCatalog = !isLoading && !error && libraryGroups.length === 0 && otherTopics.length === 0;
 
   const handleClose = () => {
     setErrorMessage(null);
@@ -64,24 +83,19 @@ export function AssignHouseholdTopicModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!topicId) return;
-    const seqNumber = sequence.trim() === '' ? null : Number.parseInt(sequence, 10);
-    if (seqNumber !== null && (Number.isNaN(seqNumber) || seqNumber < 1)) {
-      setErrorMessage('Sequence must be a positive whole number.');
-      return;
-    }
-
     try {
       setIsSubmitting(true);
       setErrorMessage(null);
-      const result = await assignHouseholdTopic(
-        organizationId,
-        householdId,
-        topicId,
-        plannedDate || null,
-        seqNumber
-      );
-      await invalidateFormationQueries(queryClient);
-      onSuccessToast?.(`Topic "${result.topic_title}" assigned to ${householdName}.`);
+      let title: string;
+      if (selectedMeeting !== NO_MEETING) {
+        const r = await assignTopicToMeeting(organizationId, householdId, topicId, selectedMeeting);
+        title = r.topic_title;
+      } else {
+        const r = await assignHouseholdTopic(organizationId, householdId, topicId, null, null);
+        title = r.topic_title;
+      }
+      await Promise.all([invalidateFormationQueries(queryClient), invalidateMeetingTopicQueries(queryClient)]);
+      onSuccessToast?.(`Topic "${title}" assigned to ${householdName}.`);
       handleClose();
     } catch (err) {
       setErrorMessage(normalizeError(err).message);
@@ -139,21 +153,6 @@ export function AssignHouseholdTopicModal({
           ) : (
             <>
               <div>
-                <label htmlFor={`${titleId}-search`} className="block text-xs font-medium text-slate-300 mb-1.5">
-                  Search Household Topics
-                </label>
-                <input
-                  id={`${titleId}-search`}
-                  type="text"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Title, code or scripture…"
-                  maxLength={100}
-                  className={inputClass}
-                />
-              </div>
-
-              <div>
                 <label htmlFor={`${titleId}-topic`} className="block text-xs font-medium text-slate-300 mb-1.5">
                   Household Topic <span className="text-red-400">*</span>
                 </label>
@@ -166,44 +165,51 @@ export function AssignHouseholdTopicModal({
                   className={inputClass}
                 >
                   <option value="">{isLoading ? 'Loading topics…' : '— Select a topic —'}</option>
-                  {topics.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.topic_code ? `${t.topic_code} · ` : ''}
-                      {t.title}
+                  {libraryGroups.map((g) => (
+                    <optgroup key={g.label} label={g.label}>
+                      {g.topics.map((t) => (
+                        <option key={t.id} value={t.id}>
+                          {t.title}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                  {otherTopics.length > 0 && (
+                    <optgroup label="Other topics">
+                      {otherTopics.map((t) => (
+                        <option key={t.id} value={t.id}>
+                          {t.topic_code ? `${t.topic_code} · ` : ''}
+                          {t.title}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor={`${titleId}-meeting`} className="block text-xs font-medium text-slate-300 mb-1.5">
+                  Meeting
+                </label>
+                <select
+                  id={`${titleId}-meeting`}
+                  value={selectedMeeting}
+                  onChange={(e) => setMeetingId(e.target.value)}
+                  disabled={isMeetingsLoading}
+                  className={inputClass}
+                >
+                  {upcoming.map((m) => (
+                    <option key={m.household_meeting_id} value={m.household_meeting_id}>
+                      {formatMeetingOption(m.meeting_date, m.scheduled_start_at)}
                     </option>
                   ))}
+                  <option value={NO_MEETING}>No meeting yet — plan without a date</option>
                 </select>
-                {!isLoading && topics.length === 0 && (
-                  <p className="mt-1 text-[11px] text-slate-500">No topics match your search.</p>
-                )}
-              </div>
-
-              <div>
-                <label htmlFor={`${titleId}-date`} className="block text-xs font-medium text-slate-300 mb-1.5">
-                  Planned Date
-                </label>
-                <input
-                  id={`${titleId}-date`}
-                  type="date"
-                  value={plannedDate}
-                  onChange={(e) => setPlannedDate(e.target.value)}
-                  className={inputClass}
-                />
-              </div>
-
-              <div>
-                <label htmlFor={`${titleId}-seq`} className="block text-xs font-medium text-slate-300 mb-1.5">
-                  Sequence (optional)
-                </label>
-                <input
-                  id={`${titleId}-seq`}
-                  type="number"
-                  min={1}
-                  step={1}
-                  value={sequence}
-                  onChange={(e) => setSequence(e.target.value)}
-                  className={inputClass}
-                />
+                <p className="mt-1 text-[11px] text-slate-400">
+                  {upcoming.length === 0 && !isMeetingsLoading
+                    ? 'No upcoming meeting is scheduled. Schedule one under Meeting History to link this topic to it.'
+                    : 'The topic is marked completed when this meeting is marked completed.'}
+                </p>
               </div>
             </>
           )}

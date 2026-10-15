@@ -5,6 +5,9 @@ import { useHouseholdMeetingDetail } from '../api/get-household-meeting-detail';
 import { completeHouseholdMeeting } from '../api/complete-household-meeting';
 import { cancelHouseholdMeeting } from '../api/cancel-household-meeting';
 import { RecordHouseholdAttendanceModal } from './RecordHouseholdAttendanceModal';
+import { MeetingTopicSection } from './MeetingTopicSection';
+import { invalidateMeetingTopicQueries } from '../api/meeting-topics';
+import { invalidateFormationQueries } from './formation-labels';
 import { normalizeError } from '../../../lib/supabase/errors';
 import type { HouseholdMeetingStatus } from '../types';
 
@@ -85,6 +88,8 @@ export function HouseholdMeetingDetailModal({
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: meetingKeys.detail(organizationId, meetingId) }),
         queryClient.invalidateQueries({ queryKey: meetingKeys.history(organizationId, householdId) }),
+        invalidateMeetingTopicQueries(queryClient),
+        invalidateFormationQueries(queryClient),
       ]);
       onSuccessToast?.(`Meeting on ${detail.meeting_date} marked as completed.`);
     } catch (err) {
@@ -103,6 +108,8 @@ export function HouseholdMeetingDetailModal({
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: meetingKeys.detail(organizationId, meetingId) }),
         queryClient.invalidateQueries({ queryKey: meetingKeys.history(organizationId, householdId) }),
+        invalidateMeetingTopicQueries(queryClient),
+        invalidateFormationQueries(queryClient),
       ]);
       onSuccessToast?.(`Meeting on ${detail.meeting_date} was cancelled.`);
       handleClose();
@@ -216,6 +223,16 @@ export function HouseholdMeetingDetailModal({
                     </>
                   )}
                 </dl>
+
+                <MeetingTopicSection
+                  organizationId={organizationId}
+                  householdId={householdId}
+                  meetingId={meetingId}
+                  meetingDate={detail.meeting_date}
+                  meetingStatus={detail.meeting_status}
+                  canManage={canManage}
+                  onSuccessToast={onSuccessToast}
+                />
 
                 {/* Attendance Summary */}
                 {isCompleted && (

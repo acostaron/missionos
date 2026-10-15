@@ -2556,6 +2556,7 @@ export type Database = {
           assignment_status: string
           cancelled_at: string | null
           cancelled_by_profile_id: string | null
+          change_reason_code: string | null
           completed_at: string | null
           completed_by_profile_id: string | null
           completed_household_meeting_id: string | null
@@ -2566,6 +2567,9 @@ export type Database = {
           id: string
           organization_id: string
           planned_for_date: string | null
+          planned_household_meeting_id: string | null
+          replaced_by_assignment_id: string | null
+          replaces_assignment_id: string | null
           rescheduled_at: string | null
           rescheduled_by_profile_id: string | null
           resolution_reason_code: string | null
@@ -2575,6 +2579,7 @@ export type Database = {
           topic_id: string
           updated_at: string
           updated_by_profile_id: string | null
+          used_topic_title: string | null
         }
         Insert: {
           assigned_at?: string
@@ -2582,6 +2587,7 @@ export type Database = {
           assignment_status?: string
           cancelled_at?: string | null
           cancelled_by_profile_id?: string | null
+          change_reason_code?: string | null
           completed_at?: string | null
           completed_by_profile_id?: string | null
           completed_household_meeting_id?: string | null
@@ -2592,6 +2598,9 @@ export type Database = {
           id?: string
           organization_id: string
           planned_for_date?: string | null
+          planned_household_meeting_id?: string | null
+          replaced_by_assignment_id?: string | null
+          replaces_assignment_id?: string | null
           rescheduled_at?: string | null
           rescheduled_by_profile_id?: string | null
           resolution_reason_code?: string | null
@@ -2601,6 +2610,7 @@ export type Database = {
           topic_id: string
           updated_at?: string
           updated_by_profile_id?: string | null
+          used_topic_title?: string | null
         }
         Update: {
           assigned_at?: string
@@ -2608,6 +2618,7 @@ export type Database = {
           assignment_status?: string
           cancelled_at?: string | null
           cancelled_by_profile_id?: string | null
+          change_reason_code?: string | null
           completed_at?: string | null
           completed_by_profile_id?: string | null
           completed_household_meeting_id?: string | null
@@ -2618,6 +2629,9 @@ export type Database = {
           id?: string
           organization_id?: string
           planned_for_date?: string | null
+          planned_household_meeting_id?: string | null
+          replaced_by_assignment_id?: string | null
+          replaces_assignment_id?: string | null
           rescheduled_at?: string | null
           rescheduled_by_profile_id?: string | null
           resolution_reason_code?: string | null
@@ -2627,6 +2641,7 @@ export type Database = {
           topic_id?: string
           updated_at?: string
           updated_by_profile_id?: string | null
+          used_topic_title?: string | null
         }
         Relationships: [
           {
@@ -2676,6 +2691,27 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "household_topic_assignments_planned_household_meeting_id_fkey"
+            columns: ["planned_household_meeting_id"]
+            isOneToOne: false
+            referencedRelation: "household_meetings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "household_topic_assignments_replaced_by_assignment_id_fkey"
+            columns: ["replaced_by_assignment_id"]
+            isOneToOne: false
+            referencedRelation: "household_topic_assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "household_topic_assignments_replaces_assignment_id_fkey"
+            columns: ["replaces_assignment_id"]
+            isOneToOne: false
+            referencedRelation: "household_topic_assignments"
             referencedColumns: ["id"]
           },
           {
@@ -7674,6 +7710,15 @@ export type Database = {
         }
         Returns: Json
       }
+      assign_household_topic_to_meeting: {
+        Args: {
+          p_household_node_id: string
+          p_meeting_id: string
+          p_organization_id: string
+          p_topic_id: string
+        }
+        Returns: Json
+      }
       assign_member_to_household: {
         Args: {
           p_confirm_governance_mismatch?: boolean
@@ -7758,6 +7803,17 @@ export type Database = {
           p_household_topic_assignment_id: string
           p_organization_id: string
           p_reason_code?: string
+        }
+        Returns: Json
+      }
+      change_meeting_topic: {
+        Args: {
+          p_meeting_id: string
+          p_new_topic_id?: string
+          p_organization_id: string
+          p_other_title?: string
+          p_reason_code: string
+          p_replaced_assignment_id?: string
         }
         Returns: Json
       }
@@ -8130,6 +8186,10 @@ export type Database = {
           p_offset?: number
           p_organization_id: string
         }
+        Returns: Json
+      }
+      get_household_meeting_topics: {
+        Args: { p_household_node_id: string; p_organization_id: string }
         Returns: Json
       }
       get_household_profile: {

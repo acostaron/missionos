@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useHouseholdMeetingHistory } from '../api/get-household-meeting-history';
 import { ScheduleHouseholdMeetingModal } from './ScheduleHouseholdMeetingModal';
 import { HouseholdMeetingDetailModal } from './HouseholdMeetingDetailModal';
+import { useHouseholdMeetingTopics } from '../api/meeting-topics';
 import type { HouseholdMeetingRow, HouseholdMeetingStatus, AttendanceSummary } from '../types';
 
 function formatMeetingType(t: string) {
@@ -72,6 +73,7 @@ export function HouseholdMeetingsCard({
     isLoading,
     error,
   } = useHouseholdMeetingHistory(organizationId, householdId, page, PAGE_SIZE, canView);
+  const { data: meetingTopics = [] } = useHouseholdMeetingTopics(organizationId, householdId, canView);
 
   if (!canView) {
     return (
@@ -177,6 +179,21 @@ export function HouseholdMeetingsCard({
                         </svg>
                       </div>
                     </div>
+                    {(() => {
+                      const used = meetingTopics.filter(
+                        (t) => t.household_meeting_id === meeting.household_meeting_id && t.assignment_status !== 'skipped',
+                      );
+                      const replaced = meetingTopics.some(
+                        (t) => t.household_meeting_id === meeting.household_meeting_id && t.assignment_status === 'skipped',
+                      );
+                      if (used.length === 0 && !replaced) return null;
+                      return (
+                        <div className="mt-1 text-[11px] text-ink-secondary">
+                          Topic: {used.map((t) => t.title).join(', ') || '—'}
+                          {replaced && <span className="ml-1 text-warning-700">· changed</span>}
+                        </div>
+                      );
+                    })()}
                     {meeting.facilitator_display_name && (
                       <div className="mt-1 text-[10px] text-ink-muted">
                         Facilitator: {meeting.facilitator_display_name}
