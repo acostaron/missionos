@@ -117,7 +117,6 @@ export function SyncTopicLibraryModal({
               <table className="w-full text-left text-sm">
                 <thead className="sticky top-0 bg-surface-muted text-xs uppercase text-ink-muted">
                   <tr>
-                    <th className="px-3 py-2">Month</th>
                     <th className="px-3 py-2">Type</th>
                     <th className="px-3 py-2">Sections</th>
                     <th className="px-3 py-2">Status</th>
@@ -126,11 +125,11 @@ export function SyncTopicLibraryModal({
                 <tbody>
                   {shown.results.map((r) => (
                     <tr key={`${r.month}|${r.kind}|${r.url}`} className="border-t border-line align-top">
-                      <td className="whitespace-nowrap px-3 py-2 text-ink">{formatTopicMonth(`${r.month}-01`)}</td>
                       <td className="px-3 py-2 text-ink">
                         <a href={r.url} target="_blank" rel="noopener noreferrer" className="text-primary underline-offset-2 hover:underline">
                           {materialKindLabel(r.kind)}
                         </a>
+                        <span className="block text-xs text-ink-muted">{formatTopicMonth(`${r.month}-01`)}</span>
                       </td>
                       <td className="px-3 py-2 text-ink-secondary">
                         {r.heading_count ?? '–'}

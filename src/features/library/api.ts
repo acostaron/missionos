@@ -79,6 +79,18 @@ export type LibraryItem = z.infer<typeof libraryItemSchema>;
 export const libraryListSchema = z.object({
   can_manage: z.boolean(),
   pending_review_count: z.number(),
+  last_sync: z
+    .object({
+      ran_at: z.string(),
+      trigger_source: z.enum(['scheduled', 'manual']),
+      newest_month: z.string().nullable(),
+      new_count: z.number(),
+      changed_count: z.number(),
+      unchanged_count: z.number(),
+      failed_count: z.number(),
+    })
+    .nullable()
+    .optional(),
   items: z.array(libraryItemSchema),
 });
 export type LibraryList = z.infer<typeof libraryListSchema>;

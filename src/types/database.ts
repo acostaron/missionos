@@ -7358,6 +7358,60 @@ export type Database = {
           },
         ]
       }
+      topic_library_sync_runs: {
+        Row: {
+          changed_count: number
+          failed_count: number
+          id: string
+          new_count: number
+          newest_month: string | null
+          organization_id: string
+          ran_at: string
+          run_by_profile_id: string | null
+          trigger_source: string
+          unchanged_count: number
+        }
+        Insert: {
+          changed_count?: number
+          failed_count?: number
+          id?: string
+          new_count?: number
+          newest_month?: string | null
+          organization_id: string
+          ran_at?: string
+          run_by_profile_id?: string | null
+          trigger_source: string
+          unchanged_count?: number
+        }
+        Update: {
+          changed_count?: number
+          failed_count?: number
+          id?: string
+          new_count?: number
+          newest_month?: string | null
+          organization_id?: string
+          ran_at?: string
+          run_by_profile_id?: string | null
+          trigger_source?: string
+          unchanged_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "topic_library_sync_runs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "topic_library_sync_runs_run_by_profile_id_fkey"
+            columns: ["run_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       units: {
         Row: {
           created_at: string
@@ -8488,6 +8542,19 @@ export type Database = {
         }
         Returns: Json
       }
+      record_topic_library_sync_run: {
+        Args: {
+          p_changed_count: number
+          p_failed_count: number
+          p_new_count: number
+          p_newest_month: string
+          p_organization_id: string
+          p_run_by_profile_id?: string
+          p_trigger_source: string
+          p_unchanged_count: number
+        }
+        Returns: string
+      }
       redeem_member_claim_code: {
         Args: {
           p_auth_user_id: string
@@ -8953,6 +9020,7 @@ export type Database = {
         }
         Returns: string
       }
+      verify_topic_sync_secret: { Args: { p_secret: string }; Returns: boolean }
       void_member_formation_program_record: {
         Args: {
           p_organization_id: string

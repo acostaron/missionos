@@ -73,6 +73,19 @@ export default function LibraryPage() {
         }
       />
 
+      {canManage && (
+        <p className="text-xs text-ink-muted">
+          The app checks the MFC site automatically from the 20th to the 5th of each month.
+          {data?.last_sync ? (
+            <>
+              {' '}Last check ({data.last_sync.trigger_source === 'scheduled' ? 'automatic' : 'by hand'}):{' '}
+              {formatCopiedAt(data.last_sync.ran_at)} — {data.last_sync.new_count} new, {data.last_sync.changed_count} updated
+              {data.last_sync.failed_count > 0 ? `, ${data.last_sync.failed_count} could not be read` : ''}.
+            </>
+          ) : null}
+        </p>
+      )}
+
       {canManage && (data?.pending_review_count ?? 0) > 0 && (
         <Alert variant="warning" title="Copies waiting for your approval">
           {data!.pending_review_count} topic {data!.pending_review_count === 1 ? 'copy is' : 'copies are'} waiting.

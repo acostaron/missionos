@@ -1,2 +1,5 @@
 [functions.claim-member-account]
 verify_jwt = false
+
+[functions.sync-topic-library]
+verify_jwt = false

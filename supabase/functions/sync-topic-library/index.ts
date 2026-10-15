@@ -18,6 +18,10 @@
 // same URL every month, so they are copied only for the NEWEST month on the page.
 // Song Choices are skipped.
 //
+// Callers: a signed-in manager (JWT), or the scheduled job (pg_cron, header x-sync-secret
+// checked against Vault; always "ingest"). verify_jwt is off for this function (config.toml).
+// Every ingest run is logged with record_topic_library_sync_run.
+//
 // Request body:
 //   { organization_id: uuid, mode?: "dry_run" | "ingest" (default "dry_run"),
 //     months?: ["2026-10", ...], from_month?: "2026-10" (default: current NY month),
@@ -226,14 +230,16 @@ if (import.meta.main) {
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
     const authHeader = req.headers.get("Authorization") ?? "";
-    if (!authHeader.startsWith("Bearer ")) return json({ error: "Authentication is required." }, 401);
+    const syncSecret = req.headers.get("x-sync-secret") ?? "";
+    if (!syncSecret && !authHeader.startsWith("Bearer ")) return json({ error: "Authentication is required." }, 401);
+    const admin = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
 
     let body: any;
     try { body = await req.json(); } catch { return json({ error: "Invalid JSON body." }, 400); }
 
     const orgId = String(body?.organization_id ?? "");
     if (!/^[0-9a-f-]{36}$/i.test(orgId)) return json({ error: "organization_id is required." }, 400);
-    const mode = body?.mode === "ingest" ? "ingest" : "dry_run";
+    let mode: "ingest" | "dry_run" = body?.mode === "ingest" ? "ingest" : "dry_run";
     // Only this month and later are copied (New York time), unless from_month says otherwise.
     const nyMonth = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York", year: "numeric", month: "2-digit" })
       .format(new Date()).slice(0, 7);
@@ -259,13 +265,23 @@ if (import.meta.main) {
       }
     }
 
-    // 1. caller permission (caller's own JWT)
-    const caller = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: authHeader } } });
-    const { data: canManage, error: permErr } = await caller.rpc("can_manage_topic_library", {
-      p_organization_id: orgId,
-    });
-    if (permErr) return json({ error: `Permission check failed: ${permErr.message}` }, 403);
-    if (canManage !== true) return json({ error: "You do not have permission to update the Household Library." }, 403);
+    // 1. Who is calling?
+    //    a) the scheduled job (pg_cron) with the Vault secret -> always "ingest"
+    //    b) a signed-in manager (households.formation.manage), checked with their own JWT
+    let triggerSource: "scheduled" | "manual" = "manual";
+    if (syncSecret) {
+      const { data: ok, error: secretErr } = await admin.rpc("verify_topic_sync_secret", { p_secret: syncSecret });
+      if (secretErr || ok !== true) return json({ error: "Not authorised." }, 401);
+      triggerSource = "scheduled";
+      mode = "ingest";
+    } else {
+      const caller = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: authHeader } } });
+      const { data: canManage, error: permErr } = await caller.rpc("can_manage_topic_library", {
+        p_organization_id: orgId,
+      });
+      if (permErr) return json({ error: `Permission check failed: ${permErr.message}` }, 403);
+      if (canManage !== true) return json({ error: "You do not have permission to update the Household Library." }, 403);
+    }
 
     // 2. discover
     let discovered: Discovered[];
@@ -275,6 +291,12 @@ if (import.meta.main) {
       discovered = r.found;
       unclassified = r.unclassified;
     } catch (e) {
+      if (mode === "ingest") {
+        await admin.rpc("record_topic_library_sync_run", {
+          p_organization_id: orgId, p_trigger_source: triggerSource, p_newest_month: null,
+          p_new_count: 0, p_changed_count: 0, p_unchanged_count: 0, p_failed_count: 1,
+        });
+      }
       return json({ error: `Could not read the MFC downloads page: ${(e as Error).message}` }, 502);
     }
     if (discovered.length === 0) return json({ error: "No topics were found on the MFC downloads page." }, 502);
@@ -287,7 +309,6 @@ if (import.meta.main) {
     );
 
     // 3 + 4. copy each page
-    const admin = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
     const results: Record<string, unknown>[] = [];
     for (const d of work) {
       const row: Record<string, unknown> = { month: d.month.slice(0, 7), kind: d.kind, url: d.url };
@@ -324,8 +345,24 @@ if (import.meta.main) {
       await new Promise((r) => setTimeout(r, 300));
     }
 
+    if (mode === "ingest") {
+      const count = (k: string) => results.filter((r) => r.result === k).length;
+      const failed = results.filter((r) => !["new_topic", "changed", "unchanged"].includes(String(r.result))).length;
+      const { error: logErr } = await admin.rpc("record_topic_library_sync_run", {
+        p_organization_id: orgId,
+        p_trigger_source: triggerSource,
+        p_newest_month: newestMonth.slice(0, 7),
+        p_new_count: count("new_topic"),
+        p_changed_count: count("changed"),
+        p_unchanged_count: count("unchanged"),
+        p_failed_count: failed,
+      });
+      if (logErr) console.error("record_topic_library_sync_run failed:", logErr.message);
+    }
+
     return json({
       mode,
+      trigger_source: triggerSource,
       series_code: seriesCode,
       newest_month: newestMonth.slice(0, 7),
       from_month: fromMonth,
