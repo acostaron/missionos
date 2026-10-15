@@ -310,7 +310,7 @@ export default function PastoralOperationsDashboardPage() {
                 {care_responsibilities.map((resp, idx) => (
                   <div key={idx} className="space-y-2">
                     <p className="text-xs font-medium text-ink-secondary">
-                      Scope: <span className="font-semibold text-white">{resp.scope_name}</span> ({resp.responsibility_level})
+                      Scope: <span className="font-semibold text-ink">{resp.scope_name}</span> ({resp.responsibility_level})
                     </p>
 
                     {resp.details.type === 'household_members' && (
