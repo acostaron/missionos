@@ -1,7 +1,7 @@
 // QR check-in at the event desk (Pass 9.12, written by Claude 2026-10-16).
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase/client';
-import type { PaymentState } from './payments';
+import type { EventGuest, GuestPaymentState, PaymentState } from './payments';
 
 export interface CheckInMember {
   member_id: string;
@@ -23,7 +23,25 @@ export type ScanResult =
   | { result: 'payment_required'; member: CheckInMember; payment: PaymentState; can_record_payment: boolean }
   | { result: 'not_registered'; member: CheckInMember; payment: PaymentState; can_register: boolean }
   | { result: 'already_checked_in'; member: CheckInMember; checked_in_at: string; kit_given_at: string | null }
-  | { result: 'invalid'; reason: string; member: CheckInMember | null };
+  | { result: 'invalid'; reason: string; member: CheckInMember | null }
+  // Pass 9.15: guest passes (MFCNYG1:<code>) and guests checked in from the list
+  | {
+      result: 'guest_checked_in';
+      guest: EventGuest;
+      payment: GuestPaymentState;
+      checked_in_at: string;
+      first_check_in: boolean;
+      kit_given_at: string | null;
+    }
+  | { result: 'guest_already_checked_in'; guest: EventGuest; checked_in_at: string; kit_given_at: string | null }
+  | { result: 'guest_payment_required'; guest: EventGuest; payment: GuestPaymentState; can_record_payment: boolean }
+  | { result: 'guest_invalid'; reason: 'unknown_guest_pass' | 'other_event' | 'cancelled'; guest?: EventGuest };
+
+export const GUEST_INVALID_REASONS: Record<string, string> = {
+  unknown_guest_pass: 'This guest pass is not on file.',
+  other_event: 'This guest pass is for a different event.',
+  cancelled: 'This guest was removed from the guest list.',
+};
 
 export interface CheckInSummary {
   today: string;
@@ -32,6 +50,7 @@ export interface CheckInSummary {
   event_status: string;
   checked_in_today: number;
   attended_total: number;
+  guests_today?: number;
   recent: { member_id: string; display_name: string; member_number: string | null; recorded_at: string }[];
 }
 

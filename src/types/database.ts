@@ -1221,6 +1221,242 @@ export type Database = {
           },
         ]
       }
+      event_guest_check_ins: {
+        Row: {
+          check_in_date: string
+          check_in_method: string
+          event_id: string
+          guest_id: string
+          id: string
+          organization_id: string
+          recorded_at: string
+          recorded_by_profile_id: string
+        }
+        Insert: {
+          check_in_date: string
+          check_in_method: string
+          event_id: string
+          guest_id: string
+          id?: string
+          organization_id: string
+          recorded_at?: string
+          recorded_by_profile_id: string
+        }
+        Update: {
+          check_in_date?: string
+          check_in_method?: string
+          event_id?: string
+          guest_id?: string
+          id?: string
+          organization_id?: string
+          recorded_at?: string
+          recorded_by_profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_guest_check_ins_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_guest_check_ins_guest_id_fkey"
+            columns: ["guest_id"]
+            isOneToOne: false
+            referencedRelation: "event_guests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_guest_check_ins_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_guest_check_ins_recorded_by_profile_id_fkey"
+            columns: ["recorded_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_guest_payments: {
+        Row: {
+          amount: number
+          guest_id: string
+          id: string
+          organization_id: string
+          payment_method: string
+          recorded_at: string
+          recorded_by_profile_id: string
+          voided_at: string | null
+          voided_by_profile_id: string | null
+        }
+        Insert: {
+          amount: number
+          guest_id: string
+          id?: string
+          organization_id: string
+          payment_method: string
+          recorded_at?: string
+          recorded_by_profile_id: string
+          voided_at?: string | null
+          voided_by_profile_id?: string | null
+        }
+        Update: {
+          amount?: number
+          guest_id?: string
+          id?: string
+          organization_id?: string
+          payment_method?: string
+          recorded_at?: string
+          recorded_by_profile_id?: string
+          voided_at?: string | null
+          voided_by_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_guest_payments_guest_id_fkey"
+            columns: ["guest_id"]
+            isOneToOne: false
+            referencedRelation: "event_guests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_guest_payments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_guest_payments_recorded_by_profile_id_fkey"
+            columns: ["recorded_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_guest_payments_voided_by_profile_id_fkey"
+            columns: ["voided_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_guests: {
+        Row: {
+          amount_due: number
+          cancelled_at: string | null
+          cancelled_by_profile_id: string | null
+          email: string | null
+          event_id: string
+          first_name: string
+          guest_code: string
+          host_member_id: string | null
+          id: string
+          last_name: string
+          organization_id: string
+          phone: string | null
+          price_tier: string
+          registered_at: string
+          registered_by_profile_id: string
+          registration_type: string
+          source: string
+          waived_at: string | null
+          waived_by_profile_id: string | null
+        }
+        Insert: {
+          amount_due: number
+          cancelled_at?: string | null
+          cancelled_by_profile_id?: string | null
+          email?: string | null
+          event_id: string
+          first_name: string
+          guest_code: string
+          host_member_id?: string | null
+          id?: string
+          last_name: string
+          organization_id: string
+          phone?: string | null
+          price_tier: string
+          registered_at?: string
+          registered_by_profile_id: string
+          registration_type: string
+          source: string
+          waived_at?: string | null
+          waived_by_profile_id?: string | null
+        }
+        Update: {
+          amount_due?: number
+          cancelled_at?: string | null
+          cancelled_by_profile_id?: string | null
+          email?: string | null
+          event_id?: string
+          first_name?: string
+          guest_code?: string
+          host_member_id?: string | null
+          id?: string
+          last_name?: string
+          organization_id?: string
+          phone?: string | null
+          price_tier?: string
+          registered_at?: string
+          registered_by_profile_id?: string
+          registration_type?: string
+          source?: string
+          waived_at?: string | null
+          waived_by_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_guests_cancelled_by_profile_id_fkey"
+            columns: ["cancelled_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_guests_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_guests_host_member_id_fkey"
+            columns: ["host_member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_guests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_guests_registered_by_profile_id_fkey"
+            columns: ["registered_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_guests_waived_by_profile_id_fkey"
+            columns: ["waived_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_payments: {
         Row: {
           amount: number
@@ -1394,6 +1630,7 @@ export type Database = {
           formation_posted_by_profile_id: string | null
           formation_program_id: string | null
           formation_talk_id: string | null
+          guest_fee: number | null
           id: string
           location_text: string | null
           organization_id: string
@@ -1422,6 +1659,7 @@ export type Database = {
           formation_posted_by_profile_id?: string | null
           formation_program_id?: string | null
           formation_talk_id?: string | null
+          guest_fee?: number | null
           id?: string
           location_text?: string | null
           organization_id: string
@@ -1450,6 +1688,7 @@ export type Database = {
           formation_posted_by_profile_id?: string | null
           formation_program_id?: string | null
           formation_talk_id?: string | null
+          guest_fee?: number | null
           id?: string
           location_text?: string | null
           organization_id?: string
@@ -7942,6 +8181,20 @@ export type Database = {
         Args: { p_actor_profile_id: string; p_assignment_id: string }
         Returns: undefined
       }
+      add_event_guest: {
+        Args: {
+          p_as_staff?: boolean
+          p_email?: string
+          p_event_id: string
+          p_first_name: string
+          p_host_member_id?: string
+          p_last_name: string
+          p_organization_id: string
+          p_phone?: string
+          p_walk_in?: boolean
+        }
+        Returns: Json
+      }
       add_family_member: {
         Args: {
           p_confirm_multiple_active_family?: boolean
@@ -8154,6 +8407,10 @@ export type Database = {
         Args: { p_object_name: string }
         Returns: boolean
       }
+      cancel_event_guest: {
+        Args: { p_guest_id: string; p_organization_id: string }
+        Returns: Json
+      }
       cancel_event_registration: {
         Args: {
           p_event_id: string
@@ -8227,6 +8484,10 @@ export type Database = {
           p_reason?: string
           p_section_code: string
         }
+        Returns: Json
+      }
+      check_in_event_guest: {
+        Args: { p_guest_id: string; p_organization_id: string }
         Returns: Json
       }
       check_member_claim_code: {
@@ -8509,6 +8770,10 @@ export type Database = {
         Returns: Json
       }
       get_event_check_in_summary: {
+        Args: { p_event_id: string; p_organization_id: string }
+        Returns: Json
+      }
+      get_event_guests: {
         Args: { p_event_id: string; p_organization_id: string }
         Returns: Json
       }
@@ -8840,6 +9105,10 @@ export type Database = {
         Args: { p_from?: string; p_organization_id: string; p_to?: string }
         Returns: Json
       }
+      list_my_event_guests: {
+        Args: { p_organization_id: string }
+        Returns: Json
+      }
       list_my_event_registrations: {
         Args: { p_organization_id: string }
         Returns: Json
@@ -9028,6 +9297,15 @@ export type Database = {
           p_subject_type: string
         }
         Returns: string
+      }
+      record_event_guest_payment: {
+        Args: {
+          p_amount: number
+          p_guest_id: string
+          p_organization_id: string
+          p_payment_method: string
+        }
+        Returns: Json
       }
       record_event_payment: {
         Args: {
@@ -9344,6 +9622,22 @@ export type Database = {
         }
         Returns: Json
       }
+      set_event_guest_fee: {
+        Args: {
+          p_event_id: string
+          p_guest_fee?: number
+          p_organization_id: string
+        }
+        Returns: Json
+      }
+      set_event_guest_waiver: {
+        Args: {
+          p_guest_id: string
+          p_organization_id: string
+          p_waived: boolean
+        }
+        Returns: Json
+      }
       set_event_pricing: {
         Args: {
           p_early_bird_fee?: number
@@ -9633,6 +9927,10 @@ export type Database = {
         Returns: string
       }
       verify_topic_sync_secret: { Args: { p_secret: string }; Returns: boolean }
+      void_event_guest_payment: {
+        Args: { p_organization_id: string; p_payment_id: string }
+        Returns: Json
+      }
       void_event_payment: {
         Args: { p_organization_id: string; p_payment_id: string }
         Returns: Json

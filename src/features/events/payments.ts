@@ -254,3 +254,141 @@ export function useMyEventRegistrations(orgId: string | null) {
     staleTime: 30_000,
   });
 }
+
+// ---------------------------------------------------------------------------------------------------------------
+// Guests (non-members), Pass 9.15 (Claude 2026-10-16). Recorded by name (+ optional phone / email) under the member
+// who brings them; organizers can also add guests with or without a host. Guests show an on-screen guest pass.
+// ---------------------------------------------------------------------------------------------------------------
+export type GuestPriceTier = PriceTier | 'guest';
+export interface GuestPaymentState {
+  status: Exclude<PaymentStatus, 'not_registered'>;
+  fee: number;
+  paid: number;
+  balance: number;
+  registration_type: 'reserved' | 'walk_in';
+  price_tier: GuestPriceTier;
+}
+export interface EventGuest {
+  guest_id: string;
+  event_id: string;
+  first_name: string;
+  last_name: string;
+  display_name: string;
+  phone: string | null;
+  email: string | null;
+  host_member_id: string | null;
+  host_name: string | null;
+  guest_code: string;
+  registered_at: string;
+  payment: GuestPaymentState;
+  checked_in_today: boolean;
+  checked_in_ever: boolean;
+  payments?: { payment_id: string; amount: number; payment_method: PaymentMethod; recorded_at: string }[];
+}
+export interface EventGuestsResponse {
+  guest_fee: number | null;
+  guest_price_now: { tier: GuestPriceTier; amount: number };
+  guest_walk_in_price: { tier: GuestPriceTier; amount: number };
+  can_manage: boolean;
+  guests: EventGuest[];
+}
+export interface GuestFields {
+  firstName: string;
+  lastName: string;
+  phone: string;
+  email: string;
+}
+
+export const GUEST_PASS_PREFIX = 'MFCNYG1:';
+export const guestPassPayload = (code: string) => `${GUEST_PASS_PREFIX}${code}`;
+
+export function useEventGuests(orgId: string | null, eventId: string | null, enabled: boolean) {
+  return useQuery<EventGuestsResponse>({
+    queryKey: [...paymentKeys.all, 'guests', orgId, eventId],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_event_guests', { p_organization_id: orgId!, p_event_id: eventId! });
+      if (error) throw error;
+      return data as unknown as EventGuestsResponse;
+    },
+    enabled: !!orgId && !!eventId && enabled,
+  });
+}
+
+export function useMyEventGuests(orgId: string | null) {
+  return useQuery<EventGuest[]>({
+    queryKey: [...paymentKeys.all, 'my-guests', orgId],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('list_my_event_guests', { p_organization_id: orgId! });
+      if (error) throw error;
+      return (data ?? []) as unknown as EventGuest[];
+    },
+    enabled: !!orgId,
+    staleTime: 30_000,
+  });
+}
+
+/** asStaff false = I am adding my own guest (My Events). */
+export async function addEventGuest(
+  orgId: string,
+  eventId: string,
+  f: GuestFields,
+  opts: { asStaff: boolean; hostMemberId?: string | null; walkIn?: boolean },
+) {
+  const { data, error } = await supabase.rpc('add_event_guest', {
+    p_organization_id: orgId,
+    p_event_id: eventId,
+    p_first_name: f.firstName.trim(),
+    p_last_name: f.lastName.trim(),
+    p_phone: f.phone.trim() || undefined,
+    p_email: f.email.trim() || undefined,
+    p_as_staff: opts.asStaff,
+    p_host_member_id: opts.hostMemberId ?? undefined,
+    p_walk_in: !!opts.walkIn,
+  });
+  if (error) throw error;
+  return data as unknown as EventGuest;
+}
+
+export async function cancelEventGuest(orgId: string, guestId: string) {
+  const { error } = await supabase.rpc('cancel_event_guest', { p_organization_id: orgId, p_guest_id: guestId });
+  if (error) throw error;
+}
+
+export async function recordEventGuestPayment(orgId: string, guestId: string, amount: number, method: PaymentMethod) {
+  const { error } = await supabase.rpc('record_event_guest_payment', {
+    p_organization_id: orgId,
+    p_guest_id: guestId,
+    p_amount: amount,
+    p_payment_method: method,
+  });
+  if (error) throw error;
+}
+
+export async function voidEventGuestPayment(orgId: string, paymentId: string) {
+  const { error } = await supabase.rpc('void_event_guest_payment', { p_organization_id: orgId, p_payment_id: paymentId });
+  if (error) throw error;
+}
+
+export async function setEventGuestWaiver(orgId: string, guestId: string, waived: boolean) {
+  const { error } = await supabase.rpc('set_event_guest_waiver', {
+    p_organization_id: orgId,
+    p_guest_id: guestId,
+    p_waived: waived,
+  });
+  if (error) throw error;
+}
+
+export async function setEventGuestFee(orgId: string, eventId: string, fee: number | null) {
+  const { error } = await supabase.rpc('set_event_guest_fee', {
+    p_organization_id: orgId,
+    p_event_id: eventId,
+    p_guest_fee: fee ?? undefined,
+  });
+  if (error) throw error;
+}
+
+export async function checkInEventGuest(orgId: string, guestId: string) {
+  const { data, error } = await supabase.rpc('check_in_event_guest', { p_organization_id: orgId, p_guest_id: guestId });
+  if (error) throw error;
+  return data as unknown as { result: string };
+}

@@ -1,18 +1,25 @@
 // My Events: events open for registration — register, see my balance, cancel (Pass 9.14, Claude 2026-10-16).
+// Pass 9.15: add my guests (non-members), see what they owe, show their guest pass, remove an unpaid guest.
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Ticket } from 'lucide-react';
+import { QrCode, Ticket, UserPlus } from 'lucide-react';
 import { formatNyDateShort, formatNyTime } from '../../lib/ny-time';
 import { getEventErrorMessage } from '../events/error-message';
 import {
   PRICE_TIER_LABELS,
+  addEventGuest,
+  cancelEventGuest,
   cancelEventRegistration,
   invalidatePayments,
   money,
   registerForEvent,
+  useMyEventGuests,
   useMyEventRegistrations,
+  type EventGuest,
   type MyEventRegistration,
 } from '../events/payments';
+import { GuestForm } from '../events/components/GuestForm';
+import { GuestPassModal } from '../events/components/GuestPassModal';
 import { Alert, Badge, Button, Card } from '../../components/ui';
 
 function priceText(e: MyEventRegistration) {
@@ -29,7 +36,10 @@ function priceText(e: MyEventRegistration) {
 export function MyEventRegistrationsCard({ organizationId }: { organizationId: string | null }) {
   const qc = useQueryClient();
   const { data: events = [] } = useMyEventRegistrations(organizationId);
+  const { data: guests = [] } = useMyEventGuests(organizationId);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [addingFor, setAddingFor] = useState<string | null>(null);
+  const [pass, setPass] = useState<{ guest: EventGuest; title: string } | null>(null);
   const [errorText, setErrorText] = useState<string | null>(null);
 
   if (!organizationId || events.length === 0) return null;
@@ -40,11 +50,85 @@ export function MyEventRegistrationsCard({ organizationId }: { organizationId: s
       setErrorText(null);
       await fn();
       await invalidatePayments(qc);
+      return true;
     } catch (e) {
       setErrorText(getEventErrorMessage(e));
+      return false;
     } finally {
       setBusyId(null);
     }
+  };
+
+  const guestsBlock = (e: MyEventRegistration) => {
+    const mine = guests.filter((g) => g.event_id === e.event_id);
+    const busy = busyId === e.event_id;
+    return (
+      <div className="space-y-1.5 pt-1">
+        {mine.length > 0 && (
+          <ul className="space-y-1">
+            {mine.map((g) => {
+              const p = g.payment;
+              const due = p.status === 'unpaid' || p.status === 'partial';
+              return (
+                <li key={g.guest_id} className="flex flex-wrap items-center gap-2 text-sm">
+                  <span className="text-ink">Guest: {g.display_name}</span>
+                  {p.status === 'paid' && <Badge variant="success">Paid</Badge>}
+                  {p.status === 'waived' && <Badge variant="info">Fee waived</Badge>}
+                  {due && <Badge variant="warning">{money(p.balance)} due</Badge>}
+                  {g.checked_in_today && <Badge variant="success">Checked in</Badge>}
+                  <Button size="sm" variant="ghost" icon={<QrCode className="h-4 w-4" />} onClick={() => setPass({ guest: g, title: e.title })}>
+                    Guest pass
+                  </Button>
+                  {p.paid === 0 && !g.checked_in_ever && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      disabled={busy}
+                      onClick={() => {
+                        if (window.confirm(`Remove ${g.display_name} from your guests?`)) {
+                          run(e.event_id, () => cancelEventGuest(organizationId, g.guest_id));
+                        }
+                      }}
+                    >
+                      Remove
+                    </Button>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        )}
+        {mine.some((g) => g.payment.status === 'unpaid' || g.payment.status === 'partial') && (
+          <p className="text-xs text-ink-secondary">Pay for your guests with the registration team or the treasurer.</p>
+        )}
+        {e.registration_open &&
+          (addingFor === e.event_id ? (
+            <div className="rounded-card border border-line p-3">
+              <p className="mb-2 text-xs font-semibold text-ink-secondary">
+                Add a guest (non-member)
+              </p>
+              <GuestForm
+                submitLabel="Add guest"
+                busy={busy}
+                onSubmit={async (f) => {
+                  const ok = await run(e.event_id, () => addEventGuest(organizationId, e.event_id, f, { asStaff: false }));
+                  if (ok) setAddingFor(null);
+                  return ok;
+                }}
+                extra={
+                  <Button type="button" size="sm" variant="ghost" onClick={() => setAddingFor(null)}>
+                    Cancel
+                  </Button>
+                }
+              />
+            </div>
+          ) : (
+            <Button size="sm" variant="outline" icon={<UserPlus className="h-4 w-4" />} onClick={() => setAddingFor(e.event_id)}>
+              Add a guest
+            </Button>
+          ))}
+      </div>
+    );
   };
 
   return (
@@ -107,6 +191,7 @@ export function MyEventRegistrationsCard({ organizationId }: { organizationId: s
                       Cancel registration
                     </Button>
                   )}
+                  {guestsBlock(e)}
                 </div>
               ) : (
                 e.registration_open && (
@@ -119,6 +204,7 @@ export function MyEventRegistrationsCard({ organizationId }: { organizationId: s
           );
         })}
       </ul>
+      {pass && <GuestPassModal guest={pass.guest} eventTitle={pass.title} onClose={() => setPass(null)} />}
     </Card>
   );
 }

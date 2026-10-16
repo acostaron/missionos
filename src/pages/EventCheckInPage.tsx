@@ -1,15 +1,17 @@
 // QR check-in desk for an event (Pass 9.12, written by Claude 2026-10-16).
 // Scan the member's QR (My Card on the phone, or the ID card) with the camera or a handheld scanner.
 // A member checks in once per event day; a second scan shows a warning. First check-in = kit and T-shirt given.
+// Pass 9.15: guests (non-members) check in with their guest pass (MFCNYG1:<code>) or by name from the guest list.
 import { useCallback, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, ArrowLeft, CheckCircle2, CircleDollarSign, ScanLine, XCircle } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, CheckCircle2, CircleDollarSign, ScanLine, UserRound, XCircle } from 'lucide-react';
 import { useCurrentOrganization } from '../hooks/use-current-organization';
 import { useEvent, eventKeys } from '../features/events/queries';
 import { getEventErrorMessage } from '../features/events/error-message';
 import { QrScanner } from '../features/events/components/QrScanner';
 import {
+  GUEST_INVALID_REASONS,
   INVALID_REASONS,
   checkInKeys,
   scanCheckIn,
@@ -17,10 +19,21 @@ import {
   type ScanResult,
 } from '../features/events/check-in';
 import { MemberAvatar } from '../features/self-service/components/MemberAvatar';
-import { invalidatePayments, money, recordEventPayment, registerForEvent, type PaymentMethod } from '../features/events/payments';
+import {
+  GUEST_PASS_PREFIX,
+  PAYMENT_STATUS_LABELS,
+  checkInEventGuest,
+  invalidatePayments,
+  money,
+  recordEventGuestPayment,
+  recordEventPayment,
+  registerForEvent,
+  useEventGuests,
+  type PaymentMethod,
+} from '../features/events/payments';
 import { RecordPaymentForm } from '../features/events/components/RecordPaymentForm';
 import { formatNyDateShort, formatNyTime } from '../lib/ny-time';
-import { Alert, Button, Card, Input } from '../components/ui';
+import { Alert, Badge, Button, Card, Input } from '../components/ui';
 
 function beep(ok: boolean) {
   try {
@@ -45,6 +58,9 @@ function beep(ok: boolean) {
   }
 }
 
+const SUCCESS = new Set<ScanResult['result']>(['checked_in', 'guest_checked_in']);
+const WARNING = new Set<ScanResult['result']>(['already_checked_in', 'guest_already_checked_in']);
+
 function when(iso: string | null) {
   return iso ? `${formatNyDateShort(iso)} at ${formatNyTime(iso)}` : '';
 }
@@ -61,29 +77,32 @@ export default function EventCheckInPage() {
   const [errorText, setErrorText] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [manual, setManual] = useState('');
+  const [showGuests, setShowGuests] = useState(false);
+  const [guestQuery, setGuestQuery] = useState('');
+  const { data: guestList } = useEventGuests(orgId, eventId ?? null, showGuests);
   const lastPayload = useRef('');
   const busyRef = useRef(false);
   const resumeTimer = useRef<number | undefined>(undefined);
 
-  const submit = useCallback(
-    async (payload: string) => {
-      if (!orgId || !eventId || busyRef.current || !payload.trim()) return;
+  const process = useCallback(
+    async (fetcher: () => Promise<ScanResult>) => {
+      if (!orgId || !eventId || busyRef.current) return;
       busyRef.current = true;
-      lastPayload.current = payload.trim();
       setBusy(true);
       setErrorText(null);
       window.clearTimeout(resumeTimer.current);
       try {
-        const r = await scanCheckIn(orgId, eventId, payload.trim());
+        const r = await fetcher();
         setResult(r);
-        beep(r.result === 'checked_in');
-        if (r.result === 'checked_in') {
+        beep(SUCCESS.has(r.result));
+        if (SUCCESS.has(r.result)) {
           // keep the desk moving: clear a success automatically
           resumeTimer.current = window.setTimeout(() => setResult(null), 4000);
         }
         await Promise.all([
           qc.invalidateQueries({ queryKey: checkInKeys.summary(orgId, eventId) }),
           qc.invalidateQueries({ queryKey: eventKeys.all }),
+          invalidatePayments(qc),
         ]);
       } catch (e) {
         setResult(null);
@@ -97,7 +116,23 @@ export default function EventCheckInPage() {
     [orgId, eventId, qc],
   );
 
-  const waitingForTap = result !== null && result.result !== 'checked_in';
+  const submit = useCallback(
+    async (payload: string) => {
+      if (!orgId || !eventId || !payload.trim()) return;
+      lastPayload.current = payload.trim();
+      await process(() => scanCheckIn(orgId, eventId, payload.trim()));
+    },
+    [orgId, eventId, process],
+  );
+
+  // Guest without a pass: check in by name from the guest list
+  const checkInGuest = async (guestId: string) => {
+    if (!orgId) return;
+    lastPayload.current = '';
+    await process(async () => (await checkInEventGuest(orgId, guestId)) as unknown as ScanResult);
+  };
+
+  const waitingForTap = result !== null && !SUCCESS.has(result.result);
 
   // Paid events: record the payment at the desk, then check the member in with the same QR.
   const payAndCheckIn = async (memberId: string, amount: number, method: PaymentMethod, walkIn = false) => {
@@ -116,6 +151,28 @@ export default function EventCheckInPage() {
     setBusy(false);
     await submit(lastPayload.current);
   };
+
+  // Guests: record the payment, then check in again (same pass, or from the list)
+  const payGuestAndCheckIn = async (guestId: string, amount: number, method: PaymentMethod) => {
+    if (!orgId) return;
+    try {
+      setBusy(true);
+      setErrorText(null);
+      await recordEventGuestPayment(orgId, guestId, amount, method);
+    } catch (e) {
+      setErrorText(getEventErrorMessage(e));
+      setBusy(false);
+      return;
+    }
+    setBusy(false);
+    if (lastPayload.current.toUpperCase().startsWith(GUEST_PASS_PREFIX)) await submit(lastPayload.current);
+    else await checkInGuest(guestId);
+  };
+
+  const q = guestQuery.trim().toLowerCase();
+  const matchedGuests = (guestList?.guests ?? []).filter(
+    (g) => q.length >= 2 && (g.display_name.toLowerCase().includes(q) || (g.host_name ?? '').toLowerCase().includes(q)),
+  );
 
   if (isLoading || !event) {
     return <div className="p-8 text-center text-sm text-ink-muted">Loading event…</div>;
@@ -151,6 +208,12 @@ export default function EventCheckInPage() {
                   <div className="text-xs text-ink-secondary">attended (all days)</div>
                 </div>
               )}
+              {(summary.guests_today ?? 0) > 0 && (
+                <div className="flex-1 rounded-card border border-line bg-surface p-3">
+                  <div className="text-2xl font-bold text-ink">{summary.guests_today}</div>
+                  <div className="text-xs text-ink-secondary">guests today</div>
+                </div>
+              )}
             </div>
           )}
 
@@ -166,17 +229,17 @@ export default function EventCheckInPage() {
             <Card
               padding="comfortable"
               className={
-                result.result === 'checked_in'
+                SUCCESS.has(result.result)
                   ? 'border-2 border-success-600 bg-success-50'
-                  : result.result === 'already_checked_in'
+                  : WARNING.has(result.result)
                     ? 'border-2 border-warning-600 bg-warning-50'
                     : 'border-2 border-danger-600 bg-danger-50'
               }
             >
               <div className="flex items-start gap-3" role="status" aria-live="assertive">
-                {result.result === 'checked_in' ? (
+                {SUCCESS.has(result.result) ? (
                   <CheckCircle2 className="h-8 w-8 shrink-0 text-success-700" />
-                ) : result.result === 'already_checked_in' ? (
+                ) : WARNING.has(result.result) ? (
                   <AlertTriangle className="h-8 w-8 shrink-0 text-warning-700" />
                 ) : (
                   <XCircle className="h-8 w-8 shrink-0 text-danger-700" />
@@ -185,15 +248,28 @@ export default function EventCheckInPage() {
                   <p className="text-base font-bold text-ink">
                     {result.result === 'checked_in'
                       ? 'Checked in'
-                      : result.result === 'already_checked_in'
-                        ? 'Already checked in'
-                        : result.result === 'payment_required'
-                          ? 'Not paid — not checked in'
-                          : result.result === 'not_registered'
-                            ? 'Not registered — walk-in'
-                          : 'Not checked in'}
+                      : result.result === 'guest_checked_in'
+                        ? 'Guest checked in'
+                        : WARNING.has(result.result)
+                          ? 'Already checked in'
+                          : result.result === 'payment_required' || result.result === 'guest_payment_required'
+                            ? 'Not paid — not checked in'
+                            : result.result === 'not_registered'
+                              ? 'Not registered — walk-in'
+                              : 'Not checked in'}
                   </p>
-                  {result.member && (
+                  {'guest' in result && result.guest && (
+                    <div className="flex items-center gap-2">
+                      <UserRound className="h-8 w-8 shrink-0 text-ink-muted" />
+                      <div>
+                        <p className="font-semibold text-ink">{result.guest.display_name}</p>
+                        <p className="text-xs text-ink-secondary">
+                          {result.guest.host_name ? `Guest of ${result.guest.host_name}` : 'Guest (non-member)'}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  {'member' in result && result.member && (
                     <div className="flex items-center gap-2">
                       <MemberAvatar path={result.member.photo_path} name={result.member.display_name} size="md" />
                       <div>
@@ -259,6 +335,43 @@ export default function EventCheckInPage() {
                       )}
                     </div>
                   )}
+                  {result.result === 'guest_checked_in' && (
+                    <p className="text-sm text-ink">
+                      {result.first_check_in
+                        ? 'First check-in for this event — give the guest kit.'
+                        : `Checked in for today. Kit already given ${when(result.kit_given_at)}.`}
+                      {result.payment.status === 'paid' ? ` Paid ${money(result.payment.paid)}.` : ''}
+                      {result.payment.status === 'waived' ? ' Fee waived.' : ''}
+                    </p>
+                  )}
+                  {result.result === 'guest_already_checked_in' && (
+                    <p className="text-sm text-ink">
+                      This guest already checked in today at {formatNyTime(result.checked_in_at)}.
+                      {result.kit_given_at ? ` Kit already given ${when(result.kit_given_at)}.` : ''} Do not give another kit.
+                    </p>
+                  )}
+                  {result.result === 'guest_payment_required' && (
+                    <div className="space-y-2">
+                      <p className="flex items-center gap-1 text-sm font-semibold text-danger-700">
+                        <CircleDollarSign className="h-4 w-4" />
+                        Balance due {money(result.payment.balance)}
+                        {result.payment.paid > 0 ? ` (paid ${money(result.payment.paid)} of ${money(result.payment.fee)})` : ''}
+                      </p>
+                      {result.can_record_payment ? (
+                        <RecordPaymentForm
+                          defaultAmount={result.payment.balance}
+                          submitLabel="Record payment & check in"
+                          busy={busy}
+                          onSubmit={(amount, method) => payGuestAndCheckIn(result.guest.guest_id, amount, method)}
+                        />
+                      ) : (
+                        <p className="text-sm text-ink">Do not give the kit. Send the guest to the payment table.</p>
+                      )}
+                    </div>
+                  )}
+                  {result.result === 'guest_invalid' && (
+                    <p className="text-sm text-ink">{GUEST_INVALID_REASONS[result.reason] ?? 'This guest pass cannot be used.'}</p>
+                  )}
                   {result.result === 'invalid' && (
                     <p className="text-sm text-ink">{INVALID_REASONS[result.reason] ?? 'This QR code cannot be used.'}</p>
                   )}
@@ -294,6 +407,54 @@ export default function EventCheckInPage() {
               Check in
             </Button>
           </form>
+
+          <Card padding="compact" className="space-y-2">
+            {!showGuests ? (
+              <Button size="sm" variant="ghost" icon={<UserRound className="h-4 w-4" />} onClick={() => setShowGuests(true)}>
+                Guest without a pass? Find by name
+              </Button>
+            ) : (
+              <>
+                <h2 className="text-sm font-semibold text-ink">Find a guest</h2>
+                <Input
+                  value={guestQuery}
+                  onChange={(e) => setGuestQuery(e.target.value)}
+                  placeholder="Guest or host name"
+                  aria-label="Guest or host name"
+                  autoComplete="off"
+                />
+                {q.length >= 2 && matchedGuests.length === 0 && (
+                  <p className="text-sm text-ink-muted">No guest found. Organizers can add walk-in guests on the Registrations page.</p>
+                )}
+                <ul className="divide-y divide-line">
+                  {matchedGuests.map((g) => (
+                    <li key={g.guest_id} className="flex items-center justify-between gap-2 py-1.5">
+                      <span className="min-w-0 text-sm text-ink">
+                        {g.display_name}
+                        <span className="block text-xs text-ink-secondary">
+                          {g.host_name ? `Guest of ${g.host_name}` : 'No host member'}
+                        </span>
+                      </span>
+                      <span className="flex shrink-0 items-center gap-2">
+                        {g.checked_in_today ? (
+                          <Badge variant="success">Checked in</Badge>
+                        ) : (
+                          <>
+                            {(g.payment.status === 'unpaid' || g.payment.status === 'partial') && (
+                              <Badge variant="warning">{PAYMENT_STATUS_LABELS[g.payment.status]}</Badge>
+                            )}
+                            <Button size="sm" variant="outline" disabled={busy} onClick={() => checkInGuest(g.guest_id)}>
+                              Check in
+                            </Button>
+                          </>
+                        )}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </Card>
 
           {summary && summary.recent.length > 0 && (
             <Card padding="compact">

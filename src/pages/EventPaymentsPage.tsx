@@ -1,4 +1,4 @@
-// Registrations & payments for an event (Pass 9.13 / 9.14, written by Claude 2026-10-16).
+// Registrations & payments for an event (Pass 9.13 / 9.14 / 9.15, written by Claude 2026-10-16).
 // For the event organizers and the Treasurer / Finance Coordinator: prices (early-bird, regular, walk-in),
 // open registration to members, register members, record payments, waive, cancel, void a mistaken payment.
 import { useState } from 'react';
@@ -27,6 +27,7 @@ import {
   type PaymentStatus,
 } from '../features/events/payments';
 import { RecordPaymentForm } from '../features/events/components/RecordPaymentForm';
+import { EventGuestsCard } from '../features/events/components/EventGuestsCard';
 import { formatNyDateShort } from '../lib/ny-time';
 import { Alert, Badge, Button, Card, Input } from '../components/ui';
 import type { BadgeVariant } from '../components/ui';
@@ -339,6 +340,8 @@ export default function EventPaymentsPage() {
           </ul>
         )}
       </Card>
+
+      <EventGuestsCard orgId={orgId!} eventId={eventId!} eventTitle={event.title} hosts={data?.members ?? []} />
     </div>
   );
 }
