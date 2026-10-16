@@ -12,6 +12,7 @@ import type { InvitationDetails } from '../features/auth/invitation/api';
 import { identityKeys } from '../features/identity/queries';
 import { authorizationKeys } from '../features/authorization/queries';
 import { selfServiceKeys } from '../features/self-service/api';
+import { MissionOSLogo } from '../components/brand/MissionOSLogo';
 
 type PageState =
   | 'processing'
@@ -231,6 +232,7 @@ export default function InviteAcceptPage() {
     <div className="flex min-h-screen items-center justify-center bg-canvas px-4 py-10">
       <Card className="w-full max-w-md" padding="comfortable">
         <div className="mb-6 text-center">
+          <MissionOSLogo size={88} className="mx-auto mb-3" />
           <p className="text-small font-semibold tracking-wide text-secondary uppercase">MissionOS</p>
           <h1 className="mt-1 text-page-title font-semibold text-ink">Invitation Acceptance</h1>
         </div>

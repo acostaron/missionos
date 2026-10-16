@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase/client';
 import { normalizeError } from '../lib/supabase/errors';
 import { useAuth } from '../hooks/use-auth';
 import { Alert, Button, Card, FormField, Input } from '../components/ui';
+import { MissionOSLogo } from '../components/brand/MissionOSLogo';
 
 export default function LoginPage() {
   const [searchParams] = useSearchParams();
@@ -55,6 +56,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-canvas px-4 py-10">
       <Card className="w-full max-w-md" padding="comfortable">
         <div className="mb-6 text-center">
+          <MissionOSLogo size={88} className="mx-auto mb-3" />
           <p className="text-small font-semibold tracking-wide text-secondary uppercase">MissionOS</p>
           <h1 className="mt-1 text-page-title font-semibold text-ink">Sign in</h1>
           <p className="mt-1 text-small text-ink-secondary">Welcome back. Sign in to continue.</p>

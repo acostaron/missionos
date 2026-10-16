@@ -1,6 +1,7 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { LogOut, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { LogOut, PanelLeftClose } from 'lucide-react';
 import { isNavItemActive, type NavItem } from './navigation';
+import { MissionOSLogo } from '../brand/MissionOSLogo';
 
 type Props = {
   items: NavItem[];
@@ -28,23 +29,41 @@ export default function AppSidebar({
         collapsed ? 'w-[76px]' : 'w-64'
       }`}
     >
-      <div className="flex h-16 items-center justify-between gap-2 border-b border-line px-4">
-        {!collapsed && (
-          <div className="min-w-0">
-            <div className="truncate text-base font-bold leading-tight text-primary">MissionOS</div>
-            <div className="truncate text-xs text-ink-muted">Missionary Families of Christ</div>
-          </div>
+      <div
+        className={`flex h-16 items-center justify-between gap-2 border-b border-line ${collapsed ? 'px-2' : 'px-4'}`}
+      >
+        {collapsed ? (
+          <button
+            type="button"
+            id="nav-collapse-toggle"
+            onClick={onToggle}
+            aria-label="Expand sidebar"
+            title="Expand sidebar"
+            className={`mx-auto rounded-full p-0.5 hover:bg-canvas ${focus}`}
+          >
+            <MissionOSLogo size={36} />
+          </button>
+        ) : (
+          <>
+            <div className="flex min-w-0 items-center gap-2.5">
+              <MissionOSLogo size={36} />
+              <div className="min-w-0">
+                <div className="truncate text-base font-bold leading-tight text-primary">MissionOS</div>
+                <div className="truncate text-xs text-ink-muted">Missionary Families of Christ</div>
+              </div>
+            </div>
+            <button
+              type="button"
+              id="nav-collapse-toggle"
+              onClick={onToggle}
+              aria-label="Collapse sidebar"
+              title="Collapse sidebar"
+              className={`rounded-md p-2 text-ink-muted hover:bg-canvas ${focus}`}
+            >
+              <PanelLeftClose size={18} />
+            </button>
+          </>
         )}
-        <button
-          type="button"
-          id="nav-collapse-toggle"
-          onClick={onToggle}
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          className={`rounded-md p-2 text-ink-muted hover:bg-canvas ${focus} ${collapsed ? 'mx-auto' : ''}`}
-        >
-          {collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
-        </button>
       </div>
 
       <nav aria-label="Primary navigation" className="flex-1 space-y-1 overflow-y-auto p-3">
