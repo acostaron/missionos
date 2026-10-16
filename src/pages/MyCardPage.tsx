@@ -6,7 +6,7 @@ import { useOrganizationContext } from '../hooks/use-organization-context';
 import { useMyMemberCard, useReissueMemberCard, type MemberCard } from '../features/self-service/portal-api';
 import { MemberAvatar } from '../features/self-service/components/MemberAvatar';
 import { getEventErrorMessage } from '../features/events/error-message';
-import { Alert, Button, Card, EmptyState, Modal, PageHeader } from '../components/ui';
+import { Alert, Button, Card, EmptyState, Modal } from '../components/ui';
 
 interface OfflineCardData {
   payload: string;
@@ -241,12 +241,19 @@ export default function MyCardPage() {
 
   const cardIdShort = activeCard.card_public_id ? activeCard.card_public_id.slice(0, 8) : null;
 
+  // Pass 9.17 (Ron, 2026-10-16): the whole card, QR included, fits on one phone screen without scrolling.
+  // The QR shrinks with the screen height (between 8rem and 16rem); 31rem is everything else on the page
+  // (app header, title, card details, buttons and the bottom navigation), measured at about 30rem.
+  const qrSize = 'clamp(8rem, min(100vw - 7rem, 100dvh - 31rem), 16rem)';
+
   return (
-    <div className="mx-auto max-w-md space-y-6 px-4 py-8">
-      <PageHeader
-        title="My MFC ID"
-        description="Show this digital ID card to check in at assemblies and community gatherings."
-      />
+    <div className="mx-auto max-w-md space-y-3 sm:space-y-6 sm:py-4">
+      <div>
+        <h1 className="text-lg font-semibold tracking-tight text-ink sm:text-page-title">My MFC ID</h1>
+        <p className="hidden text-body text-ink-secondary sm:block">
+          Show this digital ID card to check in at assemblies and community gatherings.
+        </p>
+      </div>
 
       {offlineData && !card && (
         <Alert variant="info">
@@ -261,53 +268,40 @@ export default function MyCardPage() {
       )}
 
       {/* ID Card Display */}
-      <div className="rounded-2xl border-2 border-line bg-white p-6 shadow-md text-slate-900 space-y-5 text-center">
+      <div className="space-y-2 rounded-2xl border-2 border-line bg-white p-3 text-center text-slate-900 shadow-md sm:space-y-4 sm:p-6">
         {/* Header */}
-        <div className="border-b border-slate-200 pb-3">
-          <p className="text-xs font-bold uppercase tracking-widest text-primary-blue">
-            Missionary Families of Christ
-          </p>
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-            New York
+        <div className="border-b border-slate-200 pb-2">
+          <p className="text-[11px] font-bold uppercase tracking-widest text-primary-blue sm:text-xs">
+            Missionary Families of Christ · New York
           </p>
         </div>
 
         {/* Member Avatar & Details */}
-        <div className="flex flex-col items-center space-y-2">
+        <div className="flex items-center gap-3 text-left">
           <MemberAvatar
             path={activeCard.photo_path}
             name={activeCard.display_name}
             size="lg"
-            className="ring-2 ring-primary-blue/20"
+            className="shrink-0 ring-2 ring-primary-blue/20"
           />
-          <h2 className="text-xl font-bold text-slate-900 pt-1">
-            {activeCard.display_name}
-          </h2>
-
-          <div className="rounded-md bg-slate-50 px-3 py-1.5 border border-slate-200">
-            <p className="text-[11px] font-medium uppercase tracking-wider text-slate-500">
-              Member No.
+          <div className="min-w-0 space-y-0.5">
+            <h2 className="text-lg font-bold leading-tight text-slate-900">{activeCard.display_name}</h2>
+            <p className="font-mono text-base font-bold tracking-wider text-slate-900">
+              <span className="mr-1.5 font-sans text-[10px] font-medium uppercase tracking-wider text-slate-500">No.</span>
+              {activeCard.member_number || 'Not yet assigned'}
             </p>
-            <p className="font-mono text-lg font-bold tracking-wider text-slate-900">
-              {activeCard.member_number || 'Member No. not yet assigned'}
-            </p>
+            {orgParts.length > 0 && (
+              <p className="truncate text-xs font-medium text-slate-600">{orgParts.join(' · ')}</p>
+            )}
+            {activeCard.household_name && (
+              <p className="truncate text-xs text-slate-500">{activeCard.household_name}</p>
+            )}
+            {cardIdShort && <p className="text-[10px] font-mono text-slate-400">Card {cardIdShort}</p>}
           </div>
-
-          {orgParts.length > 0 && (
-            <p className="text-xs font-medium text-slate-600">
-              {orgParts.join(' · ')}
-            </p>
-          )}
-
-          {activeCard.household_name && (
-            <p className="text-xs text-slate-500">
-              {activeCard.household_name}
-            </p>
-          )}
         </div>
 
         {/* QR Code Container */}
-        <div className="flex flex-col items-center justify-center p-3 rounded-xl bg-white border border-slate-200 shadow-inner">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-slate-200 bg-white p-2 shadow-inner">
           {qrDataUrl ? (
             <button
               ref={qrButtonRef}
@@ -319,52 +313,50 @@ export default function MyCardPage() {
               <img
                 src={qrDataUrl}
                 alt="Your member QR code"
-                className="h-56 w-56 object-contain"
+                className="aspect-square h-auto w-56 object-contain"
+                style={{ width: qrSize }}
               />
             </button>
           ) : (
-            <div className="flex h-56 w-56 items-center justify-center text-xs text-slate-400">
+            <div
+              className="flex aspect-square w-56 items-center justify-center text-xs text-slate-400"
+              style={{ width: qrSize }}
+            >
               Generating QR…
             </div>
           )}
         </div>
 
-        {cardIdShort && (
-          <p className="text-[11px] font-mono text-slate-400">
-            Card {cardIdShort}
-          </p>
-        )}
+        <p className="flex items-center justify-center gap-1.5 text-[11px] text-slate-500">
+          <Sun className="h-3.5 w-3.5 shrink-0 text-amber-500" />
+          <span>Turn brightness up to scan · tap the QR to enlarge</span>
+        </p>
       </div>
 
-      {/* Tip & Action Buttons */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-2 rounded-lg bg-surface-muted p-3 text-xs text-ink-secondary">
-          <Sun className="h-4 w-4 shrink-0 text-amber-500" />
-          <span>Tip: Turn your screen brightness up when scanning.</span>
-        </div>
+      {/* Action Buttons */}
+      <div className="flex gap-2 sm:gap-3">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="flex-1 gap-2"
+          onClick={handleDownloadQr}
+          disabled={!qrDataUrl}
+        >
+          <Download className="h-4 w-4" />
+          Save QR image
+        </Button>
 
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            className="flex-1 gap-2"
-            onClick={handleDownloadQr}
-            disabled={!qrDataUrl}
-          >
-            <Download className="h-4 w-4" />
-            Save QR image
-          </Button>
-
-          <Button
-            type="button"
-            variant="outline"
-            className="flex-1 gap-2 text-ink-secondary hover:text-ink"
-            onClick={() => setIsReplaceModalOpen(true)}
-          >
-            <RefreshCw className="h-4 w-4" />
-            Replace my QR
-          </Button>
-        </div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="flex-1 gap-2 text-ink-secondary hover:text-ink"
+          onClick={() => setIsReplaceModalOpen(true)}
+        >
+          <RefreshCw className="h-4 w-4" />
+          Replace my QR
+        </Button>
       </div>
 
       {/* Replace Confirmation Modal */}
