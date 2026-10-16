@@ -249,8 +249,12 @@ export default function MyCardPage() {
   return (
     <div className="mx-auto max-w-md space-y-3 sm:space-y-6 sm:py-4">
       <div>
-        <h1 className="text-lg font-semibold tracking-tight text-ink sm:text-page-title">My MFC ID</h1>
-        <p className="hidden text-body text-ink-secondary sm:block">
+        {/* Pass 9.18 (Ron): show MEMBER, centered, instead of the page title (title kept for screen readers) */}
+        <h1 className="sr-only">My MFC ID</h1>
+        <p aria-hidden="true" className="text-center text-lg font-bold uppercase tracking-[0.3em] text-ink sm:text-page-title">
+          Member
+        </p>
+        <p className="hidden text-center text-body text-ink-secondary sm:block">
           Show this digital ID card to check in at assemblies and community gatherings.
         </p>
       </div>
@@ -287,14 +291,10 @@ export default function MyCardPage() {
           <div className="min-w-0 space-y-0.5">
             <h2 className="text-lg font-bold leading-tight text-slate-900">{activeCard.display_name}</h2>
             <p className="font-mono text-base font-bold tracking-wider text-slate-900">
-              <span className="mr-1.5 font-sans text-[10px] font-medium uppercase tracking-wider text-slate-500">No.</span>
               {activeCard.member_number || 'Not yet assigned'}
             </p>
             {orgParts.length > 0 && (
               <p className="truncate text-xs font-medium text-slate-600">{orgParts.join(' · ')}</p>
-            )}
-            {activeCard.household_name && (
-              <p className="truncate text-xs text-slate-500">{activeCard.household_name}</p>
             )}
             {cardIdShort && <p className="text-[10px] font-mono text-slate-400">Card {cardIdShort}</p>}
           </div>
