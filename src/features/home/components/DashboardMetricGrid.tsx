@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-/** 2 columns on mobile and tablet, 4 on wide screens. */
+/** Pass 9.19: 4 compact tiles in one row on phones (Home fits one screen), 4 on wide screens. */
 export default function DashboardMetricGrid({ children }: { children: ReactNode }) {
-  return <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">{children}</div>;
+  return <div className="grid grid-cols-4 gap-2 sm:gap-4">{children}</div>;
 }

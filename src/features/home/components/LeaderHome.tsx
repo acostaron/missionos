@@ -1,6 +1,5 @@
-import { HeartHandshake, House, UserPlus, UserX } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { Alert, Skeleton, StatCard } from '../../../components/ui';
+import { HeartHandshake, House, UserPlus } from 'lucide-react';
+import { Alert, Skeleton } from '../../../components/ui';
 import { usePastoralOperationsDashboard } from '../../households/api/get-pastoral-operations-dashboard';
 import type { PastoralOperationsDashboardV2 } from '../../households/types';
 import { Permissions } from '../../../types/permissions';
@@ -10,10 +9,10 @@ import type { AttentionItem } from './AttentionList';
 import DashboardMetricGrid from './DashboardMetricGrid';
 import HomeSection from './HomeSection';
 import HomeWelcomeHeader from './HomeWelcomeHeader';
-import PastoralResponsibilityCard from './PastoralResponsibilityCard';
+import HomeStat from './HomeStat';
 import QuickActions from './QuickActions';
 import type { QuickAction } from './QuickActions';
-import { formatPastoralRolesList, pluralize, servantRoleLabel } from '../role-labels';
+import { formatPastoralRolesList, servantRoleLabel } from '../role-labels';
 
 type Props = {
   organizationId: string;
@@ -88,14 +87,6 @@ export default function LeaderHome({ organizationId, organizationName, firstName
     (a) => a.role_code === 'household_servant_leader'
   ) ?? [];
   const singleLedHouseholdId = hslAssignments.length === 1 ? hslAssignments[0].governance_node_id : null;
-  const hasMultipleHouseholdAssignments = hslAssignments.length > 1;
-
-  const hasBroaderScope =
-    isOrgAdmin ||
-    hasMultipleHouseholdAssignments ||
-    (data?.identity.serving_assignments.some(
-      (a) => a.role_code !== 'household_servant_leader'
-    ) ?? false);
 
   const actions: QuickAction[] = [];
 
@@ -108,14 +99,8 @@ export default function LeaderHome({ organizationId, organizationName, firstName
     });
   }
 
-  if (canAssignMembers) {
-    actions.push({
-      key: 'unassigned-members',
-      label: 'Members Without a Household',
-      to: '/app/households/unassigned',
-      icon: <UserX />,
-    });
-  }
+  // Pass 9.19: "Members Without a Household" and "View Households" quick actions removed on Home
+  // (the At a Glance tiles now open those same pages).
 
   if (singleLedHouseholdId && canViewHouseholds) {
     actions.push({
@@ -126,14 +111,6 @@ export default function LeaderHome({ organizationId, organizationName, firstName
     });
   }
 
-  if (canViewHouseholds && (hasBroaderScope || !singleLedHouseholdId)) {
-    actions.push({
-      key: 'view-households',
-      label: 'View Households',
-      to: '/app/households',
-      icon: <House />,
-    });
-  }
 
   if (canViewPastoralOps) {
     actions.push({
@@ -191,44 +168,44 @@ export default function LeaderHome({ organizationId, organizationName, firstName
 
   const m = data.meeting_operations_summary;
   const attention = buildAttention(data, hasPermission(Permissions.HouseholdsMembersAssign));
-  const hasResponsibility =
-    data.identity.serving_assignments.length > 0 ||
-    !!data.identity.pastoral_membership ||
-    (data.care_responsibilities?.length ?? 0) > 0;
-
+  // Pass 9.19 (Ron, 2026-10-16): Home fits one phone screen. "My Pastoral Responsibility" removed here
+  // (the Pastoral tab shows the same cards); "Coming Up" folded into the Upcoming Meetings tile.
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 sm:space-y-8">
       {header}
 
       <HomeSection title="At a Glance">
         <DashboardMetricGrid>
-          <StatCard label="Households" value={data.operational_summary?.total ?? 0} />
-          <StatCard label="Members Without a Household" value={data.unassigned_members_count ?? 0} />
-          <StatCard label="Upcoming Meetings" value={m?.upcoming_meetings ?? 0} />
-          <StatCard label="Household Topics Planned" value={data.formation_operations_summary?.topics_planned ?? 0} />
+          <HomeStat
+            label="Households"
+            shortLabel="Households"
+            value={data.operational_summary?.total ?? 0}
+            to={canViewHouseholds ? '/app/households' : undefined}
+          />
+          <HomeStat
+            label="Members Without a Household"
+            shortLabel="No household"
+            value={data.unassigned_members_count ?? 0}
+            to={canAssignMembers ? '/app/households/unassigned' : undefined}
+          />
+          <HomeStat
+            label="Upcoming Meetings"
+            shortLabel="Meetings"
+            value={m?.upcoming_meetings ?? 0}
+            to={canViewPastoralOps ? '/app/pastoral-operations' : undefined}
+          />
+          <HomeStat
+            label="Household Topics Planned"
+            shortLabel="Topics"
+            value={data.formation_operations_summary?.topics_planned ?? 0}
+            to={canViewPastoralOps ? '/app/pastoral-operations' : undefined}
+          />
         </DashboardMetricGrid>
       </HomeSection>
 
       <HomeSection title="Needs Your Attention">
         <AttentionList items={attention} />
       </HomeSection>
-
-      {hasResponsibility && (
-        <HomeSection title="My Pastoral Responsibility">
-          <PastoralResponsibilityCard dashboard={data} />
-        </HomeSection>
-      )}
-
-      {(m?.upcoming_meetings ?? 0) > 0 && (
-        <HomeSection title="Coming Up">
-          <Link
-            to="/app/pastoral-operations"
-            className="block rounded-card border border-line bg-surface p-4 text-body text-ink hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
-          >
-            {pluralize(m.upcoming_meetings, 'household meeting')} coming up
-          </Link>
-        </HomeSection>
-      )}
 
       <HomeSection title="Quick Actions">
         <QuickActions actions={actions} />

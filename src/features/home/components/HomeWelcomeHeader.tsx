@@ -1,6 +1,3 @@
-import type { ReactNode } from 'react';
-import { PageHeader } from '../../../components/ui';
-
 type Props = {
   name: string;
   organizationName?: string | null;
@@ -8,22 +5,27 @@ type Props = {
   responsibilities?: string[];
 };
 
+// Pass 9.19 (Ron, 2026-10-16): compact header so Home fits one phone screen; the organization name
+// ("Missionary Families of Christ — New York") is shown once, without the extra "Missionary Families of Christ" line.
 export default function HomeWelcomeHeader({ name, organizationName, responsibilities = [] }: Props) {
-  const description: ReactNode = (
-    <>
-      <span className="block">Missionary Families of Christ</span>
-      {organizationName && <span className="block text-small text-ink-muted">{organizationName}</span>}
+  return (
+    <header className="space-y-0.5">
+      <h1 className="text-xl font-semibold tracking-tight text-ink sm:text-page-title">Welcome, {name}</h1>
+      {organizationName && <p className="text-small text-ink-secondary sm:text-body">{organizationName}</p>}
       {responsibilities.length > 0 && (
-        <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-small font-medium text-primary-blue">
+        <p className="flex flex-wrap items-center gap-x-2 text-xs font-medium text-primary-blue sm:text-small">
           {responsibilities.map((r, i) => (
             <span key={i} className="inline-flex items-center">
-              {i > 0 && <span className="mr-2 text-ink-muted" aria-hidden="true">·</span>}
+              {i > 0 && (
+                <span className="mr-2 text-ink-muted" aria-hidden="true">
+                  ·
+                </span>
+              )}
               {r}
             </span>
           ))}
-        </span>
+        </p>
       )}
-    </>
+    </header>
   );
-  return <PageHeader title={`Welcome, ${name}`} description={description} />;
 }

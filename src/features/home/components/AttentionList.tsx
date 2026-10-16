@@ -26,10 +26,10 @@ export default function AttentionList({ items }: { items: AttentionItem[] }) {
       <ul className="divide-y divide-line">
         {items.map((item) => {
           const body = (
-            <div className="flex items-center gap-3 px-4 py-3">
+            <div className="flex items-center gap-3 px-3 py-2 sm:px-4 sm:py-3">
               <div className="min-w-0 flex-1">
-                <p className="text-body font-medium text-ink">{item.label}</p>
-                {item.detail && <p className="text-small text-ink-muted">{item.detail}</p>}
+                <p className="text-small font-medium text-ink sm:text-body">{item.label}</p>
+                {item.detail && <p className="hidden text-small text-ink-muted sm:block">{item.detail}</p>}
               </div>
               <Badge variant={BADGE[item.tone]}>{item.count}</Badge>
               {item.to && <ChevronRight size={16} aria-hidden="true" className="text-ink-muted" />}

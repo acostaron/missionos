@@ -88,7 +88,7 @@ export default function MemberHome({ organizationId, organizationName, firstName
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 sm:space-y-8">
       <HomeWelcomeHeader name={firstName} organizationName={organizationName} />
 
       <HomeSection title="My Household">
