@@ -21,6 +21,7 @@ export type ScanResult =
       payment?: PaymentState;
     }
   | { result: 'payment_required'; member: CheckInMember; payment: PaymentState; can_record_payment: boolean }
+  | { result: 'not_registered'; member: CheckInMember; payment: PaymentState; can_register: boolean }
   | { result: 'already_checked_in'; member: CheckInMember; checked_in_at: string; kit_given_at: string | null }
   | { result: 'invalid'; reason: string; member: CheckInMember | null };
 

@@ -1,14 +1,37 @@
-// Event fees and payments (Pass 9.13, written by Claude 2026-10-16).
-// Organizers and the Treasurer / Finance Coordinator set the fee and record Paid / Partial / Waived.
+// Event fees, registrations and payments (Pass 9.13 / 9.14, written by Claude 2026-10-16).
+// Organizers and the Treasurer / Finance Coordinator set prices (early-bird, regular, walk-in), register members
+// and record Paid / Partial / Waived. Members can register themselves in My Events when registration is open.
 import { useQuery, type QueryClient } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase/client';
 
-export type PaymentStatus = 'free' | 'waived' | 'paid' | 'partial' | 'unpaid';
+export type PaymentStatus = 'free' | 'waived' | 'paid' | 'partial' | 'unpaid' | 'not_registered';
+export type PriceTier = 'free' | 'early_bird' | 'regular' | 'walk_in';
 export interface PaymentState {
   status: PaymentStatus;
+  /** amount due for this member (registration price), or today's price when not registered */
   fee: number;
   paid: number;
   balance: number;
+  registered?: boolean;
+  registration_type?: 'reserved' | 'walk_in' | null;
+  price_tier?: PriceTier;
+  walk_in_fee?: number;
+  registered_at?: string;
+}
+
+export const PRICE_TIER_LABELS: Record<PriceTier, string> = {
+  free: 'Free',
+  early_bird: 'Early-bird',
+  regular: 'Regular',
+  walk_in: 'Walk-in',
+};
+
+export interface EventPricing {
+  fee_amount: number | null;
+  early_bird_fee: number | null;
+  early_bird_until: string | null;
+  walk_in_fee: number | null;
+  registration_open: boolean;
 }
 
 export const PAYMENT_METHODS = [
@@ -27,6 +50,7 @@ export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
   paid: 'Paid',
   partial: 'Partial',
   unpaid: 'Not paid',
+  not_registered: 'Not registered',
 };
 
 export function money(n: number | string | null | undefined): string {
@@ -41,10 +65,20 @@ export interface EventPaymentRow {
   payment: PaymentState;
   payments: { payment_id: string; amount: number; payment_method: PaymentMethod; recorded_at: string }[];
 }
-export interface EventPaymentsResponse {
-  fee_amount: number | null;
-  totals: { paid: number; partial: number; waived: number; collected: number };
-  members: EventPaymentRow[];
+export interface EventPaymentsResponse extends EventPricing {
+  totals: {
+    registered: number;
+    reserved: number;
+    walk_in: number;
+    checked_in: number;
+    paid: number;
+    partial: number;
+    unpaid: number;
+    waived: number;
+    expected: number;
+    collected: number;
+  };
+  members: (EventPaymentRow & { checked_in: boolean })[];
 }
 export interface PaymentSearchRow {
   member_id: string;
@@ -53,7 +87,7 @@ export interface PaymentSearchRow {
   payment: PaymentState;
 }
 
-export interface PaymentAccess {
+export interface PaymentAccess extends Partial<EventPricing> {
   fee_amount: number | null;
   can_manage_payments: boolean;
   /** false on paid events for anyone but the organizers and administrators (use Scan QR instead) */
@@ -159,4 +193,64 @@ export async function setFeeWaiver(orgId: string, eventId: string, memberId: str
 
 export async function invalidatePayments(qc: QueryClient) {
   await qc.invalidateQueries({ queryKey: paymentKeys.all });
+}
+
+export async function setEventPricing(orgId: string, eventId: string, p: EventPricing) {
+  const { error } = await supabase.rpc('set_event_pricing', {
+    p_organization_id: orgId,
+    p_event_id: eventId,
+    p_fee_amount: p.fee_amount ?? undefined,
+    p_early_bird_fee: p.early_bird_fee ?? undefined,
+    p_early_bird_until: p.early_bird_until ?? undefined,
+    p_walk_in_fee: p.walk_in_fee ?? undefined,
+    p_registration_open: p.registration_open,
+  });
+  if (error) throw error;
+}
+
+/** memberId null = register myself (My Events) */
+export async function registerForEvent(orgId: string, eventId: string, memberId: string | null, walkIn = false) {
+  const { data, error } = await supabase.rpc('register_for_event', {
+    p_organization_id: orgId,
+    p_event_id: eventId,
+    p_member_id: memberId ?? undefined,
+    p_walk_in: walkIn,
+  });
+  if (error) throw error;
+  return data as unknown as { registration_id: string; already_registered: boolean; payment: PaymentState };
+}
+
+/** memberId null = cancel my own registration */
+export async function cancelEventRegistration(orgId: string, eventId: string, memberId: string | null) {
+  const { error } = await supabase.rpc('cancel_event_registration', {
+    p_organization_id: orgId,
+    p_event_id: eventId,
+    p_member_id: memberId ?? undefined,
+  });
+  if (error) throw error;
+}
+
+export interface MyEventRegistration extends EventPricing {
+  event_id: string;
+  title: string;
+  event_type: string;
+  starts_at: string;
+  ends_at: string | null;
+  location_text: string | null;
+  price_now: { tier: PriceTier; amount: number };
+  my: PaymentState;
+  checked_in: boolean;
+}
+
+export function useMyEventRegistrations(orgId: string | null) {
+  return useQuery<MyEventRegistration[]>({
+    queryKey: [...paymentKeys.all, 'mine', orgId],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('list_my_event_registrations', { p_organization_id: orgId! });
+      if (error) throw error;
+      return (data ?? []) as unknown as MyEventRegistration[];
+    },
+    enabled: !!orgId,
+    staleTime: 30_000,
+  });
 }

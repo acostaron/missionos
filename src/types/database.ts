@@ -1296,6 +1296,87 @@ export type Database = {
           },
         ]
       }
+      event_registrations: {
+        Row: {
+          amount_due: number
+          cancelled_at: string | null
+          cancelled_by_profile_id: string | null
+          event_id: string
+          id: string
+          member_id: string
+          organization_id: string
+          price_tier: string
+          registered_at: string
+          registered_by_profile_id: string
+          registration_type: string
+          source: string
+        }
+        Insert: {
+          amount_due: number
+          cancelled_at?: string | null
+          cancelled_by_profile_id?: string | null
+          event_id: string
+          id?: string
+          member_id: string
+          organization_id: string
+          price_tier: string
+          registered_at?: string
+          registered_by_profile_id: string
+          registration_type: string
+          source: string
+        }
+        Update: {
+          amount_due?: number
+          cancelled_at?: string | null
+          cancelled_by_profile_id?: string | null
+          event_id?: string
+          id?: string
+          member_id?: string
+          organization_id?: string
+          price_tier?: string
+          registered_at?: string
+          registered_by_profile_id?: string
+          registration_type?: string
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_registrations_cancelled_by_profile_id_fkey"
+            columns: ["cancelled_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_registrations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_registrations_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_registrations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_registrations_registered_by_profile_id_fkey"
+            columns: ["registered_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           audience_node_id: string | null
@@ -1303,6 +1384,8 @@ export type Database = {
           created_at: string
           created_by_profile_id: string
           description: string | null
+          early_bird_fee: number | null
+          early_bird_until: string | null
           ends_at: string | null
           event_status: string
           event_type: string
@@ -1315,11 +1398,13 @@ export type Database = {
           location_text: string | null
           organization_id: string
           program_run_id: string | null
+          registration_open: boolean
           session_number: number | null
           starts_at: string
           title: string
           updated_at: string
           updated_by_profile_id: string | null
+          walk_in_fee: number | null
         }
         Insert: {
           audience_node_id?: string | null
@@ -1327,6 +1412,8 @@ export type Database = {
           created_at?: string
           created_by_profile_id: string
           description?: string | null
+          early_bird_fee?: number | null
+          early_bird_until?: string | null
           ends_at?: string | null
           event_status?: string
           event_type: string
@@ -1339,11 +1426,13 @@ export type Database = {
           location_text?: string | null
           organization_id: string
           program_run_id?: string | null
+          registration_open?: boolean
           session_number?: number | null
           starts_at: string
           title: string
           updated_at?: string
           updated_by_profile_id?: string | null
+          walk_in_fee?: number | null
         }
         Update: {
           audience_node_id?: string | null
@@ -1351,6 +1440,8 @@ export type Database = {
           created_at?: string
           created_by_profile_id?: string
           description?: string | null
+          early_bird_fee?: number | null
+          early_bird_until?: string | null
           ends_at?: string | null
           event_status?: string
           event_type?: string
@@ -1363,11 +1454,13 @@ export type Database = {
           location_text?: string | null
           organization_id?: string
           program_run_id?: string | null
+          registration_open?: boolean
           session_number?: number | null
           starts_at?: string
           title?: string
           updated_at?: string
           updated_by_profile_id?: string | null
+          walk_in_fee?: number | null
         }
         Relationships: [
           {
@@ -8061,6 +8154,14 @@ export type Database = {
         Args: { p_object_name: string }
         Returns: boolean
       }
+      cancel_event_registration: {
+        Args: {
+          p_event_id: string
+          p_member_id?: string
+          p_organization_id: string
+        }
+        Returns: Json
+      }
       cancel_household_meeting: {
         Args: {
           p_meeting_id: string
@@ -8739,6 +8840,10 @@ export type Database = {
         Args: { p_from?: string; p_organization_id: string; p_to?: string }
         Returns: Json
       }
+      list_my_event_registrations: {
+        Args: { p_organization_id: string }
+        Returns: Json
+      }
       list_my_events: {
         Args: { p_from: string; p_organization_id: string; p_to: string }
         Returns: Json
@@ -9012,6 +9117,15 @@ export type Database = {
         }
         Returns: Json
       }
+      register_for_event: {
+        Args: {
+          p_event_id: string
+          p_member_id?: string
+          p_organization_id: string
+          p_walk_in?: boolean
+        }
+        Returns: Json
+      }
       register_user_device: {
         Args: {
           p_app_version?: string
@@ -9227,6 +9341,18 @@ export type Database = {
           p_event_id: string
           p_member_id: string
           p_organization_id: string
+        }
+        Returns: Json
+      }
+      set_event_pricing: {
+        Args: {
+          p_early_bird_fee?: number
+          p_early_bird_until?: string
+          p_event_id: string
+          p_fee_amount?: number
+          p_organization_id: string
+          p_registration_open?: boolean
+          p_walk_in_fee?: number
         }
         Returns: Json
       }

@@ -371,7 +371,7 @@ export default function EventPage() {
                     icon={<CircleDollarSign className="h-4 w-4" />}
                     onClick={() => navigate(`/app/calendar/${event.id}/payments`)}
                   >
-                    {paymentAccess.fee_amount ? `Payments · ${money(paymentAccess.fee_amount)}` : 'Payments'}
+                    {paymentAccess.fee_amount ? `Registrations · ${money(paymentAccess.fee_amount)}` : 'Registrations'}
                   </Button>
                 )}
                 {canRecordAttendance && !event.is_program_session && (

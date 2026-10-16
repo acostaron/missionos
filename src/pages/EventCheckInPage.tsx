@@ -17,7 +17,7 @@ import {
   type ScanResult,
 } from '../features/events/check-in';
 import { MemberAvatar } from '../features/self-service/components/MemberAvatar';
-import { invalidatePayments, money, recordEventPayment, type PaymentMethod } from '../features/events/payments';
+import { invalidatePayments, money, recordEventPayment, registerForEvent, type PaymentMethod } from '../features/events/payments';
 import { RecordPaymentForm } from '../features/events/components/RecordPaymentForm';
 import { formatNyDateShort, formatNyTime } from '../lib/ny-time';
 import { Alert, Button, Card, Input } from '../components/ui';
@@ -100,11 +100,12 @@ export default function EventCheckInPage() {
   const waitingForTap = result !== null && result.result !== 'checked_in';
 
   // Paid events: record the payment at the desk, then check the member in with the same QR.
-  const payAndCheckIn = async (memberId: string, amount: number, method: PaymentMethod) => {
+  const payAndCheckIn = async (memberId: string, amount: number, method: PaymentMethod, walkIn = false) => {
     if (!orgId || !eventId) return;
     try {
       setBusy(true);
       setErrorText(null);
+      if (walkIn) await registerForEvent(orgId, eventId, memberId, true);
       await recordEventPayment(orgId, eventId, memberId, amount, method);
       await invalidatePayments(qc);
     } catch (e) {
@@ -188,6 +189,8 @@ export default function EventCheckInPage() {
                         ? 'Already checked in'
                         : result.result === 'payment_required'
                           ? 'Not paid — not checked in'
+                          : result.result === 'not_registered'
+                            ? 'Not registered — walk-in'
                           : 'Not checked in'}
                   </p>
                   {result.member && (
@@ -218,6 +221,24 @@ export default function EventCheckInPage() {
                     <p className="text-xs font-medium text-success-700">
                       {result.payment.status === 'paid' ? `Paid ${money(result.payment.paid)}` : 'Fee waived'}
                     </p>
+                  )}
+                  {result.result === 'not_registered' && (
+                    <div className="space-y-2">
+                      <p className="flex items-center gap-1 text-sm font-semibold text-danger-700">
+                        <CircleDollarSign className="h-4 w-4" />
+                        No reservation. Walk-in price {money(result.payment.walk_in_fee ?? result.payment.fee)}
+                      </p>
+                      {result.can_register ? (
+                        <RecordPaymentForm
+                          defaultAmount={result.payment.walk_in_fee ?? result.payment.fee}
+                          submitLabel="Register walk-in, pay & check in"
+                          busy={busy}
+                          onSubmit={(amount, method) => payAndCheckIn(result.member.member_id, amount, method, true)}
+                        />
+                      ) : (
+                        <p className="text-sm text-ink">Do not give the kit. Send the member to the registration table.</p>
+                      )}
+                    </div>
                   )}
                   {result.result === 'payment_required' && (
                     <div className="space-y-2">

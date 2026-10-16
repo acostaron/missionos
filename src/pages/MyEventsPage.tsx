@@ -18,6 +18,7 @@ import { EVENT_TYPE_LABELS, getEventTypeBadgeVariant } from '../features/events/
 import type { EventType } from '../features/events/types';
 import { Badge, Card, EmptyState, PageHeader } from '../components/ui';
 import { HouseholdTopicsCard } from '../features/self-service/HouseholdTopicsCard';
+import { MyEventRegistrationsCard } from '../features/self-service/MyEventRegistrationsCard';
 
 // Household meetings are shown in the household topic cards above, so Upcoming lists other events only
 // (assemblies, teachings, retreats, …). Pass 9.8, Claude 2026-10-16.
@@ -91,6 +92,8 @@ export default function MyEventsPage() {
         title="My Events"
         description="View your upcoming community assemblies and personal attendance record."
       />
+
+      <MyEventRegistrationsCard organizationId={orgId} />
 
       <HouseholdTopicsCard organizationId={orgId} />
 
