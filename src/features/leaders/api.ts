@@ -24,6 +24,15 @@ export interface LeaderOffice {
   role_code: ServantLeaderRoleCode;
   parent_name: string | null;
   leader: OfficeLeader | null;
+  /** Pass 9.20A: an Area placed under another Area (MFC New York, FMC New York) */
+  is_sub_area?: boolean;
+  /** Pass 9.20A: a coordinator appointed on this node (e.g. FMC Coordinator) */
+  coordinator?: {
+    role_name: string;
+    member_number: string | null;
+    display_name: string;
+    partner: { member_number: string | null; display_name: string } | null;
+  } | null;
 }
 
 export interface LeaderOfficesResponse {

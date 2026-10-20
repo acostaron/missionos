@@ -1,6 +1,8 @@
 // Pastoral -> Leaders: Area, Chapter and Unit Servant Leaders in one place (Pass 9.20, Ron 2026-10-19).
 // Appoint (husband and wife linked in the same step), end an appointment, and grant / revoke app access.
 // Household leaders stay on each household's page.
+// Pass 9.20A (Ron, 2026-10-20): shows coordinators (FMC New York Coordinators) and marks MFC New York / FMC New York
+// as sub-areas overseen by New York Area (no Appoint there).
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCurrentOrganization } from '../hooks/use-current-organization';
@@ -87,6 +89,22 @@ export default function LeadersPage() {
                               {l.effective_from ? ` · since ${l.effective_from}` : ''}
                             </p>
                           </>
+                        ) : o.coordinator ? (
+                          <>
+                            <p className="mt-1 text-sm text-ink">
+                              {o.coordinator.partner
+                                ? `${o.coordinator.display_name} & ${o.coordinator.partner.display_name}`
+                                : o.coordinator.display_name}
+                            </p>
+                            <p className="text-xs text-ink-muted">
+                              {o.coordinator.role_name}
+                              {[o.coordinator.member_number, o.coordinator.partner?.member_number].filter(Boolean).length > 0
+                                ? ` · ${[o.coordinator.member_number, o.coordinator.partner?.member_number].filter(Boolean).join(' · ')}`
+                                : ''}
+                            </p>
+                          </>
+                        ) : o.is_sub_area ? (
+                          <p className="mt-1 text-sm text-ink-muted">Overseen by {o.parent_name ?? 'the Area'}</p>
                         ) : (
                           <p className="mt-1 text-sm italic text-ink-muted">Vacant</p>
                         )}
@@ -100,7 +118,7 @@ export default function LeadersPage() {
                           ) : (
                             <Badge variant="neutral">No login yet</Badge>
                           ))}
-                        {!l && data.can_appoint && (
+                        {!l && !o.coordinator && !o.is_sub_area && data.can_appoint && (
                           <Button size="sm" onClick={() => setDialog({ kind: 'appoint', office: o })}>
                             Appoint
                           </Button>
