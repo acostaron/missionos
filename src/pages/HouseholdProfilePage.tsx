@@ -375,13 +375,15 @@ export default function HouseholdProfilePage() {
                     {data.household_leaders.formatted_names}
                   </p>
                   <p className="text-[10px] text-ink-muted">
-                    Pastoral couple designation for Couples Section ({data.household_leaders.pastoral_label || 'Household Leaders'})
+                    {data.household_leaders.source === 'coordinator'
+                      ? `Coordinators of ${parent_governance?.parent_node_name ?? 'this Area'}; they lead this household.`
+                      : `Pastoral couple designation for Couples Section (${data.household_leaders.pastoral_label || 'Household Leaders'})`}
                   </p>
                 </div>
               )}
 
               {/* Formal Office Holders */}
-              {leaders.length === 0 ? (
+              {leaders.length === 0 && data.household_leaders?.source === 'coordinator' ? null : leaders.length === 0 ? (
                 <div className="py-2 flex items-center justify-between gap-4">
                   <p className="text-xs text-ink-muted italic">
                     No formal leaders currently assigned.

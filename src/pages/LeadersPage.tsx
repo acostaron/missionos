@@ -3,6 +3,8 @@
 // Household leaders stay on each household's page.
 // Pass 9.20A (Ron, 2026-10-20): shows coordinators (FMC New York Coordinators) and marks MFC New York / FMC New York
 // as sub-areas overseen by New York Area (no Appoint there).
+// Pass 9.22 (Ron, 2026-10-20): a sub-area with no Coordinator (MFC New York) shows the names of the Area Servant
+// Leaders who oversee it.
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCurrentOrganization } from '../hooks/use-current-organization';
@@ -104,7 +106,22 @@ export default function LeadersPage() {
                             </p>
                           </>
                         ) : o.is_sub_area ? (
-                          <p className="mt-1 text-sm text-ink-muted">Overseen by {o.parent_name ?? 'the Area'}</p>
+                          (() => {
+                            const over = data.offices.find((p) => p.node_name === o.parent_name && p.leader)?.leader;
+                            return over ? (
+                              <>
+                                <p className="mt-1 text-sm text-ink">
+                                  {over.spouse ? `${over.display_name} & ${over.spouse.display_name}` : over.display_name}
+                                </p>
+                                <p className="text-xs text-ink-muted">
+                                  {over.role_name || 'Area Servant Leader'}
+                                  {over.spouse ? 's' : ''} · {o.parent_name}
+                                </p>
+                              </>
+                            ) : (
+                              <p className="mt-1 text-sm text-ink-muted">Overseen by {o.parent_name ?? 'the Area'}</p>
+                            );
+                          })()
                         ) : (
                           <p className="mt-1 text-sm italic text-ink-muted">Vacant</p>
                         )}

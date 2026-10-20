@@ -100,13 +100,15 @@ export interface HouseholdProfileIdentity {
 }
 
 export interface HouseholdLeadersCouple {
+  /** 'coordinator': an Area household led by its Area's Coordinators (Pass 9.22). */
+  source?: 'couple' | 'coordinator';
   husband: {
     member_id: string;
     display_name: string;
   };
   wife: {
-    member_id: string;
-    display_name: string;
+    member_id: string | null;
+    display_name: string | null;
   };
   pastoral_label: string;
   formatted_names: string;
