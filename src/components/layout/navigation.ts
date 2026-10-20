@@ -34,6 +34,7 @@ export type NavItem = {
  * Reserved (not yet implemented): Finance, Administration.
  * Pass 9.11 (Ron): People = Directory + Sections; Pastoral Operations = Households + Dashboard;
  * Library = Household Topics + Formation Curriculum. Old URLs are unchanged.
+ * Pass 9.20: Pastoral Operations also has a Leaders tab (Area / Chapter / Unit Servant Leaders).
  */
 export const NAV_ITEMS: NavItem[] = [
   { id: 'nav-dashboard', label: 'Home', shortLabel: 'Home', to: '/app/dashboard', icon: Home },
@@ -67,8 +68,10 @@ export const NAV_ITEMS: NavItem[] = [
     tabs: [
       { label: 'Households', to: '/app/households', permission: Permissions.HouseholdsRecordsView },
       { label: 'Dashboard', to: '/app/pastoral-operations', permission: Permissions.LeadershipPastoralDashboardView },
+      // Pass 9.20 (Ron): Area / Chapter / Unit Servant Leaders
+      { label: 'Leaders', to: '/app/leaders', permission: Permissions.LeadershipServantLeadersAppoint },
     ],
-    matchPaths: ['/app/households', '/app/pastoral-operations'],
+    matchPaths: ['/app/households', '/app/pastoral-operations', '/app/leaders'],
   },
   {
     id: 'nav-library',

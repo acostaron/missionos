@@ -15,6 +15,7 @@ import {
   HouseholdProfilePage,
   MembersWithoutHouseholdPage,
   PastoralOperationsDashboardPage,
+  LeadersPage,
   MyProfilePage,
   FormationCatalogPage,
   FormationProgramDetailPage,
@@ -254,6 +255,14 @@ export const router = createBrowserRouter([
             element: (
               <Suspense fallback={<PageLoadingFallback />}>
                 <PastoralOperationsDashboardPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'leaders',
+            element: (
+              <Suspense fallback={<PageLoadingFallback />}>
+                <LeadersPage />
               </Suspense>
             ),
           },

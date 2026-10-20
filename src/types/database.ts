@@ -8280,6 +8280,17 @@ export type Database = {
         }
         Returns: Json
       }
+      appoint_servant_leader_with_spouse: {
+        Args: {
+          p_governance_node_id: string
+          p_member_id: string
+          p_organization_id: string
+          p_reason?: string
+          p_role_code: string
+          p_spouse_member_id?: string
+        }
+        Returns: Json
+      }
       approve_leadership_assignment: {
         Args: {
           p_actor_profile_id: string
@@ -9131,6 +9142,10 @@ export type Database = {
       }
       list_program_runs: {
         Args: { p_include_closed?: boolean; p_organization_id: string }
+        Returns: Json
+      }
+      list_servant_leader_offices: {
+        Args: { p_organization_id: string }
         Returns: Json
       }
       list_topic_library: {
