@@ -228,9 +228,9 @@ export function CreateHouseholdModal({
                 Parent Placement Node <span className="text-rose-400">*</span>
                 <span className="text-slate-400 font-normal ml-1">
                   {selectedPastoralLevel === 'member' && '(Attach to a Unit, the Area, or a Chapter with no units)'}
-                  {selectedPastoralLevel === 'unit' && '(Must attach to Unit)'}
-                  {selectedPastoralLevel === 'chapter' && '(Must attach to Chapter)'}
-                  {selectedPastoralLevel === 'area' && '(Must attach to Area / State)'}
+                  {selectedPastoralLevel === 'unit' && '(Choose the Unit whose Servant Leaders lead this household)'}
+                  {selectedPastoralLevel === 'chapter' && '(Choose the Chapter whose Servant Leaders lead this household)'}
+                  {selectedPastoralLevel === 'area' && '(Choose the Area whose Servant Leaders or Coordinators lead this household)'}
                   {selectedPastoralLevel === 'fraternal' && '(Must attach to Area / State)'}
                 </span>
               </label>

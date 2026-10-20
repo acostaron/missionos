@@ -283,16 +283,29 @@ export default function HouseholdProfilePage() {
               </span>
             </div>
 
-            <div className="flex justify-between items-center">
-              <span className="text-ink-muted">Parent Governance</span>
-              <span className="font-medium text-ink">
+            {/* Pass 9.25 (Ron, 2026-10-20): a Unit / Chapter / Area household sits under the office whose leaders
+                lead it, so say "Led by" instead of the technical "Parent Governance". */}
+            <div className="flex justify-between items-center gap-3">
+              <span className="text-ink-muted shrink-0">
+                {parent_governance && ['unit', 'chapter', 'area'].includes(household.pastoral_level ?? '')
+                  ? 'Led by'
+                  : 'Placed under'}
+              </span>
+              <span className="font-medium text-ink text-right">
                 {parent_governance ? (
-                  <>
-                    {parent_governance.parent_node_name}{' '}
-                    <span className="text-[10px] uppercase text-ink-muted">
-                      ({parent_governance.parent_node_type})
-                    </span>
-                  </>
+                  ['unit', 'chapter', 'area'].includes(household.pastoral_level ?? '') ? (
+                    <>
+                      {parent_governance.parent_node_name}{' '}
+                      {data.household_leaders?.source === 'coordinator' ? 'Coordinators' : 'Servant Leaders'}
+                    </>
+                  ) : (
+                    <>
+                      {parent_governance.parent_node_name}{' '}
+                      <span className="text-[10px] uppercase text-ink-muted">
+                        ({parent_governance.parent_node_type})
+                      </span>
+                    </>
+                  )
                 ) : (
                   <span className="text-ink-muted italic">None</span>
                 )}
