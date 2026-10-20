@@ -163,6 +163,8 @@ export default function PastoralOperationsDashboardPage() {
   const filteredHouseholds = household_summary.filter((hh: PastoralHouseholdSummary) => {
     if (levelFilter !== 'all' && hh.pastoral_level !== levelFilter) return false;
     if (statusFilter !== 'all' && hh.operational_status !== statusFilter) return false;
+    // Pass 9.24 (Ron, 2026-10-20): archived households are hidden unless "Archived" is chosen.
+    if (statusFilter === 'all' && hh.operational_status === 'inactive') return false;
     return true;
   });
 
@@ -619,6 +621,7 @@ export default function PastoralOperationsDashboardPage() {
               <option value="needs_members">Needs Members</option>
               <option value="at_capacity">At Capacity</option>
               <option value="not_accepting">Not Accepting</option>
+              <option value="inactive">Archived</option>
             </select>
           </div>
         </div>
