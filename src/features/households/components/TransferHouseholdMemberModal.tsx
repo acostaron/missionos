@@ -152,8 +152,12 @@ export function TransferHouseholdMemberModal({
       queryClient.invalidateQueries({ queryKey: householdKeys.lists() });
       queryClient.invalidateQueries({ queryKey: householdKeys.member(organizationId, values.member_id) });
 
+      // Pass 9.26: a husband's wife moves with him (server side).
+      const spouse = (result as { spouse?: { display_name?: string; status?: string } }).spouse;
       onSuccessToast?.(
-        `${memberName} successfully transferred from ${currentHouseholdName} to ${selectedDestination?.name ?? 'new household'}.`
+        spouse?.display_name && spouse.status !== 'already_in_household'
+          ? `${memberName} and ${spouse.display_name} successfully moved to ${selectedDestination?.name ?? 'the new household'}.`
+          : `${memberName} successfully transferred from ${currentHouseholdName} to ${selectedDestination?.name ?? 'new household'}.`
       );
       handleClose();
     } catch (err) {
@@ -184,6 +188,7 @@ export function TransferHouseholdMemberModal({
             </h2>
             <p className="text-xs text-slate-400 mt-0.5">
               Member: <span className="text-slate-200 font-semibold">{memberName}</span>
+              <span className="block text-[11px] text-slate-500 mt-0.5">A husband&apos;s wife on record moves with him.</span>
             </p>
           </div>
           <button

@@ -96,8 +96,12 @@ export function EndHouseholdMembershipModal({
       queryClient.invalidateQueries({ queryKey: householdKeys.membersWithoutHousehold(organizationId) });
       queryClient.invalidateQueries({ queryKey: householdKeys.member(organizationId, values.member_id) });
 
+      // Pass 9.26: the spouse in the same household leaves too (server side).
+      const spouse = (result as { spouse?: { display_name?: string; status?: string } }).spouse;
       onSuccessToast?.(
-        `Pastoral household assignment on ${currentHouseholdName} ended for ${memberName}. History preserved.`
+        spouse?.display_name
+          ? `Pastoral household assignment on ${currentHouseholdName} ended for ${memberName} and ${spouse.display_name}. History preserved.`
+          : `Pastoral household assignment on ${currentHouseholdName} ended for ${memberName}. History preserved.`
       );
       handleClose();
     } catch (err) {
@@ -123,6 +127,7 @@ export function EndHouseholdMembershipModal({
             </h2>
             <p className="text-xs text-slate-400 mt-0.5">
               Conclude active placement without transferring to a new household.
+              <span className="block text-[11px] text-slate-500 mt-0.5">A spouse in the same household is removed too.</span>
             </p>
           </div>
           <button

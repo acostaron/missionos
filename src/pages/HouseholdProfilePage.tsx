@@ -207,12 +207,6 @@ export default function HouseholdProfilePage() {
                   <span>Language: {household.language_code.toUpperCase()}</span>
                 </>
               )}
-              {household.is_couple_household && (
-                <>
-                  <span className="mx-2 text-ink-muted">•</span>
-                  <span className="text-primary-blue font-medium">Couples Household</span>
-                </>
-              )}
             </p>
           </div>
 

@@ -153,8 +153,12 @@ export function AssignHouseholdMemberModal({
       queryClient.invalidateQueries({ queryKey: householdKeys.membersWithoutHousehold(organizationId) });
       queryClient.invalidateQueries({ queryKey: householdKeys.member(organizationId, values.member_id) });
 
+      // Pass 9.26: a husband's wife is placed with him (server side).
+      const spouse = (result as { spouse?: { display_name?: string; status?: string } }).spouse;
       onSuccessToast?.(
-        `${selectedMember?.display_name ?? 'Member'} successfully assigned to ${householdName}.`
+        spouse?.display_name && spouse.status !== 'already_in_household'
+          ? `${selectedMember?.display_name ?? 'Member'} and ${spouse.display_name} successfully assigned to ${householdName}.`
+          : `${selectedMember?.display_name ?? 'Member'} successfully assigned to ${householdName}.`
       );
       handleClose();
     } catch (err) {
@@ -188,6 +192,7 @@ export function AssignHouseholdMemberModal({
               {parentGovernanceName && (
                 <span className="text-slate-500"> ({parentGovernanceName})</span>
               )}
+              <span className="block text-[11px] text-slate-500 mt-0.5">A husband&apos;s wife on record is placed with him.</span>
             </p>
           </div>
           <button

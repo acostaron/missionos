@@ -685,9 +685,6 @@ export default function PastoralOperationsDashboardPage() {
                         >
                           {hh.household_name}
                         </Link>
-                        {hh.is_couple_household && (
-                          <span className="block text-[10px] text-primary-blue">Couples</span>
-                        )}
                       </td>
 
                       <td className="px-4 py-3">

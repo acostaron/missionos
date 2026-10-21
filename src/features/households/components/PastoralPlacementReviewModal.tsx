@@ -332,7 +332,7 @@ export function PastoralPlacementReviewModal({
                             <div>
                               <span className="font-medium text-white block">{dest.household_name}</span>
                               <span className="text-slate-400 block text-[11px] mt-0.5">
-                                {dest.pastoral_level} level • {dest.is_couple_household ? 'Couples Household' : 'Standard Household'}
+                                {dest.pastoral_level} level
                               </span>
                             </div>
                             <div className="text-right">

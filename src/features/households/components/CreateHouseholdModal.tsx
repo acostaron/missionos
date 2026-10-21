@@ -457,14 +457,7 @@ export function CreateHouseholdModal({
                 <span className="text-sm font-medium text-slate-100">Accepts New Members</span>
               </label>
 
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  {...register('is_couple_household')}
-                  className="h-5 w-5 rounded border-slate-600 bg-slate-800 text-indigo-500 accent-indigo-500 focus:ring-indigo-500"
-                />
-                <span className="text-sm font-medium text-slate-100">Couple Household</span>
-              </label>
+              {/* Pass 9.26 (Ron, 2026-10-21): no Couple Household flag — any household may hold couples. */}
             </div>
           </div>
 
