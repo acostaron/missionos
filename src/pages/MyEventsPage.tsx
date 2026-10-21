@@ -18,13 +18,17 @@ import { EVENT_TYPE_LABELS, getEventTypeBadgeVariant } from '../features/events/
 import type { EventType } from '../features/events/types';
 import { Badge, Card, EmptyState, PageHeader } from '../components/ui';
 import { HouseholdTopicsCard } from '../features/self-service/HouseholdTopicsCard';
-import { MyEventRegistrationsCard } from '../features/self-service/MyEventRegistrationsCard';
+import { EventRegistrationPanel } from '../features/self-service/MyEventRegistrationsCard';
+import { useMyEventGuests, useMyEventRegistrations } from '../features/events/payments';
+import { useMyPaymentReports } from '../features/events/advance-payments';
 import { MapLink } from '../components/MapLink';
 import { useMyReplies } from '../features/replies/api';
 import { ReplyButtons } from '../features/replies/ReplyControls';
 
 // Household meetings are shown in the household topic cards above, so Upcoming lists other events only
 // (assemblies, teachings, retreats, …). Pass 9.8, Claude 2026-10-16.
+// Pass 9.31 (Ron 2026-10-21): registration, payment and guests are shown inside each event here (the separate
+// "Event registration" card listed the same events again).
 type UpcomingItem = { kind: 'event'; sortKey: string; event: MyEvent };
 
 export default function MyEventsPage() {
@@ -56,12 +60,37 @@ export default function MyEventsPage() {
     [myReplies]
   );
 
+  // Pass 9.31: registration / payment / guests per event
+  const { data: registrations = [] } = useMyEventRegistrations(orgId);
+  const { data: myGuests = [] } = useMyEventGuests(orgId);
+  const { data: myReports = [] } = useMyPaymentReports(orgId);
+  const regByEvent = useMemo(() => new Map(registrations.map((r) => [r.event_id, r])), [registrations]);
+
   // Group upcoming events by month ('YYYY-MM')
   const groupedUpcoming = useMemo(() => {
     const groups: { monthKey: string; monthLabel: string; items: UpcomingItem[] }[] = [];
     const map = new Map<string, UpcomingItem[]>();
 
-    upcomingEvents.forEach((e) => {
+    // Events open for registration (or that I registered for) beyond the Upcoming window still appear once.
+    const listed = new Set(upcomingEvents.map((e) => e.event_id));
+    const extra: MyEvent[] = registrations
+      .filter((r) => !listed.has(r.event_id))
+      .map((r) => ({
+        event_id: r.event_id,
+        event_type: r.event_type,
+        title: r.title,
+        starts_at: r.starts_at,
+        ends_at: r.ends_at,
+        location_text: r.location_text,
+        event_status: 'scheduled',
+        audience_name: null,
+        program_title: null,
+        session_number: null,
+        session_count: null,
+        attended: r.checked_in,
+      }));
+
+    [...upcomingEvents, ...extra].forEach((e) => {
       const local = isoToNyLocal(e.starts_at);
       const key = local.date.slice(0, 7); // 'YYYY-MM'
       if (!map.has(key)) {
@@ -86,7 +115,7 @@ export default function MyEventsPage() {
     });
 
     return groups;
-  }, [upcomingEvents]);
+  }, [upcomingEvents, registrations]);
 
   if (isOrgLoading) {
     return (
@@ -102,8 +131,6 @@ export default function MyEventsPage() {
         title="My Events"
         description="View your upcoming community assemblies and personal attendance record."
       />
-
-      <MyEventRegistrationsCard organizationId={orgId} />
 
       <HouseholdTopicsCard organizationId={orgId} />
 
@@ -160,6 +187,7 @@ export default function MyEventsPage() {
                     const isCancelled = e.event_status === 'cancelled';
                     const typeLabel = EVENT_TYPE_LABELS[e.event_type as EventType] || e.event_type;
                     const typeBadgeVariant = getEventTypeBadgeVariant(e.event_type as EventType);
+                    const reg = isCancelled ? undefined : regByEvent.get(e.event_id);
 
                     return (
                       <div
@@ -169,7 +197,7 @@ export default function MyEventsPage() {
                         }`}
                       >
                         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
-                          <div className="space-y-1">
+                          <div className="w-full space-y-1">
                             <div className="flex flex-wrap items-center gap-2">
                               <Badge variant={typeBadgeVariant}>{typeLabel}</Badge>
                               {isCancelled && <Badge variant="danger">Cancelled</Badge>}
@@ -210,6 +238,14 @@ export default function MyEventsPage() {
                                 orgId={orgId}
                                 target={{ eventId: e.event_id }}
                                 current={replyByEvent.get(e.event_id) ?? null}
+                              />
+                            )}
+                            {orgId && reg && (
+                              <EventRegistrationPanel
+                                orgId={orgId}
+                                reg={reg}
+                                guests={myGuests.filter((g) => g.event_id === e.event_id)}
+                                reports={myReports.filter((r) => r.event_id === e.event_id)}
                               />
                             )}
                           </div>
