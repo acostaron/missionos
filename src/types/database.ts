@@ -8967,6 +8967,7 @@ export type Database = {
         Returns: Json
       }
       get_my_member_card: { Args: { p_organization_id: string }; Returns: Json }
+      get_my_push_status: { Args: { p_organization_id: string }; Returns: Json }
       get_my_reminder_preferences: {
         Args: { p_organization_id: string }
         Returns: Json
@@ -9435,6 +9436,10 @@ export type Database = {
         }
         Returns: string
       }
+      remove_my_push_subscription: {
+        Args: { p_endpoint: string; p_organization_id: string }
+        Returns: Json
+      }
       reissue_member_card: {
         Args: {
           p_member_id?: string
@@ -9822,6 +9827,16 @@ export type Database = {
           p_decline_reason?: string
           p_organization_id: string
           p_report_id: string
+        }
+        Returns: Json
+      }
+      save_my_push_subscription: {
+        Args: {
+          p_auth: string
+          p_device_label?: string
+          p_endpoint: string
+          p_organization_id: string
+          p_p256dh: string
         }
         Returns: Json
       }

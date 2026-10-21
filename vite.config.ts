@@ -46,6 +46,8 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff,woff2}'],
         navigateFallback: '/index.html',
+        // Pass 9.34: push notification handlers (public/push-handler.js)
+        importScripts: ['/push-handler.js'],
         navigateFallbackDenylist: [/^\/(rest|auth|functions|storage)\//],
         runtimeCaching: [
           {

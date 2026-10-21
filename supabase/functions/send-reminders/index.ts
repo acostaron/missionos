@@ -22,10 +22,19 @@
 //   REMINDERS_FROM   (optional, default "MFC New York <reminders@auth.mfcny.net>")
 //   APP_URL          (optional, default "https://app.mfcny.net")
 // The response never contains email addresses or names.
+//
+// Pass 9.34 (Claude, 2026-10-21): push notifications on the same schedule (Web Push, VAPID).
+//   * GET ?push_public_key=1 returns the VAPID public key for the app (CORS open; the public key is not secret).
+//   * After the emails, claims due push reminders (public.claim_due_push_reminders, push_mode 'test' / 'on'),
+//     sends one notification to each of the member's devices, records the delivery (complete_reminders, channel
+//     'push') and each device's result (record_push_results; 404 / 410 = device gone, switched off).
+//   Secrets: VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY (set by Ron's local script, never in the repo), VAPID_SUBJECT
+//   (optional, default https://app.mfcny.net). Without them, push is skipped and email still runs.
 // =============================================================================
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.48.0";
+import webpush from "npm:web-push@3.6.7";
 
 const TZ = "America/New_York";
 const MAX_BATCHES_PER_RUN = 5;
@@ -39,6 +48,18 @@ type Item = {
   group_name: string | null;
   registration_open: boolean;
   donation_pending: number | null;
+};
+
+type PushClaimed = {
+  delivery_id: string;
+  item_kind: "event" | "meeting";
+  item_id: string;
+  days_before: 1 | 3;
+  reminder_type: "reminder" | "nudge";
+  reply: string | null;
+  registered: boolean;
+  item: Item;
+  subscriptions: { subscription_id: string; endpoint: string; p256dh: string; auth: string }[];
 };
 
 type Claimed = {
@@ -142,6 +163,26 @@ ${it.donation_pending && it.donation_pending > 0 ? `<tr><td style="padding:2px 1
   return { subject, text, html };
 }
 
+function buildPush(c: PushClaimed) {
+  const it = c.item;
+  const label = c.item_kind === "meeting" ? `${it.title}${it.group_name ? ` — ${it.group_name}` : ""}` : it.title;
+  const soon = c.days_before === 1 ? "Tomorrow" : "In 3 days";
+  const when = whenText(it);
+  const title = c.reminder_type === "nudge" ? `Will you attend? ${label}` : `Reminder: ${label}`;
+  const parts = [`${soon}${when ? ` · ${when}` : ""}`];
+  if (it.location_text) parts.push(it.location_text);
+  if (it.donation_pending && it.donation_pending > 0) parts.push(`Donation pending ${money(Number(it.donation_pending))}`);
+  if (c.reminder_type === "nudge") parts.push("Tap to reply");
+  return {
+    title: title.slice(0, 120),
+    body: parts.join("\n").slice(0, 300),
+    url: "/app/my-events",
+    tag: `${c.item_kind}-${c.item_id}-${c.days_before}`,
+  };
+}
+
+const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, OPTIONS" };
+
 function page(message: string, status = 200): Response {
   return new Response(
     `<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>MFC New York</title></head>` +
@@ -157,6 +198,15 @@ if (import.meta.main) {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
     const admin = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
     const url = new URL(req.url);
+
+    // 0. VAPID public key for the app
+    if (url.searchParams.has("push_public_key")) {
+      if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
+      const key = Deno.env.get("VAPID_PUBLIC_KEY") ?? "";
+      return new Response(JSON.stringify({ public_key: key || null }), {
+        headers: { ...CORS, "Content-Type": "application/json", "Cache-Control": "max-age=300" },
+      });
+    }
 
     // 1. Unsubscribe link (GET) or one-click unsubscribe (POST with ?unsubscribe=)
     const token = url.searchParams.get("unsubscribe");
@@ -181,14 +231,19 @@ if (import.meta.main) {
     const apiKey = Deno.env.get("RESEND_API_KEY") ?? "";
     const from = Deno.env.get("REMINDERS_FROM") ?? "MFC New York <reminders@auth.mfcny.net>";
     const appUrl = (Deno.env.get("APP_URL") ?? "https://app.mfcny.net").replace(/\/+$/, "");
-    if (body.dry_run) return json({ dry_run: true, resend_key_set: apiKey.length > 0, from_domain: from.split("@")[1]?.replace(">", "") });
-    if (!apiKey) return json({ error: "RESEND_API_KEY is not set." }, 500);
+    const vapidPublic = Deno.env.get("VAPID_PUBLIC_KEY") ?? "";
+    const vapidPrivate = Deno.env.get("VAPID_PRIVATE_KEY") ?? "";
+    const vapidSubject = Deno.env.get("VAPID_SUBJECT") ?? "https://app.mfcny.net";
+    if (body.dry_run) {
+      return json({ dry_run: true, resend_key_set: apiKey.length > 0, vapid_set: !!(vapidPublic && vapidPrivate),
+                    from_domain: from.split("@")[1]?.replace(">", "") });
+    }
     const testToday = typeof body.test_today === "string" && /^20\d\d-\d\d-\d\d$/.test(body.test_today) ? body.test_today : null;
 
     let sent = 0;
     let failed = 0;
     let batches = 0;
-    for (; batches < MAX_BATCHES_PER_RUN; batches++) {
+    for (; apiKey && batches < MAX_BATCHES_PER_RUN; batches++) {
       const { data: claimedData, error: claimErr } = await admin.rpc("claim_due_reminders", testToday ? { p_limit: 100, p_today: testToday } : { p_limit: 100 });
       if (claimErr) return json({ error: `claim failed: ${claimErr.message}`, sent, failed }, 500);
       const claimed = (claimedData ?? []) as Claimed[];
@@ -240,6 +295,56 @@ if (import.meta.main) {
       if (results.every((r) => r.status === "failed")) break; // stop on a provider error; next hour retries
       if (claimed.length < 100) { batches++; break; }
     }
-    return json({ sent, failed, batches, test: !!testToday });
+
+    // 3. Push notifications (Pass 9.34)
+    let pushSent = 0;
+    let pushFailed = 0;
+    let pushDevices = 0;
+    if (vapidPublic && vapidPrivate) {
+      webpush.setVapidDetails(vapidSubject, vapidPublic, vapidPrivate);
+      for (let round = 0; round < MAX_BATCHES_PER_RUN; round++) {
+        const { data: pData, error: pErr } = await admin.rpc(
+          "claim_due_push_reminders",
+          testToday ? { p_limit: 200, p_today: testToday } : { p_limit: 200 },
+        );
+        if (pErr) return json({ error: `push claim failed: ${pErr.message}`, sent, failed, pushSent, pushFailed }, 500);
+        const claimed = (pData ?? []) as PushClaimed[];
+        if (claimed.length === 0) break;
+
+        const deliveryResults: { delivery_id: string; status: "sent" | "failed"; error?: string }[] = [];
+        const deviceResults: { subscription_id: string; ok: boolean; gone: boolean }[] = [];
+        for (const c of claimed) {
+          const payload = JSON.stringify(buildPush(c));
+          const outcomes = await Promise.allSettled(c.subscriptions.map((s) =>
+            webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, payload,
+                                     { TTL: 86400, urgency: "normal" })));
+          let anyOk = false;
+          let lastErr = "";
+          outcomes.forEach((o, i) => {
+            pushDevices++;
+            const sub = c.subscriptions[i];
+            if (o.status === "fulfilled") {
+              anyOk = true;
+              deviceResults.push({ subscription_id: sub.subscription_id, ok: true, gone: false });
+            } else {
+              const code = Number((o.reason as { statusCode?: number })?.statusCode ?? 0);
+              lastErr = `push ${code || "error"}: ${String((o.reason as Error)?.message ?? o.reason)}`.slice(0, 300);
+              deviceResults.push({ subscription_id: sub.subscription_id, ok: false, gone: code === 404 || code === 410 });
+            }
+          });
+          deliveryResults.push(anyOk
+            ? { delivery_id: c.delivery_id, status: "sent" }
+            : { delivery_id: c.delivery_id, status: "failed", error: lastErr || "no device" });
+        }
+        await admin.rpc("complete_reminders", { p_results: deliveryResults });
+        await admin.rpc("record_push_results", { p_results: deviceResults });
+        pushSent += deliveryResults.filter((r) => r.status === "sent").length;
+        pushFailed += deliveryResults.filter((r) => r.status === "failed").length;
+        if (claimed.length < 200) break;
+      }
+    }
+
+    return json({ sent, failed, batches, test: !!testToday, email_skipped: !apiKey,
+                  push: { sent: pushSent, failed: pushFailed, devices: pushDevices, skipped: !(vapidPublic && vapidPrivate) } });
   });
 }

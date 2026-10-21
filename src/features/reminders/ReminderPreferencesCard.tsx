@@ -7,6 +7,7 @@ import { BellRing } from 'lucide-react';
 import { normalizeError } from '../../lib/supabase/errors';
 import { setMyReminderPreferences, useMyReminderPreferences } from './api';
 import { Card } from '../../components/ui';
+import { PushDeviceToggle } from './PushDeviceToggle';
 
 export function ReminderPreferencesCard({ organizationId, enabled }: { organizationId: string | null; enabled: boolean }) {
   const qc = useQueryClient();
@@ -53,6 +54,8 @@ export function ReminderPreferencesCard({ organizationId, enabled }: { organizat
         <p className="text-xs text-warning-700">Add an email address above to receive reminders.</p>
       )}
       {error && <p className="text-xs text-danger-700">{error}</p>}
+      {/* Pass 9.34: push notifications on this device */}
+      <PushDeviceToggle organizationId={organizationId} />
     </Card>
   );
 }
