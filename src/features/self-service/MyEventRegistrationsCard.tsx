@@ -10,10 +10,8 @@ import {
   PRICE_TIER_LABELS,
   addEventGuest,
   cancelEventGuest,
-  cancelEventRegistration,
   invalidatePayments,
   money,
-  registerForEvent,
   useMyEventGuests,
   useMyEventRegistrations,
   type EventGuest,
@@ -21,6 +19,9 @@ import {
 } from '../events/payments';
 import { GuestForm } from '../events/components/GuestForm';
 import { GuestPassModal } from '../events/components/GuestPassModal';
+import { AdvancePaymentBlock } from '../events/components/AdvancePaymentBlock';
+import { useMyPaymentReports } from '../events/advance-payments';
+import { invalidateReplies, setMyReply } from '../replies/api';
 import { Alert, Badge, Button, Card } from '../../components/ui';
 
 function priceText(e: MyEventRegistration) {
@@ -38,6 +39,7 @@ export function MyEventRegistrationsCard({ organizationId }: { organizationId: s
   const qc = useQueryClient();
   const { data: events = [] } = useMyEventRegistrations(organizationId);
   const { data: guests = [] } = useMyEventGuests(organizationId);
+  const { data: myReports = [] } = useMyPaymentReports(organizationId);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [addingFor, setAddingFor] = useState<string | null>(null);
   const [pass, setPass] = useState<{ guest: EventGuest; title: string } | null>(null);
@@ -51,6 +53,7 @@ export function MyEventRegistrationsCard({ organizationId }: { organizationId: s
       setErrorText(null);
       await fn();
       await invalidatePayments(qc);
+      await invalidateReplies(qc);
       return true;
     } catch (e) {
       setErrorText(getEventErrorMessage(e));
@@ -173,10 +176,12 @@ export function MyEventRegistrationsCard({ organizationId }: { organizationId: s
                     )}
                   </div>
                   {(my.status === 'unpaid' || my.status === 'partial') && (
-                    <p className="text-xs text-ink-secondary">
-                      Please pay the registration team or the treasurer before the event. You will be checked in with
-                      your QR (My Card) once paid.
-                    </p>
+                    <AdvancePaymentBlock
+                      orgId={organizationId}
+                      eventId={e.event_id}
+                      balance={Number(my.balance)}
+                      reports={myReports.filter((r) => r.event_id === e.event_id)}
+                    />
                   )}
                   {my.paid === 0 && !e.checked_in && (
                     <Button
@@ -185,7 +190,8 @@ export function MyEventRegistrationsCard({ organizationId }: { organizationId: s
                       disabled={busy}
                       onClick={() => {
                         if (window.confirm('Cancel your registration?')) {
-                          run(e.event_id, () => cancelEventRegistration(organizationId, e.event_id, null));
+                          // Pass 9.29: cancelling = replying Not attending (cancels the unpaid registration)
+                          run(e.event_id, () => setMyReply(organizationId, { eventId: e.event_id }, 'not_attending'));
                         }
                       }}
                     >
@@ -196,7 +202,12 @@ export function MyEventRegistrationsCard({ organizationId }: { organizationId: s
                 </div>
               ) : (
                 e.registration_open && (
-                  <Button size="sm" loading={busy} onClick={() => run(e.event_id, () => registerForEvent(organizationId, e.event_id, null))}>
+                  <Button
+                    size="sm"
+                    loading={busy}
+                    // Pass 9.29: registering = replying Attending (registers while registration is open)
+                    onClick={() => run(e.event_id, () => setMyReply(organizationId, { eventId: e.event_id }, 'attending'))}
+                  >
                     Register{e.fee_amount ? ` · ${money(e.price_now.amount)}` : ''}
                   </Button>
                 )

@@ -9787,6 +9787,52 @@ export type Database = {
         }
         Returns: Json
       }
+      get_payment_details: {
+        Args: { p_event_id?: string; p_organization_id: string }
+        Returns: Json
+      }
+      list_event_payment_reports: {
+        Args: { p_event_id: string; p_organization_id: string }
+        Returns: Json
+      }
+      list_my_payment_reports: {
+        Args: { p_organization_id: string }
+        Returns: Json
+      }
+      report_my_event_payment: {
+        Args: {
+          p_amount: number
+          p_event_id: string
+          p_organization_id: string
+          p_payment_method: string
+          p_reference?: string
+        }
+        Returns: Json
+      }
+      review_event_payment_report: {
+        Args: {
+          p_confirm: boolean
+          p_decline_reason?: string
+          p_organization_id: string
+          p_report_id: string
+        }
+        Returns: Json
+      }
+      set_payment_details: {
+        Args: {
+          p_event_id?: string
+          p_organization_id: string
+          p_payment_note?: string
+          p_paypal_link?: string
+          p_zelle_name?: string
+          p_zelle_recipient?: string
+        }
+        Returns: Json
+      }
+      withdraw_my_payment_report: {
+        Args: { p_organization_id: string; p_report_id: string }
+        Returns: Json
+      }
       skip_household_topic: {
         Args: {
           p_household_topic_assignment_id: string

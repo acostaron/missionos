@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Check, X } from 'lucide-react';
 import { normalizeError } from '../../lib/supabase/errors';
 import { invalidateReplies, setMyReply, type RepliesSummary, type ReplyResponse } from './api';
+import { invalidatePayments } from '../events/payments';
 
 /** "Will you attend?" — Attending / Not attending. Tapping the chosen answer again clears it. */
 export function ReplyButtons({
@@ -25,6 +26,7 @@ export function ReplyButtons({
       setError(null);
       await setMyReply(orgId, target, current === r ? null : r);
       await invalidateReplies(qc);
+      await invalidatePayments(qc); // Pass 9.29: a reply may register / cancel the registration
     } catch (e) {
       setError(normalizeError(e).message);
     } finally {

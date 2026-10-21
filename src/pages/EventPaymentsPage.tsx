@@ -28,6 +28,8 @@ import {
 } from '../features/events/payments';
 import { RecordPaymentForm } from '../features/events/components/RecordPaymentForm';
 import { EventGuestsCard } from '../features/events/components/EventGuestsCard';
+import { PaymentReportsCard } from '../features/events/components/PaymentReportsCard';
+import { PaymentDetailsCard } from '../features/events/components/PaymentDetailsCard';
 import { formatNyDateShort } from '../lib/ny-time';
 import { Alert, Badge, Button, Card, Input } from '../components/ui';
 import type { BadgeVariant } from '../components/ui';
@@ -280,6 +282,9 @@ export default function EventPaymentsPage() {
         </div>
       )}
 
+      {/* Pass 9.29: Zelle / PayPal payments reported by members */}
+      <PaymentReportsCard orgId={orgId!} eventId={eventId!} />
+
       <Card padding="compact" className="space-y-2">
         <h2 className="text-sm font-semibold text-ink">Register a member or record a payment</h2>
         <div className="relative">
@@ -342,6 +347,8 @@ export default function EventPaymentsPage() {
       </Card>
 
       <EventGuestsCard orgId={orgId!} eventId={eventId!} eventTitle={event.title} hosts={data?.members ?? []} />
+
+      <PaymentDetailsCard orgId={orgId!} eventId={eventId!} />
     </div>
   );
 }
