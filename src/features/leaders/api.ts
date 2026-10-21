@@ -14,6 +14,8 @@ export interface OfficeLeader {
   effective_from: string;
   has_login: boolean;
   access_status: 'active' | null;
+  /** Pass 9.27: interim (temporary) appointment */
+  is_interim?: boolean;
   spouse: { member_id: string; member_number: string | null; display_name: string } | null;
 }
 
@@ -72,7 +74,17 @@ export async function appointLeaderWithSpouse(
     p_reason: input.reason.trim() || undefined,
   });
   if (error) throw error;
-  return data as unknown as { role_name: string; spouse_link: string };
+  return data as unknown as { role_name: string; spouse_link: string; leadership_assignment_id?: string };
+}
+
+/** Pass 9.27 (Ron, 2026-10-21): mark or unmark an appointment as Interim. */
+export async function setLeaderInterim(orgId: string, assignmentId: string, isInterim: boolean) {
+  const { error } = await supabase.rpc('set_servant_leader_interim', {
+    p_organization_id: orgId,
+    p_leadership_assignment_id: assignmentId,
+    p_is_interim: isInterim,
+  });
+  if (error) throw error;
 }
 
 export async function invalidateLeaderOffices(qc: QueryClient) {

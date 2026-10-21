@@ -9,7 +9,7 @@ import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCurrentOrganization } from '../hooks/use-current-organization';
 import { normalizeError } from '../lib/supabase/errors';
-import { LEVEL_LABELS, invalidateLeaderOffices, useLeaderOffices, type LeaderOffice, type OfficeNodeType } from '../features/leaders/api';
+import { LEVEL_LABELS, invalidateLeaderOffices, setLeaderInterim, useLeaderOffices, type LeaderOffice, type OfficeNodeType } from '../features/leaders/api';
 import { AppointLeaderModal } from '../features/leaders/AppointLeaderModal';
 import { ConcludeServantLeaderModal } from '../features/households/components/ConcludeServantLeaderModal';
 import { ServantLeaderAccessModal } from '../features/households/components/ServantLeaderAccessModal';
@@ -35,6 +35,25 @@ export default function LeadersPage() {
   const { data, isLoading, error, refetch } = useLeaderOffices(orgId);
   const [dialog, setDialog] = useState<Dialog>(null);
   const [notice, setNotice] = useState<string | null>(null);
+
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+
+  // Pass 9.27 (Ron, 2026-10-21): mark / unmark an appointment as Interim.
+  const toggleInterim = async (o: LeaderOffice) => {
+    const l = o.leader;
+    if (!l || !orgId) return;
+    try {
+      setBusyId(l.assignment_id);
+      setActionError(null);
+      await setLeaderInterim(orgId, l.assignment_id, !l.is_interim);
+      await done(`${o.node_name}: ${l.is_interim ? 'no longer marked interim' : 'marked as an interim appointment'}.`);
+    } catch (e) {
+      setActionError(normalizeError(e).message);
+    } finally {
+      setBusyId(null);
+    }
+  };
 
   const done = async (msg: string) => {
     setNotice(msg);
@@ -63,6 +82,11 @@ export default function LeadersPage() {
       {notice && (
         <Alert variant="success" title="Done">
           {notice}
+        </Alert>
+      )}
+      {actionError && (
+        <Alert variant="danger" title="Could not update">
+          {actionError}
         </Alert>
       )}
 
@@ -127,6 +151,7 @@ export default function LeadersPage() {
                         )}
                       </div>
                       <div className="flex flex-wrap items-center gap-2">
+                        {l?.is_interim && <Badge variant="warning">Interim</Badge>}
                         {l &&
                           (l.access_status === 'active' ? (
                             <Badge variant="success">App access</Badge>
@@ -143,6 +168,16 @@ export default function LeadersPage() {
                         {l && data.can_manage_access && (l.has_login || l.access_status === 'active') && (
                           <Button size="sm" variant="outline" onClick={() => setDialog({ kind: 'access', office: o })}>
                             App access
+                          </Button>
+                        )}
+                        {l && data.can_appoint && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            disabled={busyId === l.assignment_id}
+                            onClick={() => void toggleInterim(o)}
+                          >
+                            {l.is_interim ? 'Not interim' : 'Mark interim'}
                           </Button>
                         )}
                         {l && data.can_conclude && (

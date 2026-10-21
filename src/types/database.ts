@@ -9758,6 +9758,14 @@ export type Database = {
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      set_servant_leader_interim: {
+        Args: {
+          p_is_interim: boolean
+          p_leadership_assignment_id: string
+          p_organization_id: string
+        }
+        Returns: Json
+      }
       skip_household_topic: {
         Args: {
           p_household_topic_assignment_id: string

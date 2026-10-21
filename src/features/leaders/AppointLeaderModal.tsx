@@ -6,7 +6,7 @@ import { Search, X } from 'lucide-react';
 import { useSearchMembers, type MemberListItem } from '../members/queries';
 import { normalizeError } from '../../lib/supabase/errors';
 import { Alert, Button, Input, Modal } from '../../components/ui';
-import { LEVEL_LABELS, appointLeaderWithSpouse, invalidateLeaderOffices, type LeaderOffice } from './api';
+import { LEVEL_LABELS, appointLeaderWithSpouse, invalidateLeaderOffices, setLeaderInterim, type LeaderOffice } from './api';
 
 function MemberPicker({
   orgId,
@@ -96,6 +96,7 @@ export function AppointLeaderModal({
   const [leader, setLeader] = useState<MemberListItem | null>(null);
   const [spouse, setSpouse] = useState<MemberListItem | null>(null);
   const [reason, setReason] = useState('');
+  const [interim, setInterim] = useState(false);
   const [busy, setBusy] = useState(false);
   const [errorText, setErrorText] = useState<string | null>(null);
   const level = LEVEL_LABELS[office.node_type];
@@ -105,13 +106,17 @@ export function AppointLeaderModal({
     try {
       setBusy(true);
       setErrorText(null);
-      await appointLeaderWithSpouse(orgId, {
+      const res = await appointLeaderWithSpouse(orgId, {
         roleCode: office.role_code,
         nodeId: office.node_id,
         memberId: leader.id,
         spouseMemberId: spouse?.id ?? null,
         reason,
       });
+      // Pass 9.27: mark the new appointment as Interim when ticked.
+      if (interim && res.leadership_assignment_id) {
+        await setLeaderInterim(orgId, res.leadership_assignment_id, true);
+      }
       await invalidateLeaderOffices(qc);
       onDone(
         `${spouse ? `${leader.display_name} & ${spouse.display_name}` : leader.display_name} appointed for ${office.node_name}.`,
@@ -150,6 +155,10 @@ export function AppointLeaderModal({
         )}
         <MemberPicker orgId={orgId} label="Servant leader (the husband, for a couple)" value={leader} onChange={setLeader} excludeId={spouse?.id} />
         <MemberPicker orgId={orgId} label="Wife (optional — couples serve together)" value={spouse} onChange={setSpouse} excludeId={leader?.id} />
+        <label className="flex items-center gap-2 text-sm text-ink">
+          <input type="checkbox" checked={interim} onChange={(e) => setInterim(e.target.checked)} />
+          Interim appointment (temporary, while leadership is being discerned)
+        </label>
         <label className="block">
           <span className="mb-1 block text-xs font-medium text-ink-secondary">Note (optional)</span>
           <Input value={reason} maxLength={200} placeholder="e.g. Appointed by the Area Council" onChange={(e) => setReason(e.target.value)} />
