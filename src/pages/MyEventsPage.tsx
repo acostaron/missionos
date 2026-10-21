@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Calendar, CalendarCheck2, Clock, MapPin, QrCode } from 'lucide-react';
+import { Calendar, CalendarCheck2, Clock, QrCode } from 'lucide-react';
 import { useOrganizationContext } from '../hooks/use-organization-context';
 import {
   useListMyEvents,
@@ -19,6 +19,9 @@ import type { EventType } from '../features/events/types';
 import { Badge, Card, EmptyState, PageHeader } from '../components/ui';
 import { HouseholdTopicsCard } from '../features/self-service/HouseholdTopicsCard';
 import { MyEventRegistrationsCard } from '../features/self-service/MyEventRegistrationsCard';
+import { MapLink } from '../components/MapLink';
+import { useMyReplies } from '../features/replies/api';
+import { ReplyButtons } from '../features/replies/ReplyControls';
 
 // Household meetings are shown in the household topic cards above, so Upcoming lists other events only
 // (assemblies, teachings, retreats, …). Pass 9.8, Claude 2026-10-16.
@@ -44,6 +47,13 @@ export default function MyEventsPage() {
     orgId,
     pastFrom,
     today
+  );
+
+  // Pass 9.28: the member's Attending / Not attending replies
+  const { data: myReplies = [] } = useMyReplies(orgId);
+  const replyByEvent = useMemo(
+    () => new Map(myReplies.filter((r) => r.event_id).map((r) => [r.event_id as string, r.response])),
+    [myReplies]
   );
 
   // Group upcoming events by month ('YYYY-MM')
@@ -180,12 +190,7 @@ export default function MyEventsPage() {
                                 {formatNyDateShort(e.starts_at)} · {formatNyTime(e.starts_at)}
                               </span>
 
-                              {e.location_text && (
-                                <span className="flex items-center gap-1">
-                                  <MapPin className="h-3.5 w-3.5 text-ink-muted" />
-                                  {e.location_text}
-                                </span>
-                              )}
+                              <MapLink location={e.location_text} />
 
                               {e.audience_name && (
                                 <span className="rounded bg-surface-muted px-1.5 py-0.5 text-[11px] text-ink-muted">
@@ -199,6 +204,13 @@ export default function MyEventsPage() {
                                 Session {e.session_number || 1}
                                 {e.session_count ? ` of ${e.session_count}` : ''} · {e.program_title}
                               </p>
+                            )}
+                            {orgId && e.event_status === 'scheduled' && new Date(e.starts_at).getTime() > Date.now() && (
+                              <ReplyButtons
+                                orgId={orgId}
+                                target={{ eventId: e.event_id }}
+                                current={replyByEvent.get(e.event_id) ?? null}
+                              />
                             )}
                           </div>
                         </div>

@@ -1,4 +1,7 @@
 import { useState, useId } from 'react';
+import { mapsUrl } from '../../../lib/maps';
+import { useMeetingReplies } from '../../replies/api';
+import { RepliesSummaryView } from '../../replies/ReplyControls';
 import { useQueryClient } from '@tanstack/react-query';
 import { meetingKeys } from '../api/get-household-meeting-history';
 import { useHouseholdMeetingDetail } from '../api/get-household-meeting-detail';
@@ -61,6 +64,8 @@ export function HouseholdMeetingDetailModal({
   const queryClient = useQueryClient();
   const titleId = useId();
 
+  // Pass 9.28: members' Attending / Not attending replies
+  const { data: replies } = useMeetingReplies(organizationId, meetingId, true);
   const { data: detail, isLoading, error: loadError } = useHouseholdMeetingDetail(
     organizationId,
     meetingId,
@@ -211,7 +216,23 @@ export function HouseholdMeetingDetailModal({
                   {detail.location_text && (
                     <>
                       <dt className="text-slate-400">Location</dt>
-                      <dd className="text-slate-200">{detail.location_text}</dd>
+                      <dd className="text-slate-200">
+                        {mapsUrl(detail.location_text) ? (
+                          <a href={mapsUrl(detail.location_text)!} target="_blank" rel="noopener noreferrer" className="text-indigo-300 hover:underline">
+                            {detail.location_text}
+                          </a>
+                        ) : (
+                          detail.location_text
+                        )}
+                      </dd>
+                    </>
+                  )}
+                  {replies && detail.meeting_status === 'scheduled' && (
+                    <>
+                      <dt className="text-slate-400">Replies</dt>
+                      <dd>
+                        <RepliesSummaryView data={replies} dark />
+                      </dd>
                     </>
                   )}
                   {detail.attendance_recorded_at && (

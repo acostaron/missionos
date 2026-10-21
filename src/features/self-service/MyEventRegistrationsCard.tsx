@@ -1,6 +1,7 @@
 // My Events: events open for registration — register, see my balance, cancel (Pass 9.14, Claude 2026-10-16).
 // Pass 9.15: add my guests (non-members), see what they owe, show their guest pass, remove an unpaid guest.
 import { useState } from 'react';
+import { MapLink } from '../../components/MapLink';
 import { useQueryClient } from '@tanstack/react-query';
 import { QrCode, Ticket, UserPlus } from 'lucide-react';
 import { formatNyDateShort, formatNyTime } from '../../lib/ny-time';
@@ -152,8 +153,8 @@ export function MyEventRegistrationsCard({ organizationId }: { organizationId: s
                 <p className="font-medium text-ink">{e.title}</p>
                 <p className="text-xs text-ink-secondary">
                   {formatNyDateShort(e.starts_at)} · {formatNyTime(e.starts_at)}
-                  {e.location_text ? ` · ${e.location_text}` : ''}
                 </p>
+                <MapLink location={e.location_text} className="text-xs text-ink-secondary" />
                 <p className="text-xs text-ink-muted">{priceText(e)}</p>
               </div>
               {my.registered ? (

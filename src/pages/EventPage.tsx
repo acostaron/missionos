@@ -42,6 +42,9 @@ import { CancelEventModal } from '../features/events/components/CancelEventModal
 import { AddGreeterModal } from '../features/events/components/AddGreeterModal';
 import { money, useEventPaymentAccess } from '../features/events/payments';
 import { getEventErrorMessage } from '../features/events/error-message';
+import { mapsUrl } from '../lib/maps';
+import { useEventReplies } from '../features/replies/api';
+import { RepliesSummaryView } from '../features/replies/ReplyControls';
 import {
   formatNyDateLong,
   formatNyDateShort,
@@ -59,6 +62,8 @@ export default function EventPage() {
 
   const { data: event, isLoading: isEventLoading, error } = useEvent(orgId, eventId ?? null);
   const { data: paymentAccess } = useEventPaymentAccess(orgId, eventId ?? null);
+  // Pass 9.28: members' Attending / Not attending replies (organizers, attendance recorders, admins, leaders in scope)
+  const { data: replies, error: repliesError } = useEventReplies(orgId, eventId ?? '', !!event && !!eventId);
 
   const statusMutation = useSetEventStatus();
   const greeterMutation = useSetEventGreeter();
@@ -321,7 +326,22 @@ export default function EventPage() {
             <div>
               <p className="text-caption font-medium text-ink-muted">Location</p>
               <p className="text-body font-medium text-ink">
-                {event.location_text || 'None specified'}
+                {event.location_text ? (
+                  mapsUrl(event.location_text) ? (
+                    <a
+                      href={mapsUrl(event.location_text)!}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                    >
+                      {event.location_text}
+                    </a>
+                  ) : (
+                    event.location_text
+                  )
+                ) : (
+                  'None specified'
+                )}
               </p>
             </div>
           </div>
@@ -355,6 +375,15 @@ export default function EventPage() {
           </div>
         )}
       </Card>
+
+      {/* Pass 9.28: replies (shown when the server allows this viewer to see them) */}
+      {replies && !repliesError && event.event_status === 'scheduled' && (
+        <Card padding="comfortable" className="space-y-2">
+          <h2 className="text-h3 font-semibold text-ink">Replies</h2>
+          <p className="text-xs text-ink-muted">Members answer “Will you attend?” on My Events until the event starts.</p>
+          <RepliesSummaryView data={replies} />
+        </Card>
+      )}
 
       {/* Grid: Attendance & Greeters */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">

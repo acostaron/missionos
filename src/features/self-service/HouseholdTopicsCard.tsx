@@ -7,7 +7,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { BookOpenText, CalendarPlus, MapPin } from 'lucide-react';
+import { BookOpenText, CalendarPlus } from 'lucide-react';
 import { supabase } from '../../lib/supabase/client';
 import { formatNyDateShort, formatNyTime, getTodayNyDate } from '../../lib/ny-time';
 import { normalizeError } from '../../lib/supabase/errors';
@@ -25,6 +25,15 @@ import {
 } from './household-card-api';
 import { HouseholdMeetingFormModal } from './HouseholdMeetingFormModal';
 import { HouseholdAttendanceModal } from './HouseholdAttendanceModal';
+import { MapLink } from '../../components/MapLink';
+import { useMeetingReplies, useMyReplies } from '../replies/api';
+import { RepliesSummaryView, ReplyButtons } from '../replies/ReplyControls';
+
+// Pass 9.28: replies summary for the household's leaders.
+function MeetingReplies({ orgId, meetingId }: { orgId: string; meetingId: string }) {
+  const { data } = useMeetingReplies(orgId, meetingId, true);
+  return <RepliesSummaryView data={data} />;
+}
 
 type FraternalMeeting = CardMeeting;
 
@@ -43,6 +52,16 @@ type Dialog =
 export function HouseholdTopicsCard({ organizationId }: { organizationId: string | null }) {
   const qc = useQueryClient();
   const { data: households = [] } = useMyHouseholdCards(organizationId);
+  // Pass 9.28: my Attending / Not attending replies
+  const orgId = organizationId;
+  const { data: myReplies = [] } = useMyReplies(households.length > 0 ? organizationId : null);
+  const replyByMeeting = useMemo(
+    () =>
+      new Map(
+        myReplies.filter((r) => r.household_meeting_id).map((r) => [r.household_meeting_id as string, r.response])
+      ),
+    [myReplies]
+  );
   const [meetingDialog, setMeetingDialog] = useState<MeetingDialog>(null);
   const { data: library } = useTopicLibrary(households.length > 0 ? organizationId : null);
   const [dialog, setDialog] = useState<Dialog>(null);
@@ -166,6 +185,10 @@ export function HouseholdTopicsCard({ organizationId }: { organizationId: string
                 const place = [m.location_type ? (LOCATION_TYPES[m.location_type] ?? m.location_type) : null, m.location_text]
                   .filter(Boolean)
                   .join(' · ');
+                // Pass 9.28: replies are open until the meeting starts.
+                const replyOpen =
+                  m.meeting_status === 'scheduled' &&
+                  (m.scheduled_start_at ? new Date(m.scheduled_start_at).getTime() > Date.now() : m.meeting_date >= today);
                 return (
                   <li key={m.household_meeting_id} className={`space-y-1.5 py-3 ${cancelled ? 'opacity-70' : ''}`}>
                     <div className="flex flex-wrap items-center gap-2">
@@ -180,11 +203,9 @@ export function HouseholdTopicsCard({ organizationId }: { organizationId: string
                     {(place || m.host_name) && (
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-secondary">
                         {place && (
-                          <span className="flex items-center gap-1">
-                            <MapPin className="h-3.5 w-3.5 text-ink-muted" />
-                            {place}
-                          </span>
+                          <MapLink location={m.location_type === 'virtual' ? null : m.location_text} label={place} />
                         )}
+                        {place && m.location_type === 'virtual' && <span>{place}</span>}
                         {m.host_name && <span className="text-ink-muted">Host: {m.host_name}</span>}
                       </div>
                     )}
@@ -198,6 +219,16 @@ export function HouseholdTopicsCard({ organizationId }: { organizationId: string
                     )}
                     {hh.can_edit && m.meeting_status === 'scheduled' && m.meeting_date > today && (
                       <p className="text-xs text-ink-muted">Attendance opens on {formatNyDateShort(m.meeting_date)}.</p>
+                    )}
+                    {orgId && replyOpen && (
+                      <ReplyButtons
+                        orgId={orgId}
+                        target={{ householdMeetingId: m.household_meeting_id }}
+                        current={replyByMeeting.get(m.household_meeting_id) ?? null}
+                      />
+                    )}
+                    {orgId && hh.can_edit && !cancelled && m.meeting_status === 'scheduled' && (
+                      <MeetingReplies orgId={orgId} meetingId={m.household_meeting_id} />
                     )}
                     {!cancelled && !hh.can_edit && m.my_attendance && (
                       <p className="text-xs text-ink-secondary">You: {ATTENDANCE_LABELS[m.my_attendance]}</p>

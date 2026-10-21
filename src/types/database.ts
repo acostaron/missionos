@@ -9766,6 +9766,27 @@ export type Database = {
         }
         Returns: Json
       }
+      get_event_replies: {
+        Args: { p_event_id: string; p_organization_id: string }
+        Returns: Json
+      }
+      get_meeting_replies: {
+        Args: { p_household_meeting_id: string; p_organization_id: string }
+        Returns: Json
+      }
+      list_my_replies: {
+        Args: { p_organization_id: string }
+        Returns: Json
+      }
+      set_my_reply: {
+        Args: {
+          p_event_id?: string
+          p_household_meeting_id?: string
+          p_organization_id: string
+          p_response?: string
+        }
+        Returns: Json
+      }
       skip_household_topic: {
         Args: {
           p_household_topic_assignment_id: string
