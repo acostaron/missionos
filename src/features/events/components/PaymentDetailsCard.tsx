@@ -1,4 +1,5 @@
-// Registrations page: Zelle / PayPal details members see in My Events (Pass 9.29, Ron 2026-10-21).
+// Registrations page: Zelle / PayPal details members see in My Events (Pass 9.29, Ron 2026-10-21);
+// check and cash instructions (Pass 9.30).
 // Organization default (administrator / finance coordinator) and an optional override for this event.
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -7,7 +8,15 @@ import { invalidatePayments } from '../payments';
 import { setPaymentDetails, usePaymentDetails, type PaymentDetailsFields } from '../advance-payments';
 import { Alert, Button, Card, Input } from '../../../components/ui';
 
-const EMPTY: PaymentDetailsFields = { zelle_recipient: null, zelle_name: null, paypal_link: null, payment_note: null };
+const EMPTY: PaymentDetailsFields = {
+  zelle_recipient: null,
+  zelle_name: null,
+  paypal_link: null,
+  payment_note: null,
+  check_payable_to: null,
+  check_mailing_address: null,
+  cash_check_note: null,
+};
 
 function DetailsForm({
   title,
@@ -58,7 +67,10 @@ function DetailsForm({
         {field('zelle_recipient', 'Zelle email or phone', 'treasurer@example.org')}
         {field('zelle_name', 'Zelle name shown to members', 'MFC New York')}
         {field('paypal_link', 'PayPal link', 'https://paypal.me/yourname')}
-        {field('payment_note', 'Note for members (optional)', 'Put your name and the event in the memo')}
+        {field('payment_note', 'Zelle / PayPal note (optional)', 'Put your name and the event in the memo')}
+        {field('check_payable_to', 'Checks payable to', 'MFC New York')}
+        {field('check_mailing_address', 'Mail checks to (optional)', 'Street, City, NY ZIP')}
+        {field('cash_check_note', 'Cash / check note (optional)', 'Hand to your chapter treasurer or pay at the registration table')}
       </div>
       <div className="flex items-center gap-2">
         <Button size="sm" type="submit" loading={busy}>
@@ -89,7 +101,7 @@ export function PaymentDetailsCard({ orgId, eventId }: { orgId: string; eventId:
 
   return (
     <Card padding="compact" className="space-y-4">
-      <h2 className="text-sm font-semibold text-ink">Advance payment (Zelle / PayPal)</h2>
+      <h2 className="text-sm font-semibold text-ink">Payment options (Zelle / PayPal / check / cash)</h2>
       {error && (
         <Alert variant="danger" title="Could not save">
           {error}

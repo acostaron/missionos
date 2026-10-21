@@ -1,5 +1,6 @@
 // Registrations page: payments members reported (Zelle / PayPal) for the treasurer to confirm or decline
 // (Pass 9.29, Ron 2026-10-21). Confirming records the payment as if entered here.
+// Pass 9.30: check / cash reports, and members who will pay at the event (confirm when received).
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { getEventErrorMessage } from '../error-message';
@@ -41,7 +42,8 @@ export function PaymentReportsCard({ orgId, eventId }: { orgId: string; eventId:
         Payments reported by members {pending.length > 0 && <Badge variant="warning">{pending.length} to confirm</Badge>}
       </h2>
       <p className="text-xs text-ink-muted">
-        Check your Zelle / PayPal account, then Confirm (the payment is recorded) or Decline (the member sees the reason).
+        Check your Zelle / PayPal account or the check / cash you received, then Confirm (the payment is recorded) or
+        Decline (the member sees the reason). &ldquo;Paying at the event&rdquo; — confirm when you receive it at the door.
       </p>
       {error && (
         <Alert variant="danger" title="Could not save">
@@ -56,6 +58,7 @@ export function PaymentReportsCard({ orgId, eventId }: { orgId: string; eventId:
                 {r.display_name} {r.member_number && <span className="text-xs text-ink-muted">{r.member_number}</span>}
               </p>
               <p className="text-xs text-ink-secondary">
+                {r.report_kind === 'at_event' && <Badge variant="info">Paying at the event</Badge>}{' '}
                 {REPORT_METHOD_LABELS[r.payment_method]} {money(r.amount)} · reported {formatNyDateShort(r.reported_at)}
                 {r.reference ? ` · ${r.reference}` : ''}
               </p>
@@ -63,7 +66,7 @@ export function PaymentReportsCard({ orgId, eventId }: { orgId: string; eventId:
             {r.report_status === 'pending' ? (
               <div className="flex gap-2">
                 <Button size="sm" loading={busy === r.report_id} onClick={() => void review(r.report_id, true)}>
-                  Confirm
+                  {r.report_kind === 'at_event' ? 'Received' : 'Confirm'}
                 </Button>
                 <Button size="sm" variant="ghost" disabled={busy === r.report_id} onClick={() => void review(r.report_id, false)}>
                   Decline

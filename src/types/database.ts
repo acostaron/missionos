@@ -9806,6 +9806,7 @@ export type Database = {
           p_organization_id: string
           p_payment_method: string
           p_reference?: string
+          p_report_kind?: string
         }
         Returns: Json
       }
@@ -9820,6 +9821,9 @@ export type Database = {
       }
       set_payment_details: {
         Args: {
+          p_cash_check_note?: string
+          p_check_mailing_address?: string
+          p_check_payable_to?: string
           p_event_id?: string
           p_organization_id: string
           p_payment_note?: string
