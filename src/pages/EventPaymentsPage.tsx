@@ -1,4 +1,5 @@
 // Registrations & payments for an event (Pass 9.13 / 9.14 / 9.15, written by Claude 2026-10-16).
+// Pass 9.32 (Ron 2026-10-21): shown as donations; child (under 18) donation.
 // For the event organizers and the Treasurer / Finance Coordinator: prices (early-bird, regular, walk-in),
 // open registration to members, register members, record payments, waive, cancel, void a mistaken payment.
 import { useState } from 'react';
@@ -47,7 +48,7 @@ function StatusBadge({ p }: { p: PaymentState }) {
   return (
     <Badge variant={STATUS_VARIANT[p.status]}>
       {PAYMENT_STATUS_LABELS[p.status]}
-      {p.status === 'partial' || p.status === 'unpaid' ? ` · ${money(p.balance)} due` : ''}
+      {p.status === 'partial' || p.status === 'unpaid' ? ` · ${money(p.balance)} pending` : ''}
     </Badge>
   );
 }
@@ -59,7 +60,7 @@ function regLine(p: PaymentState) {
   return `${type} · ${tier} ${money(p.fee)}`;
 }
 
-type PriceForm = { fee: string; early: string; earlyUntil: string; walkIn: string; open: boolean };
+type PriceForm = { fee: string; early: string; earlyUntil: string; walkIn: string; child: string; open: boolean };
 
 export default function EventPaymentsPage() {
   const { eventId } = useParams<{ eventId: string }>();
@@ -94,8 +95,8 @@ export default function EventPaymentsPage() {
   if (accessLoading || !event) return <div className="p-8 text-center text-sm text-ink-muted">Loading…</div>;
   if (!canManage) {
     return (
-      <Alert variant="warning" title="Registrations & payments">
-        Only the event organizers and the Treasurer / Finance Coordinator can manage registrations and payments.
+      <Alert variant="warning" title="Registrations & donations">
+        Only the event organizers and the Treasurer / Finance Coordinator can manage registrations and donations.
       </Alert>
     );
   }
@@ -106,6 +107,7 @@ export default function EventPaymentsPage() {
     early: src?.early_bird_fee ? String(src.early_bird_fee) : '',
     earlyUntil: src?.early_bird_until ?? '',
     walkIn: src?.walk_in_fee ? String(src.walk_in_fee) : '',
+    child: src?.child_fee != null ? String(src.child_fee) : '',
     open: !!src?.registration_open,
   };
   const set = (patch: Partial<PriceForm>) => setForm({ ...current, ...patch });
@@ -131,7 +133,7 @@ export default function EventPaymentsPage() {
             {paid && p.status !== 'waived' && p.status !== 'paid' && (
               <RecordPaymentForm
                 defaultAmount={p.balance}
-                submitLabel="Record payment"
+                submitLabel="Record donation"
                 busy={busy}
                 onSubmit={(amount, method) =>
                   run(async () => {
@@ -149,7 +151,7 @@ export default function EventPaymentsPage() {
                   disabled={busy}
                   onClick={() => run(() => setFeeWaiver(orgId!, eventId!, memberId, p.status !== 'waived'))}
                 >
-                  {p.status === 'waived' ? 'Remove waiver' : 'Waive fee'}
+                  {p.status === 'waived' ? 'Remove waiver' : 'Waive donation'}
                 </Button>
               )}
               {p.paid === 0 && (
@@ -198,7 +200,7 @@ export default function EventPaymentsPage() {
         <ArrowLeft className="h-4 w-4" /> Back to event
       </Link>
       <div>
-        <h1 className="text-xl font-bold text-ink">Registrations & payments</h1>
+        <h1 className="text-xl font-bold text-ink">Registrations & donations</h1>
         <p className="text-sm text-ink-secondary">
           {event.title} · {formatNyDateShort(event.starts_at)}
         </p>
@@ -211,7 +213,7 @@ export default function EventPaymentsPage() {
       )}
 
       <Card padding="compact" className="space-y-3">
-        <h2 className="text-sm font-semibold text-ink">Prices (per member) and registration</h2>
+        <h2 className="text-sm font-semibold text-ink">Suggested donations and registration</h2>
         <form
           className="space-y-3"
           onSubmit={(e) => {
@@ -222,13 +224,14 @@ export default function EventPaymentsPage() {
                 early_bird_fee: num(current.early),
                 early_bird_until: current.earlyUntil || null,
                 walk_in_fee: num(current.walkIn),
+                child_fee: num(current.child),
                 registration_open: current.open,
               });
               setForm(null);
             });
           }}
         >
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             <label className="block">
               <span className="mb-1 block text-xs font-medium text-ink-secondary">Regular ($)</span>
               <Input type="number" inputMode="decimal" min="0" step="0.01" placeholder="Free" value={current.fee} onChange={(e) => set({ fee: e.target.value })} />
@@ -245,6 +248,10 @@ export default function EventPaymentsPage() {
               <span className="mb-1 block text-xs font-medium text-ink-secondary">Walk-in ($)</span>
               <Input type="number" inputMode="decimal" min="0" step="0.01" placeholder="= Regular" value={current.walkIn} onChange={(e) => set({ walkIn: e.target.value })} />
             </label>
+            <label className="block">
+              <span className="mb-1 block text-xs font-medium text-ink-secondary">Child under 18 ($)</span>
+              <Input type="number" inputMode="decimal" min="0" step="0.01" placeholder="No child rate" value={current.child} onChange={(e) => set({ child: e.target.value })} />
+            </label>
           </div>
           <label className="flex items-center gap-2 text-sm text-ink">
             <input type="checkbox" checked={current.open} onChange={(e) => set({ open: e.target.checked })} />
@@ -252,14 +259,16 @@ export default function EventPaymentsPage() {
           </label>
           <div className="flex justify-end">
             <Button type="submit" variant="outline" disabled={busy || form === null}>
-              Save prices
+              Save donations
             </Button>
           </div>
         </form>
         <p className="text-xs text-ink-muted">
-          Each member pays the price of the day they registered (early-bird until its last day, then regular).
-          Walk-ins registered at the door pay the walk-in price. At the QR desk, members who are not registered or
-          not paid in full are not checked in until they register and pay, or the fee is waived.
+          Each person is asked for the donation of the day they registered (early-bird until its last day, then
+          regular); walk-ins at the door, the walk-in donation. Children under 18 on the event day (by their birth date
+          in MissionOS, or guests marked Child) are asked for the child donation instead; 0 = children free, blank =
+          no child rate. At the QR desk, people whose donation is not complete are not checked in until it is
+          recorded or waived.
         </p>
       </Card>
 
@@ -269,10 +278,10 @@ export default function EventPaymentsPage() {
             ['Registered', `${t.registered}`],
             ['Reserved / walk-in', `${t.reserved} / ${t.walk_in}`],
             ['Checked in', `${t.checked_in}`],
-            ['Paid / partial / unpaid', `${t.paid} / ${t.partial} / ${t.unpaid}`],
+            ['Donated / partial / pending', `${t.paid} / ${t.partial} / ${t.unpaid}`],
             ['Waived', `${t.waived}`],
-            ['Collected', money(t.collected)],
-            ['Expected', money(t.expected)],
+            ['Donations received', money(t.collected)],
+            ['Donations expected', money(t.expected)],
           ].map(([label, value]) => (
             <div key={label} className="rounded-card border border-line bg-surface p-3">
               <div className="text-lg font-bold text-ink">{value}</div>
@@ -282,11 +291,11 @@ export default function EventPaymentsPage() {
         </div>
       )}
 
-      {/* Pass 9.29: Zelle / PayPal payments reported by members */}
+      {/* Pass 9.29: donations reported by members */}
       <PaymentReportsCard orgId={orgId!} eventId={eventId!} />
 
       <Card padding="compact" className="space-y-2">
-        <h2 className="text-sm font-semibold text-ink">Register a member or record a payment</h2>
+        <h2 className="text-sm font-semibold text-ink">Register a member or record a donation</h2>
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
           <Input className="pl-9" placeholder="Search member name or number" value={query} onChange={(e) => setQuery(e.target.value)} />
@@ -327,7 +336,7 @@ export default function EventPaymentsPage() {
                             className="text-danger-700 hover:underline disabled:opacity-50"
                             disabled={busy}
                             onClick={() => {
-                              if (window.confirm(`Void the ${money(p.amount)} payment? Use this only for a payment entered by mistake.`)) {
+                              if (window.confirm(`Void the ${money(p.amount)} donation? Use this only for a donation entered by mistake.`)) {
                                 run(() => voidEventPayment(orgId!, p.payment_id));
                               }
                             }}

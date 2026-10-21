@@ -1,4 +1,5 @@
 import { normalizeError } from '../../lib/supabase/errors';
+import { donationWording } from '../../lib/donation-wording';
 
 /**
  * Returns user-facing error message for event operations.
@@ -28,7 +29,7 @@ export function getEventErrorMessage(error: unknown): string {
         rawMsg.includes('CONTEXT:');
 
       if (!leaksInternalDetails) {
-        return rawMsg;
+        return donationWording(rawMsg);
       }
     }
   }

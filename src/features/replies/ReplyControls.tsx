@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Check, X } from 'lucide-react';
 import { normalizeError } from '../../lib/supabase/errors';
+import { donationWording } from '../../lib/donation-wording';
 import { invalidateReplies, setMyReply, type RepliesSummary, type ReplyResponse } from './api';
 import { invalidatePayments } from '../events/payments';
 
@@ -28,7 +29,7 @@ export function ReplyButtons({
       await invalidateReplies(qc);
       await invalidatePayments(qc); // Pass 9.29: a reply may register / cancel the registration
     } catch (e) {
-      setError(normalizeError(e).message);
+      setError(donationWording(normalizeError(e).message));
     } finally {
       setBusy(false);
     }

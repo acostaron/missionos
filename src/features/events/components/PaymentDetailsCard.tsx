@@ -70,7 +70,7 @@ function DetailsForm({
         {field('payment_note', 'Zelle / PayPal note (optional)', 'Put your name and the event in the memo')}
         {field('check_payable_to', 'Checks payable to', 'MFC New York')}
         {field('check_mailing_address', 'Mail checks to (optional)', 'Street, City, NY ZIP')}
-        {field('cash_check_note', 'Cash / check note (optional)', 'Hand to your chapter treasurer or pay at the registration table')}
+        {field('cash_check_note', 'Cash / check note (optional)', 'Hand to your chapter treasurer or give at the registration table')}
       </div>
       <div className="flex items-center gap-2">
         <Button size="sm" type="submit" loading={busy}>
@@ -101,7 +101,7 @@ export function PaymentDetailsCard({ orgId, eventId }: { orgId: string; eventId:
 
   return (
     <Card padding="compact" className="space-y-4">
-      <h2 className="text-sm font-semibold text-ink">Payment options (Zelle / PayPal / check / cash)</h2>
+      <h2 className="text-sm font-semibold text-ink">Donation options (Zelle / PayPal / check / cash)</h2>
       {error && (
         <Alert variant="danger" title="Could not save">
           {error}
@@ -110,7 +110,7 @@ export function PaymentDetailsCard({ orgId, eventId }: { orgId: string; eventId:
       {data.can_edit_organization && (
         <DetailsForm
           title="For all events"
-          hint="Shown to members on My Events for every paid event, unless this event has its own details below."
+          hint="Shown to members on My Events for every event with a suggested donation, unless this event has its own details below."
           initial={data.organization ?? EMPTY}
           onSave={save(null)}
         />

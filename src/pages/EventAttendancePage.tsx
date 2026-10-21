@@ -362,7 +362,7 @@ export default function EventAttendancePage() {
               : isFuture
                 ? 'Attendance can only be recorded on or after the day of the event.'
                 : isPaidLocked
-                  ? 'This is a paid event. Check members in with Scan QR so payment is checked. Only the organizers and administrators can tick attendance here.'
+                  ? 'This event has a suggested donation. Check members in with Scan QR so donations are checked. Only the organizers and administrators can tick attendance here.'
                   : 'You do not have permission to record attendance for this event.'}
           </Alert>
         )}

@@ -8190,6 +8190,7 @@ export type Database = {
           p_host_member_id?: string
           p_last_name: string
           p_organization_id: string
+          p_is_child?: boolean
           p_phone?: string
           p_walk_in?: boolean
         }
@@ -9655,6 +9656,7 @@ export type Database = {
       }
       set_event_pricing: {
         Args: {
+          p_child_fee?: number
           p_early_bird_fee?: number
           p_early_bird_until?: string
           p_event_id: string

@@ -31,7 +31,7 @@ export function RecordPaymentForm({
         <Input type="number" inputMode="decimal" min="0.01" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} />
       </label>
       <label className="block w-32">
-        <span className="mb-1 block text-xs font-medium text-ink-secondary">Paid by</span>
+        <span className="mb-1 block text-xs font-medium text-ink-secondary">Given by</span>
         <Select value={method} onChange={(e) => setMethod(e.target.value as PaymentMethod)}>
           {PAYMENT_METHODS.map((m) => (
             <option key={m.value} value={m.value}>

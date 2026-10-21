@@ -31,6 +31,7 @@ function priceText(e: MyEventRegistration) {
   }
   parts.push(`Regular ${money(e.fee_amount)}`);
   if (e.walk_in_fee != null) parts.push(`Walk-in ${money(e.walk_in_fee)}`);
+  if (e.child_fee != null) parts.push(`Child (under 18) ${e.child_fee > 0 ? money(e.child_fee) : 'free'}`);
   return parts.join(' · ');
 }
 
@@ -78,9 +79,9 @@ export function EventRegistrationPanel({
             return (
               <li key={g.guest_id} className="flex flex-wrap items-center gap-2 text-sm">
                 <span className="text-ink">Guest: {g.display_name}</span>
-                {p.status === 'paid' && <Badge variant="success">Paid</Badge>}
-                {p.status === 'waived' && <Badge variant="info">Fee waived</Badge>}
-                {due && <Badge variant="warning">{money(p.balance)} due</Badge>}
+                {p.status === 'paid' && <Badge variant="success">Donated</Badge>}
+                {p.status === 'waived' && <Badge variant="info">Donation waived</Badge>}
+                {due && <Badge variant="warning">{money(p.balance)} donation pending</Badge>}
                 {g.checked_in_today && <Badge variant="success">Checked in</Badge>}
                 <Button size="sm" variant="ghost" icon={<QrCode className="h-4 w-4" />} onClick={() => setPass(g)}>
                   Guest pass
@@ -105,7 +106,7 @@ export function EventRegistrationPanel({
         </ul>
       )}
       {guests.some((g) => g.payment.status === 'unpaid' || g.payment.status === 'partial') && (
-        <p className="text-xs text-ink-secondary">Pay for your guests with the registration team or the treasurer.</p>
+        <p className="text-xs text-ink-secondary">Give your guests' donations to the registration team or the treasurer.</p>
       )}
       {reg.registration_open &&
         (adding ? (
@@ -137,18 +138,18 @@ export function EventRegistrationPanel({
   return (
     <div className="space-y-1.5 border-t border-line pt-2">
       <p className="text-xs text-ink-muted">
-        Registration · {priceText(reg)}
+        Suggested donation · {priceText(reg)}
       </p>
       {my.registered ? (
         <div className="space-y-1">
           <div className="flex flex-wrap items-center gap-2 text-sm">
             <Badge variant="success">Registered</Badge>
-            {my.status === 'paid' && <Badge variant="success">Paid</Badge>}
-            {my.status === 'waived' && <Badge variant="info">Fee waived</Badge>}
-            {(my.status === 'unpaid' || my.status === 'partial') && <Badge variant="warning">{money(my.balance)} due</Badge>}
+            {my.status === 'paid' && <Badge variant="success">Donated</Badge>}
+            {my.status === 'waived' && <Badge variant="info">Donation waived</Badge>}
+            {(my.status === 'unpaid' || my.status === 'partial') && <Badge variant="warning">{money(my.balance)} donation pending</Badge>}
             {my.price_tier && my.price_tier !== 'free' && (
               <span className="text-xs text-ink-muted">
-                {PRICE_TIER_LABELS[my.price_tier]} price {money(my.fee)}
+                {PRICE_TIER_LABELS[my.price_tier]} donation {money(my.fee)}
               </span>
             )}
           </div>

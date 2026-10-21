@@ -100,7 +100,7 @@ export function AdvancePaymentBlock({
 
   return (
     <div className="space-y-2 rounded-lg border border-line bg-surface-muted p-3">
-      <p className="text-xs font-semibold text-ink">Pay in advance or at the event</p>
+      <p className="text-xs font-semibold text-ink">Donate in advance or at the event</p>
       <div className="space-y-1 text-xs text-ink-secondary">
         {hasZelle && (
           <p>
@@ -116,7 +116,7 @@ export function AdvancePaymentBlock({
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
           >
-            Pay {money(balance)} with PayPal <ExternalLink className="h-3.5 w-3.5" />
+            Donate {money(balance)} with PayPal <ExternalLink className="h-3.5 w-3.5" />
           </a>
         )}
         {details?.payment_note && (hasZelle || hasPaypal) && <p className="text-ink-muted">{details.payment_note}</p>}
@@ -134,7 +134,7 @@ export function AdvancePaymentBlock({
         )}
         <p>
           <span className="font-medium text-ink">Cash or check:</span>{' '}
-          {details?.cash_check_note || 'give it to the treasurer, or pay at the event.'}
+          {details?.cash_check_note || 'give it to the treasurer, or bring it to the event.'}
         </p>
       </div>
 
@@ -149,7 +149,7 @@ export function AdvancePaymentBlock({
               </span>
               {r.report_status === 'pending' &&
                 (r.report_kind === 'at_event' ? (
-                  <Badge variant="info">Paying at the event</Badge>
+                  <Badge variant="info">Giving at the event</Badge>
                 ) : (
                   <Badge variant="warning">Awaiting confirmation</Badge>
                 ))}
@@ -170,11 +170,11 @@ export function AdvancePaymentBlock({
       {balance - pendingTotal > 0 && !form && (
         <div className="flex flex-wrap gap-2">
           <Button size="sm" variant="outline" onClick={() => openForm('sent')}>
-            I sent payment
+            I sent my donation
           </Button>
           {!payingAtEvent && (
             <Button size="sm" variant="ghost" onClick={() => openForm('at_event')}>
-              I&rsquo;ll pay at the event
+              I&rsquo;ll give at the event
             </Button>
           )}
         </div>
@@ -189,7 +189,7 @@ export function AdvancePaymentBlock({
         >
           <label className="block w-28">
             <span className="mb-1 block text-xs font-medium text-ink-secondary">
-              {form === 'at_event' ? 'Will pay by' : 'Paid by'}
+              {form === 'at_event' ? 'Will give by' : 'Given by'}
             </span>
             <Select value={method} onChange={(e) => setMethod(e.target.value as ReportMethod)}>
               {methodOptions.map((m) => (

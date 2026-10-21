@@ -39,11 +39,11 @@ export function PaymentReportsCard({ orgId, eventId }: { orgId: string; eventId:
   return (
     <Card padding="compact" className="space-y-2">
       <h2 className="text-sm font-semibold text-ink">
-        Payments reported by members {pending.length > 0 && <Badge variant="warning">{pending.length} to confirm</Badge>}
+        Donations reported by members {pending.length > 0 && <Badge variant="warning">{pending.length} to confirm</Badge>}
       </h2>
       <p className="text-xs text-ink-muted">
-        Check your Zelle / PayPal account or the check / cash you received, then Confirm (the payment is recorded) or
-        Decline (the member sees the reason). &ldquo;Paying at the event&rdquo; — confirm when you receive it at the door.
+        Check your Zelle / PayPal account or the check / cash you received, then Confirm (the donation is recorded) or
+        Decline (the member sees the reason). &ldquo;Giving at the event&rdquo; — tap Received when it is given at the door.
       </p>
       {error && (
         <Alert variant="danger" title="Could not save">
@@ -58,7 +58,7 @@ export function PaymentReportsCard({ orgId, eventId }: { orgId: string; eventId:
                 {r.display_name} {r.member_number && <span className="text-xs text-ink-muted">{r.member_number}</span>}
               </p>
               <p className="text-xs text-ink-secondary">
-                {r.report_kind === 'at_event' && <Badge variant="info">Paying at the event</Badge>}{' '}
+                {r.report_kind === 'at_event' && <Badge variant="info">Giving at the event</Badge>}{' '}
                 {REPORT_METHOD_LABELS[r.payment_method]} {money(r.amount)} · reported {formatNyDateShort(r.reported_at)}
                 {r.reference ? ` · ${r.reference}` : ''}
               </p>

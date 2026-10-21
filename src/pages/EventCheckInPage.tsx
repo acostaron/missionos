@@ -253,7 +253,7 @@ export default function EventCheckInPage() {
                         : WARNING.has(result.result)
                           ? 'Already checked in'
                           : result.result === 'payment_required' || result.result === 'guest_payment_required'
-                            ? 'Not paid — not checked in'
+                            ? 'Donation not complete — not checked in'
                             : result.result === 'not_registered'
                               ? 'Not registered — walk-in'
                               : 'Not checked in'}
@@ -295,19 +295,19 @@ export default function EventCheckInPage() {
                   )}
                   {result.result === 'checked_in' && result.payment && ['paid', 'waived'].includes(result.payment.status) && (
                     <p className="text-xs font-medium text-success-700">
-                      {result.payment.status === 'paid' ? `Paid ${money(result.payment.paid)}` : 'Fee waived'}
+                      {result.payment.status === 'paid' ? `Donated ${money(result.payment.paid)}` : 'Donation waived'}
                     </p>
                   )}
                   {result.result === 'not_registered' && (
                     <div className="space-y-2">
                       <p className="flex items-center gap-1 text-sm font-semibold text-danger-700">
                         <CircleDollarSign className="h-4 w-4" />
-                        No reservation. Walk-in price {money(result.payment.walk_in_fee ?? result.payment.fee)}
+                        No reservation. Walk-in donation {money(result.payment.walk_in_fee ?? result.payment.fee)}
                       </p>
                       {result.can_register ? (
                         <RecordPaymentForm
                           defaultAmount={result.payment.walk_in_fee ?? result.payment.fee}
-                          submitLabel="Register walk-in, pay & check in"
+                          submitLabel="Register walk-in, record donation & check in"
                           busy={busy}
                           onSubmit={(amount, method) => payAndCheckIn(result.member.member_id, amount, method, true)}
                         />
@@ -320,18 +320,18 @@ export default function EventCheckInPage() {
                     <div className="space-y-2">
                       <p className="flex items-center gap-1 text-sm font-semibold text-danger-700">
                         <CircleDollarSign className="h-4 w-4" />
-                        Balance due {money(result.payment.balance)}
-                        {result.payment.paid > 0 ? ` (paid ${money(result.payment.paid)} of ${money(result.payment.fee)})` : ''}
+                        Donation pending {money(result.payment.balance)}
+                        {result.payment.paid > 0 ? ` (donated ${money(result.payment.paid)} of ${money(result.payment.fee)})` : ''}
                       </p>
                       {result.can_record_payment ? (
                         <RecordPaymentForm
                           defaultAmount={result.payment.balance}
-                          submitLabel="Record payment & check in"
+                          submitLabel="Record donation & check in"
                           busy={busy}
                           onSubmit={(amount, method) => payAndCheckIn(result.member.member_id, amount, method)}
                         />
                       ) : (
-                        <p className="text-sm text-ink">Do not give the kit. Send the member to the payment table.</p>
+                        <p className="text-sm text-ink">Do not give the kit. Send the member to the donation table.</p>
                       )}
                     </div>
                   )}
@@ -340,8 +340,8 @@ export default function EventCheckInPage() {
                       {result.first_check_in
                         ? 'First check-in for this event — give the guest kit.'
                         : `Checked in for today. Kit already given ${when(result.kit_given_at)}.`}
-                      {result.payment.status === 'paid' ? ` Paid ${money(result.payment.paid)}.` : ''}
-                      {result.payment.status === 'waived' ? ' Fee waived.' : ''}
+                      {result.payment.status === 'paid' ? ` Donated ${money(result.payment.paid)}.` : ''}
+                      {result.payment.status === 'waived' ? ' Donation waived.' : ''}
                     </p>
                   )}
                   {result.result === 'guest_already_checked_in' && (
@@ -354,18 +354,18 @@ export default function EventCheckInPage() {
                     <div className="space-y-2">
                       <p className="flex items-center gap-1 text-sm font-semibold text-danger-700">
                         <CircleDollarSign className="h-4 w-4" />
-                        Balance due {money(result.payment.balance)}
-                        {result.payment.paid > 0 ? ` (paid ${money(result.payment.paid)} of ${money(result.payment.fee)})` : ''}
+                        Donation pending {money(result.payment.balance)}
+                        {result.payment.paid > 0 ? ` (donated ${money(result.payment.paid)} of ${money(result.payment.fee)})` : ''}
                       </p>
                       {result.can_record_payment ? (
                         <RecordPaymentForm
                           defaultAmount={result.payment.balance}
-                          submitLabel="Record payment & check in"
+                          submitLabel="Record donation & check in"
                           busy={busy}
                           onSubmit={(amount, method) => payGuestAndCheckIn(result.guest.guest_id, amount, method)}
                         />
                       ) : (
-                        <p className="text-sm text-ink">Do not give the kit. Send the guest to the payment table.</p>
+                        <p className="text-sm text-ink">Do not give the kit. Send the guest to the donation table.</p>
                       )}
                     </div>
                   )}

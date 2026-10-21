@@ -1,4 +1,5 @@
 // Guests (non-members) on the Registrations & payments page (Pass 9.15, Claude 2026-10-16).
+// Pass 9.32: donation wording; child (under 18) guests get the child donation.
 // Organizers and the Treasurer / Finance Coordinator: guest price, add guests (with or without a host member,
 // reserved or walk-in), record payments, waive, void, cancel, check in from the list, show the guest pass.
 import { useState } from 'react';
@@ -99,23 +100,24 @@ export function EventGuestsCard({
         }}
       >
         <label className="block w-36">
-          <span className="mb-1 block text-xs font-medium text-ink-secondary">Guest price ($)</span>
+          <span className="mb-1 block text-xs font-medium text-ink-secondary">Guest donation ($)</span>
           <Input
             type="number"
             inputMode="decimal"
             min="0"
             step="0.01"
-            placeholder="= Member price"
+            placeholder="= Member amount"
             value={feeValue}
             onChange={(e) => setFee(e.target.value)}
           />
         </label>
         <Button type="submit" size="sm" variant="outline" disabled={busy || fee === null}>
-          Save guest price
+          Save guest donation
         </Button>
       </form>
       <p className="text-xs text-ink-muted">
-        Leave empty to charge guests the member price (early-bird / regular, walk-in at the door). Enter 0 for free.
+        Leave empty to ask guests for the member donation (early-bird / regular, walk-in at the door). Enter 0 for
+        free. Guests marked Child (under 18) get the child donation when the event has one.
       </p>
 
       <div className="rounded-card border border-line p-3">
@@ -174,7 +176,7 @@ export function EventGuestsCard({
                   </span>
                   <Badge variant={VARIANT[p.status]}>
                     {PAYMENT_STATUS_LABELS[p.status]}
-                    {due ? ` · ${money(p.balance)} due` : ''}
+                    {due ? ` · ${money(p.balance)} pending` : ''}
                   </Badge>
                 </button>
                 {g.checked_in_today && <p className="text-xs font-medium text-success-700">Checked in today</p>}
@@ -192,7 +194,7 @@ export function EventGuestsCard({
                             className="text-danger-700 hover:underline disabled:opacity-50"
                             disabled={busy}
                             onClick={() => {
-                              if (window.confirm(`Void the ${money(pay.amount)} payment? Use this only for a payment entered by mistake.`)) {
+                              if (window.confirm(`Void the ${money(pay.amount)} donation? Use this only for a donation entered by mistake.`)) {
                                 run(() => voidEventGuestPayment(orgId, pay.payment_id));
                               }
                             }}
@@ -209,7 +211,7 @@ export function EventGuestsCard({
                     {due && (
                       <RecordPaymentForm
                         defaultAmount={p.balance}
-                        submitLabel="Record payment"
+                        submitLabel="Record donation"
                         busy={busy}
                         onSubmit={(amount, method) => run(() => recordEventGuestPayment(orgId, g.guest_id, amount, method))}
                       />
@@ -230,7 +232,7 @@ export function EventGuestsCard({
                           disabled={busy}
                           onClick={() => run(() => setEventGuestWaiver(orgId, g.guest_id, p.status !== 'waived'))}
                         >
-                          {p.status === 'waived' ? 'Remove waiver' : 'Waive fee'}
+                          {p.status === 'waived' ? 'Remove waiver' : 'Waive donation'}
                         </Button>
                       )}
                       {p.paid === 0 && !g.checked_in_ever && (

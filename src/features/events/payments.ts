@@ -1,11 +1,12 @@
 // Event fees, registrations and payments (Pass 9.13 / 9.14, written by Claude 2026-10-16).
+// Pass 9.32 (Ron 2026-10-21): shown to people as donations; child (under 18) rate.
 // Organizers and the Treasurer / Finance Coordinator set prices (early-bird, regular, walk-in), register members
 // and record Paid / Partial / Waived. Members can register themselves in My Events when registration is open.
 import { useQuery, type QueryClient } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase/client';
 
 export type PaymentStatus = 'free' | 'waived' | 'paid' | 'partial' | 'unpaid' | 'not_registered';
-export type PriceTier = 'free' | 'early_bird' | 'regular' | 'walk_in';
+export type PriceTier = 'free' | 'early_bird' | 'regular' | 'walk_in' | 'child';
 export interface PaymentState {
   status: PaymentStatus;
   /** amount due for this member (registration price), or today's price when not registered */
@@ -24,6 +25,7 @@ export const PRICE_TIER_LABELS: Record<PriceTier, string> = {
   early_bird: 'Early-bird',
   regular: 'Regular',
   walk_in: 'Walk-in',
+  child: 'Child (under 18)',
 };
 
 export interface EventPricing {
@@ -32,6 +34,8 @@ export interface EventPricing {
   early_bird_until: string | null;
   walk_in_fee: number | null;
   registration_open: boolean;
+  /** Pass 9.32: fixed child (under 18) donation; null = no child rate */
+  child_fee: number | null;
 }
 
 export const PAYMENT_METHODS = [
@@ -47,9 +51,9 @@ export type PaymentMethod = (typeof PAYMENT_METHODS)[number]['value'];
 export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
   free: 'Free',
   waived: 'Waived',
-  paid: 'Paid',
+  paid: 'Donated',
   partial: 'Partial',
-  unpaid: 'Not paid',
+  unpaid: 'Not yet donated',
   not_registered: 'Not registered',
 };
 
@@ -204,6 +208,7 @@ export async function setEventPricing(orgId: string, eventId: string, p: EventPr
     p_early_bird_until: p.early_bird_until ?? undefined,
     p_walk_in_fee: p.walk_in_fee ?? undefined,
     p_registration_open: p.registration_open,
+    p_child_fee: p.child_fee ?? undefined,
   });
   if (error) throw error;
 }
@@ -279,6 +284,7 @@ export interface EventGuest {
   host_member_id: string | null;
   host_name: string | null;
   guest_code: string;
+  is_child?: boolean;
   registered_at: string;
   payment: GuestPaymentState;
   checked_in_today: boolean;
@@ -287,6 +293,7 @@ export interface EventGuest {
 }
 export interface EventGuestsResponse {
   guest_fee: number | null;
+  child_fee?: number | null;
   guest_price_now: { tier: GuestPriceTier; amount: number };
   guest_walk_in_price: { tier: GuestPriceTier; amount: number };
   can_manage: boolean;
@@ -297,6 +304,8 @@ export interface GuestFields {
   lastName: string;
   phone: string;
   email: string;
+  /** Pass 9.32: child (under 18) gets the event's child rate */
+  isChild?: boolean;
 }
 
 export const GUEST_PASS_PREFIX = 'MFCNYG1:';
@@ -344,6 +353,7 @@ export async function addEventGuest(
     p_as_staff: opts.asStaff,
     p_host_member_id: opts.hostMemberId ?? undefined,
     p_walk_in: !!opts.walkIn,
+    p_is_child: !!f.isChild,
   });
   if (error) throw error;
   return data as unknown as EventGuest;

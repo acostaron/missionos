@@ -3,7 +3,7 @@ import { useState, type ReactNode } from 'react';
 import { Button, Input } from '../../../components/ui';
 import type { GuestFields } from '../payments';
 
-const EMPTY: GuestFields = { firstName: '', lastName: '', phone: '', email: '' };
+const EMPTY: GuestFields = { firstName: '', lastName: '', phone: '', email: '', isChild: false };
 
 export function GuestForm({
   submitLabel,
@@ -47,6 +47,11 @@ export function GuestForm({
           <Input type="email" value={f.email} maxLength={120} autoComplete="off" onChange={(e) => set({ email: e.target.value })} />
         </label>
       </div>
+      {/* Pass 9.32: children get the event's child donation */}
+      <label className="flex items-center gap-2 text-sm text-ink">
+        <input type="checkbox" checked={!!f.isChild} onChange={(e) => set({ isChild: e.target.checked })} />
+        Child (under 18)
+      </label>
       {extra}
       <div className="flex justify-end">
         <Button type="submit" size="sm" disabled={!ok || busy} loading={busy}>
