@@ -15,6 +15,7 @@ import { getTodayNyDate, addDaysToDateStr } from '../lib/ny-time';
 import { MemberAvatar } from '../features/self-service/components/MemberAvatar';
 import { formatMeetingSchedule } from '../features/self-service/formatters';
 import { MyFormationCard } from '../features/formation/components/MyFormationCard';
+import { ReminderPreferencesCard } from '../features/reminders/ReminderPreferencesCard';
 import { Alert, Badge, Card, EmptyState, PageHeader, Skeleton } from '../components/ui';
 
 function formatDate(dateStr: string | null | undefined): string | null {
@@ -657,6 +658,9 @@ export default function MyProfilePage() {
               )}
             </dl>
           </Card>
+
+          {/* Pass 9.33: email reminders on / off */}
+          <ReminderPreferencesCard organizationId={orgId} enabled={canSelfService} />
 
           {/* Section E: My Formation */}
           <MyFormationCard organizationId={orgId} enabled={canSelfService} />

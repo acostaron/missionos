@@ -3,3 +3,6 @@ verify_jwt = false
 
 [functions.sync-topic-library]
 verify_jwt = false
+
+[functions.send-reminders]
+verify_jwt = false

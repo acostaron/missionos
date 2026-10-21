@@ -8967,6 +8967,10 @@ export type Database = {
         Returns: Json
       }
       get_my_member_card: { Args: { p_organization_id: string }; Returns: Json }
+      get_my_reminder_preferences: {
+        Args: { p_organization_id: string }
+        Returns: Json
+      }
       get_my_member_context: {
         Args: { p_organization_id: string }
         Returns: Json
@@ -9819,6 +9823,10 @@ export type Database = {
           p_organization_id: string
           p_report_id: string
         }
+        Returns: Json
+      }
+      set_my_reminder_preferences: {
+        Args: { p_email_enabled: boolean; p_organization_id: string }
         Returns: Json
       }
       set_payment_details: {
