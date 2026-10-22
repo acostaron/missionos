@@ -6,3 +6,6 @@ verify_jwt = false
 
 [functions.send-reminders]
 verify_jwt = false
+
+[functions.sync-official-documents]
+verify_jwt = false

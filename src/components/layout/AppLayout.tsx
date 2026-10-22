@@ -7,6 +7,7 @@ import { Permissions } from '../../types/permissions';
 import { useMyEventAccess } from '../../features/events/queries';
 import { NAV_ITEMS, type NavItem } from './navigation';
 import { recordAppOpen } from '../../features/activity/api';
+import { useOfficialDocumentsAccess } from '../../features/official-documents/api';
 import AppSidebar from './AppSidebar';
 import AppHeader from './AppHeader';
 import MobileNavigation from './MobileNavigation';
@@ -36,6 +37,7 @@ export default function AppLayout() {
     activeOrganization?.id ?? null,
     !!activeOrganization?.id
   );
+  const { data: docsAccess } = useOfficialDocumentsAccess(activeOrganization?.id ?? null);
   const [collapsed, setCollapsed] = useState<boolean>(readCollapsed);
 
   // Pass 9.35: record "opened MissionOS" for the admin Activity page (at most every 15 minutes)
@@ -66,7 +68,8 @@ export default function AppLayout() {
       const tabs = item.tabs.filter(
         (t) =>
           allowed(t.permission) &&
-          (!t.role || (!isPermLoading && roles.some((r) => r.role_code === t.role && r.assignment_status === 'active'))),
+          (!t.role || (!isPermLoading && roles.some((r) => r.role_code === t.role && r.assignment_status === 'active'))) &&
+          (!t.flag || (t.flag === 'official_documents' && docsAccess?.can_view === true)),
       );
       return tabs.length > 0 ? [{ ...item, tabs, to: tabs[0].to }] : [];
     }

@@ -8245,6 +8245,7 @@ export type Database = {
         }
         Returns: Json
       }
+      apply_official_documents_listing: { Args: { p_items: Json; p_organization_id: string }; Returns: Json }
       appoint_area_coordinator: {
         Args: {
           p_effective_from?: string
@@ -8415,6 +8416,7 @@ export type Database = {
         Args: { p_object_name: string }
         Returns: boolean
       }
+      can_read_official_document: { Args: { p_name: string }; Returns: boolean }
       can_write_member_photo: {
         Args: { p_object_name: string }
         Returns: boolean
@@ -8990,6 +8992,8 @@ export type Database = {
         Returns: Json
       }
       get_my_service: { Args: { p_organization_id: string }; Returns: Json }
+      get_official_documents_access: { Args: { p_organization_id: string }; Returns: Json }
+      get_official_documents_folder: { Args: { p_organization_id: string }; Returns: string }
       get_pastoral_household_roster: {
         Args: { p_household_id: string; p_organization_id: string }
         Returns: Json
@@ -9150,6 +9154,7 @@ export type Database = {
         Args: { p_organization_id: string }
         Returns: Json
       }
+      list_official_documents: { Args: { p_organization_id: string }; Returns: Json }
       list_program_runs: {
         Args: { p_include_closed?: boolean; p_organization_id: string }
         Returns: Json
@@ -9165,6 +9170,17 @@ export type Database = {
       lookup_auth_user_for_invitation: {
         Args: { p_email: string; p_organization_id: string }
         Returns: Json
+      }
+      mark_official_document_copied: {
+        Args: {
+          p_copied_md5: string
+          p_copied_modified_at: string
+          p_drive_file_id: string
+          p_file_size: number
+          p_organization_id: string
+          p_storage_path: string
+        }
+        Returns: string
       }
       member_assign_fraternal_topic: {
         Args: {
@@ -9275,6 +9291,7 @@ export type Database = {
         }
         Returns: Json
       }
+      official_documents_to_copy: { Args: { p_organization_id: string }; Returns: Json }
       place_members_bulk: {
         Args: {
           p_effective_from: string
@@ -9398,6 +9415,21 @@ export type Database = {
           p_talk_id: string
         }
         Returns: Json
+      }
+      record_official_documents_sync_run: {
+        Args: {
+          p_error: string
+          p_failed: number
+          p_listed: number
+          p_new: number
+          p_organization_id: string
+          p_pending: number
+          p_removed: number
+          p_skipped: number
+          p_trigger_source: string
+          p_updated: number
+        }
+        Returns: string
       }
       record_topic_library_sync_run: {
         Args: {
@@ -9746,6 +9778,10 @@ export type Database = {
         Args: { p_organization_id: string; p_wedding_date: string }
         Returns: Json
       }
+      set_official_documents_folder: {
+        Args: { p_drive_folder_id: string; p_organization_id: string }
+        Returns: Json
+      }
       set_program_participant_attendance: {
         Args: {
           p_event_id: string
@@ -9863,6 +9899,7 @@ export type Database = {
         }
         Returns: Json
       }
+      verify_docs_sync_secret: { Args: { p_secret: string }; Returns: boolean }
       withdraw_my_payment_report: {
         Args: { p_organization_id: string; p_report_id: string }
         Returns: Json

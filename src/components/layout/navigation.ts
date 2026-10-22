@@ -10,6 +10,8 @@ export type NavTab = {
   permission?: PermissionCode;
   /** Pass 9.35: only for people holding this role (e.g. organization_administrator). */
   role?: string;
+  /** Pass 9.36: shown only when the server says so (e.g. 'official_documents'). */
+  flag?: 'official_documents';
 };
 
 export type NavItem = {
@@ -86,8 +88,10 @@ export const NAV_ITEMS: NavItem[] = [
     tabs: [
       { label: 'Household Topics', to: '/app/library' },
       { label: 'Formation Curriculum', to: '/app/formation', permission: Permissions.FormationCatalogView },
+      // Pass 9.36 (Ron): official MFC documents from the shared Drive — Unit Servant Leaders and up
+      { label: 'Official Documents', to: '/app/official-documents', flag: 'official_documents' },
     ],
-    matchPaths: ['/app/library', '/app/formation'],
+    matchPaths: ['/app/library', '/app/formation', '/app/official-documents'],
   },
 ];
 

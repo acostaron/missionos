@@ -35,6 +35,7 @@ import {
   MyEventsPage,
   LibraryPage,
   LibraryTopicPage,
+  OfficialDocumentsPage,
 } from './lazy-pages';
 
 
@@ -321,6 +322,15 @@ export const router = createBrowserRouter([
             element: (
               <Suspense fallback={<PageLoadingFallback />}>
                 <LibraryPage />
+              </Suspense>
+            ),
+          },
+          {
+            // Pass 9.36: Library > Official Documents (Unit Servant Leaders and up; the server checks)
+            path: 'official-documents',
+            element: (
+              <Suspense fallback={<PageLoadingFallback />}>
+                <OfficialDocumentsPage />
               </Suspense>
             ),
           },
