@@ -8,6 +8,9 @@
 //   * Google access: a service account with read-only Drive scope. Its JSON key is the secret
 //     GOOGLE_SERVICE_ACCOUNT_JSON_B64 (base64), set with supabase/seeds/fixes/setup_google_drive_key.mjs.
 //     The folder (or the shared drive) must be shared with the service account's email as Viewer.
+//     Pass 9.36C (Ron 2026-10-21): the Workspace blocks sharing outside the organization, so the service account
+//     can act as one dedicated mfcny.net account (domain-wide delegation, drive.readonly only). That account's email
+//     is the secret GOOGLE_DRIVE_AS_USER; the folder is then shared with that account instead.
 //   * The folder id is set by an administrator in the app (public.set_official_documents_folder).
 //   * Category = name of the top-level subfolder; files directly in the folder are "General". Deeper folders are
 //     kept as folder_path. Shortcuts are followed.
@@ -20,7 +23,8 @@
 // Callers: an administrator (JWT, checked with public.get_official_documents_access), or the daily pg_cron job
 // (header x-sync-secret checked against Vault). verify_jwt is off for this function (config.toml).
 // Request body: { organization_id: uuid, action?: "sync" | "info" }
-//   "info" (administrators): returns the service account email to share the folder with.
+//   "info" (administrators): returns the email to share the folder with (the dedicated account, or the service
+//   account when GOOGLE_DRIVE_AS_USER is not set).
 // The response never contains file contents or secrets.
 // =============================================================================
 
@@ -116,7 +120,7 @@ export function readServiceAccount(b64: string | undefined): ServiceAccount | nu
   }
 }
 
-export async function googleAccessToken(sa: ServiceAccount): Promise<string> {
+export async function googleAccessToken(sa: ServiceAccount, asUser?: string | null): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
   const header = b64url(JSON.stringify({ alg: "RS256", typ: "JWT" }));
   const claims = b64url(JSON.stringify({
@@ -125,6 +129,7 @@ export async function googleAccessToken(sa: ServiceAccount): Promise<string> {
     aud: "https://oauth2.googleapis.com/token",
     iat: now,
     exp: now + 3600,
+    ...(asUser ? { sub: asUser } : {}),
   }));
   const key = await crypto.subtle.importKey(
     "pkcs8", pemToDer(sa.private_key), { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["sign"],
@@ -140,6 +145,14 @@ export async function googleAccessToken(sa: ServiceAccount): Promise<string> {
   });
   const body = await res.json().catch(() => ({}));
   if (!res.ok || typeof body?.access_token !== "string") {
+    if (asUser && body?.error === "unauthorized_client") {
+      throw new Error("Google has not allowed MissionOS to read Drive as the dedicated account yet " +
+        "(Admin console → Security → API controls → Domain-wide delegation: add the Client ID with the " +
+        "scope https://www.googleapis.com/auth/drive.readonly). It can take a few minutes to start working.");
+    }
+    if (asUser && body?.error === "invalid_grant") {
+      throw new Error(`Google did not accept the account ${asUser} (check the spelling, and that it is an active mfcny.net account).`);
+    }
     throw new Error(`Google sign-in for the service account failed (${res.status} ${body?.error ?? ""}).`);
   }
   return body.access_token;
@@ -301,8 +314,11 @@ if (import.meta.main) {
     }
 
     const sa = readServiceAccount(Deno.env.get("GOOGLE_SERVICE_ACCOUNT_JSON_B64"));
+    const asUserRaw = (Deno.env.get("GOOGLE_DRIVE_AS_USER") ?? "").trim();
+    const asUser = /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(asUserRaw) ? asUserRaw : null;
+    const shareWith = asUser ?? sa?.client_email ?? null;
     if (action === "info") {
-      return json({ service_account_email: sa?.client_email ?? null, key_set: sa !== null });
+      return json({ service_account_email: shareWith, acting_as_user: asUser !== null, key_set: sa !== null });
     }
 
     const record = async (r: { listed?: number; new_?: number; updated?: number; removed?: number; skipped?: number;
@@ -328,12 +344,12 @@ if (import.meta.main) {
     let token: string;
     let listed: { items: ListedItem[]; skipped: string[] };
     try {
-      token = await googleAccessToken(sa);
+      token = await googleAccessToken(sa, asUser);
       listed = await listFolder(token, String(folderId));
     } catch (e) {
       const m = (e as Error).message;
       const msg = m === "NOT_SHARED"
-        ? `MissionOS cannot see this folder. Share it (or the shared drive) with ${sa.client_email} as Viewer.`
+        ? `MissionOS cannot see this folder. Share it (or the shared drive) with ${shareWith} as Viewer.`
         : m === "NOT_A_FOLDER" ? "The link is not a Google Drive folder." : m;
       await record({ error: msg });
       return json({ error: msg }, 502);

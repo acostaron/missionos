@@ -124,7 +124,7 @@ async function invokeSync<T>(body: Record<string, unknown>): Promise<T> {
 
 /** Administrators: the service account email to share the Drive folder with. */
 export function useOfficialDocumentsServiceAccount(orgId: string | null, enabled: boolean) {
-  return useQuery<{ service_account_email: string | null; key_set: boolean }>({
+  return useQuery<{ service_account_email: string | null; acting_as_user?: boolean; key_set: boolean }>({
     queryKey: keys.info(orgId),
     queryFn: () => invokeSync({ organization_id: orgId, action: 'info' }),
     enabled: !!orgId && enabled,
