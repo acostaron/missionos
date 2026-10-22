@@ -30,6 +30,11 @@
 //     'push') and each device's result (record_push_results; 404 / 410 = device gone, switched off).
 //   Secrets: VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY (set by Ron's local script, never in the repo), VAPID_SUBJECT
 //   (optional, default https://app.mfcny.net). Without them, push is skipped and email still runs.
+//
+// Pass 9.35 (Claude, 2026-10-21): opens / clicks for the admin Activity page.
+//   * GET ?t=open&d=<delivery_id>  — email tracking image (1x1 GIF) / push shown on the device;
+//   * GET ?t=click&d=<delivery_id> — email "Open My Events" button / push tapped; email clicks redirect to My Events.
+//   Recorded with public.track_reminder_event (first time only). The delivery id is the only identifier used.
 // =============================================================================
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
@@ -102,12 +107,14 @@ function money(n: number): string {
   return n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 }
 
-function buildEmail(c: Claimed, appUrl: string, unsubscribeUrl: string) {
+function buildEmail(c: Claimed, appUrl: string, unsubscribeUrl: string, trackBase: string) {
   const it = c.item;
   const label = c.item_kind === "meeting" ? `${it.title}${it.group_name ? ` — ${it.group_name}` : ""}` : it.title;
   const when = whenText(it);
   const soon = c.days_before === 1 ? "tomorrow" : "in 3 days";
   const myEvents = `${appUrl}/app/my-events`;
+  const clickUrl = `${trackBase}?t=click&d=${c.delivery_id}`;
+  const openUrl = `${trackBase}?t=open&d=${c.delivery_id}`;
   const mapUrl = it.location_text
     ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(it.location_text)}`
     : null;
@@ -154,16 +161,17 @@ ${when ? `<tr><td style="padding:2px 12px 2px 0;color:#6b7280">When</td><td styl
 ${it.location_text ? `<tr><td style="padding:2px 12px 2px 0;color:#6b7280">Where</td><td style="padding:2px 0">${esc(it.location_text)}${mapUrl ? ` &middot; <a href="${esc(mapUrl)}">Map</a>` : ""}</td></tr>` : ""}
 ${it.donation_pending && it.donation_pending > 0 ? `<tr><td style="padding:2px 12px 2px 0;color:#6b7280">Donation</td><td style="padding:2px 0">Suggested donation pending: <strong>${esc(money(Number(it.donation_pending)))}</strong> — Zelle, PayPal, check or cash (see My Events)</td></tr>` : ""}
 </table>
-<p><a href="${esc(myEvents)}" style="display:inline-block;background:#1e3a8a;color:#ffffff;text-decoration:none;padding:10px 16px;border-radius:6px">${esc(action)}</a></p>
+<p><a href="${esc(clickUrl)}" style="display:inline-block;background:#1e3a8a;color:#ffffff;text-decoration:none;padding:10px 16px;border-radius:6px">${esc(action)}</a></p>
 <p>God bless,<br>MFC New York</p>
 <p style="font-size:12px;color:#6b7280;margin-top:24px">You receive this because you are a member of MFC New York.
 <a href="${esc(unsubscribeUrl)}" style="color:#6b7280">Stop these reminders</a> (you can turn them back on in My Profile).</p>
+<img src="${esc(openUrl)}" width="1" height="1" alt="" style="display:block;border:0;width:1px;height:1px">
 </body></html>`;
 
   return { subject, text, html };
 }
 
-function buildPush(c: PushClaimed) {
+function buildPush(c: PushClaimed, trackBase: string) {
   const it = c.item;
   const label = c.item_kind === "meeting" ? `${it.title}${it.group_name ? ` — ${it.group_name}` : ""}` : it.title;
   const soon = c.days_before === 1 ? "Tomorrow" : "In 3 days";
@@ -177,9 +185,13 @@ function buildPush(c: PushClaimed) {
     title: title.slice(0, 120),
     body: parts.join("\n").slice(0, 300),
     url: "/app/my-events",
+    track: `${trackBase}?d=${c.delivery_id}`,
     tag: `${c.item_kind}-${c.item_id}-${c.days_before}`,
   };
 }
+
+// 1x1 transparent GIF
+const GIF = Uint8Array.from(atob("R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"), (ch) => ch.charCodeAt(0));
 
 const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, OPTIONS" };
 
@@ -198,6 +210,22 @@ if (import.meta.main) {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
     const admin = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
     const url = new URL(req.url);
+
+    // 0a. Opens / clicks (Pass 9.35)
+    const trackEvent = url.searchParams.get("t");
+    if (trackEvent === "open" || trackEvent === "click") {
+      const d = url.searchParams.get("d") ?? "";
+      if (/^[0-9a-f-]{36}$/i.test(d)) {
+        await admin.rpc("track_reminder_event", { p_delivery_id: d, p_event: trackEvent });
+      }
+      if (trackEvent === "click" && url.searchParams.get("src") !== "push") {
+        const appUrl0 = (Deno.env.get("APP_URL") ?? "https://app.mfcny.net").replace(/\/+$/, "");
+        return new Response(null, { status: 302, headers: { Location: `${appUrl0}/app/my-events` } });
+      }
+      return new Response(GIF, {
+        headers: { ...CORS, "Content-Type": "image/gif", "Cache-Control": "no-store, max-age=0" },
+      });
+    }
 
     // 0. VAPID public key for the app
     if (url.searchParams.has("push_public_key")) {
@@ -251,7 +279,7 @@ if (import.meta.main) {
 
       const payload = claimed.map((c) => {
         const unsubscribeUrl = `${supabaseUrl}/functions/v1/send-reminders?unsubscribe=${c.unsubscribe_token}`;
-        const m = buildEmail(c, appUrl, unsubscribeUrl);
+        const m = buildEmail(c, appUrl, unsubscribeUrl, `${supabaseUrl}/functions/v1/send-reminders`);
         return {
           from,
           to: [c.email],
@@ -314,7 +342,7 @@ if (import.meta.main) {
         const deliveryResults: { delivery_id: string; status: "sent" | "failed"; error?: string }[] = [];
         const deviceResults: { subscription_id: string; ok: boolean; gone: boolean }[] = [];
         for (const c of claimed) {
-          const payload = JSON.stringify(buildPush(c));
+          const payload = JSON.stringify(buildPush(c, `${supabaseUrl}/functions/v1/send-reminders`));
           const outcomes = await Promise.allSettled(c.subscriptions.map((s) =>
             webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, payload,
                                      { TTL: 86400, urgency: "normal" })));

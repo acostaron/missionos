@@ -28,6 +28,7 @@ import {
   EventPaymentsPage,
   ProgramPage,
   MemberLoginsPage,
+  ActivityPage,
   ClaimAccountPage,
   EditMyProfilePage,
   MyCardPage,
@@ -139,6 +140,15 @@ export const router = createBrowserRouter([
             element: (
               <Suspense fallback={<PageLoadingFallback />}>
                 <MemberLoginsPage />
+              </Suspense>
+            ),
+          },
+          {
+            // Pass 9.35: admin Activity page
+            path: 'activity',
+            element: (
+              <Suspense fallback={<PageLoadingFallback />}>
+                <ActivityPage />
               </Suspense>
             ),
           },

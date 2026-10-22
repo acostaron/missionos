@@ -8,6 +8,8 @@ export type NavTab = {
   label: string;
   to: string;
   permission?: PermissionCode;
+  /** Pass 9.35: only for people holding this role (e.g. organization_administrator). */
+  role?: string;
 };
 
 export type NavItem = {
@@ -47,8 +49,10 @@ export const NAV_ITEMS: NavItem[] = [
     tabs: [
       { label: 'Directory', to: '/app/members', permission: Permissions.MembersRecordsView },
       { label: 'Sections', to: '/app/sections', permission: Permissions.MembersRecordsView },
+      // Pass 9.35 (Ron): admin Activity page (the server allows administrators only)
+      { label: 'Activity', to: '/app/activity', role: 'organization_administrator' },
     ],
-    matchPaths: ['/app/members', '/app/sections', '/app/families'],
+    matchPaths: ['/app/members', '/app/sections', '/app/families', '/app/activity'],
   },
   {
     id: 'nav-calendar',

@@ -8958,6 +8958,10 @@ export type Database = {
           status_id: string
         }[]
       }
+      get_activity_report: {
+        Args: { p_day?: string; p_organization_id: string }
+        Returns: Json
+      }
       get_my_event_access: {
         Args: { p_organization_id: string }
         Returns: Json
@@ -9305,6 +9309,7 @@ export type Database = {
         }
         Returns: string
       }
+      record_my_app_open: { Args: { p_organization_id: string }; Returns: undefined }
       record_consent: {
         Args: {
           p_actor_profile_id?: string

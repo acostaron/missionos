@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/use-auth';
 import { usePermissions } from '../../hooks/use-permissions';
@@ -6,6 +6,7 @@ import { useOrganizationContext } from '../../hooks/use-organization-context';
 import { Permissions } from '../../types/permissions';
 import { useMyEventAccess } from '../../features/events/queries';
 import { NAV_ITEMS, type NavItem } from './navigation';
+import { recordAppOpen } from '../../features/activity/api';
 import AppSidebar from './AppSidebar';
 import AppHeader from './AppHeader';
 import MobileNavigation from './MobileNavigation';
@@ -29,13 +30,25 @@ function readCollapsed(): boolean {
  */
 export default function AppLayout() {
   const { user, signOut } = useAuth();
-  const { hasPermission, isLoading: isPermLoading } = usePermissions();
+  const { hasPermission, roles, isLoading: isPermLoading } = usePermissions();
   const { activeOrganization } = useOrganizationContext();
   const { data: eventAccess } = useMyEventAccess(
     activeOrganization?.id ?? null,
     !!activeOrganization?.id
   );
   const [collapsed, setCollapsed] = useState<boolean>(readCollapsed);
+
+  // Pass 9.35: record "opened MissionOS" for the admin Activity page (at most every 15 minutes)
+  const orgIdForActivity = activeOrganization?.id ?? null;
+  useEffect(() => {
+    if (!orgIdForActivity) return;
+    void recordAppOpen(orgIdForActivity);
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') void recordAppOpen(orgIdForActivity);
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [orgIdForActivity]);
 
   const { pathname } = useLocation();
   const allowed = (permission?: Parameters<typeof hasPermission>[0]) =>
@@ -50,7 +63,11 @@ export default function AppLayout() {
       return ok ? [item] : [];
     }
     if (item.tabs) {
-      const tabs = item.tabs.filter((t) => allowed(t.permission));
+      const tabs = item.tabs.filter(
+        (t) =>
+          allowed(t.permission) &&
+          (!t.role || (!isPermLoading && roles.some((r) => r.role_code === t.role && r.assignment_status === 'active'))),
+      );
       return tabs.length > 0 ? [{ ...item, tabs, to: tabs[0].to }] : [];
     }
     return allowed(item.permission) ? [item] : [];
