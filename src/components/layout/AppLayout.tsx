@@ -123,7 +123,14 @@ export default function AppLayout() {
                       }`
                     }
                   >
-                    {t.label}
+                    {t.shortLabel ? (
+                      <>
+                        <span className="sm:hidden">{t.shortLabel}</span>
+                        <span className="hidden sm:inline">{t.label}</span>
+                      </>
+                    ) : (
+                      t.label
+                    )}
                   </NavLink>
                 ))}
               </nav>

@@ -12,6 +12,8 @@ export type NavTab = {
   role?: string;
   /** Pass 9.36: shown only when the server says so (e.g. 'official_documents'). */
   flag?: 'official_documents';
+  /** Pass 9.36B: shorter label on phones, so the tabs fit the screen. */
+  shortLabel?: string;
 };
 
 export type NavItem = {
@@ -86,10 +88,10 @@ export const NAV_ITEMS: NavItem[] = [
     to: '/app/library',
     icon: Library,
     tabs: [
-      { label: 'Household Topics', to: '/app/library' },
-      { label: 'Formation Curriculum', to: '/app/formation', permission: Permissions.FormationCatalogView },
+      { label: 'Household Topics', shortLabel: 'Topics', to: '/app/library' },
+      { label: 'Formation Curriculum', shortLabel: 'Formation', to: '/app/formation', permission: Permissions.FormationCatalogView },
       // Pass 9.36 (Ron): official MFC documents from the shared Drive — Unit Servant Leaders and up
-      { label: 'Official Documents', to: '/app/official-documents', flag: 'official_documents' },
+      { label: 'Official Documents', shortLabel: 'Documents', to: '/app/official-documents', flag: 'official_documents' },
     ],
     matchPaths: ['/app/library', '/app/formation', '/app/official-documents'],
   },
