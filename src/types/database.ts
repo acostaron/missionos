@@ -8770,6 +8770,7 @@ export type Database = {
         }
         Returns: Json
       }
+      get_check_in_settings: { Args: { p_organization_id: string }; Returns: Json }
       get_current_authorization_context: {
         Args: { p_organization_id: string }
         Returns: Json
@@ -9646,6 +9647,10 @@ export type Database = {
           p_offset?: number
           p_organization_id: string
         }
+        Returns: Json
+      }
+      set_accept_legacy_id_cards: {
+        Args: { p_accept: boolean; p_organization_id: string }
         Returns: Json
       }
       set_event_attendance: {

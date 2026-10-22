@@ -2,6 +2,7 @@
 // Scan the member's QR (My Card on the phone, or the ID card) with the camera or a handheld scanner.
 // A member checks in once per event day; a second scan shows a warning. First check-in = kit and T-shirt given.
 // Pass 9.15: guests (non-members) check in with their guest pass (MFCNYG1:<code>) or by name from the guest list.
+// Pass 9.37: the QR on the old MFCNY ID cards is also accepted until administrators switch it off.
 import { useCallback, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -14,8 +15,11 @@ import {
   GUEST_INVALID_REASONS,
   INVALID_REASONS,
   checkInKeys,
+  isLegacyIdCard,
   scanCheckIn,
+  useCheckInSettings,
   useCheckInSummary,
+  useSetAcceptLegacyIdCards,
   type ScanResult,
 } from '../features/events/check-in';
 import { MemberAvatar } from '../features/self-service/components/MemberAvatar';
@@ -72,6 +76,9 @@ export default function EventCheckInPage() {
   const orgId = organization?.id ?? null;
   const { data: event, isLoading } = useEvent(orgId, eventId ?? null);
   const { data: summary } = useCheckInSummary(orgId, eventId ?? null);
+  const { data: settings } = useCheckInSettings(orgId);
+  const setLegacy = useSetAcceptLegacyIdCards(orgId);
+  const [lastWasLegacy, setLastWasLegacy] = useState(false);
 
   const [result, setResult] = useState<ScanResult | null>(null);
   const [errorText, setErrorText] = useState<string | null>(null);
@@ -120,6 +127,7 @@ export default function EventCheckInPage() {
     async (payload: string) => {
       if (!orgId || !eventId || !payload.trim()) return;
       lastPayload.current = payload.trim();
+      setLastWasLegacy(isLegacyIdCard(payload));
       await process(() => scanCheckIn(orgId, eventId, payload.trim()));
     },
     [orgId, eventId, process],
@@ -129,6 +137,7 @@ export default function EventCheckInPage() {
   const checkInGuest = async (guestId: string) => {
     if (!orgId) return;
     lastPayload.current = '';
+    setLastWasLegacy(false);
     await process(async () => (await checkInEventGuest(orgId, guestId)) as unknown as ScanResult);
   };
 
@@ -219,6 +228,25 @@ export default function EventCheckInPage() {
 
           <QrScanner paused={busy || waitingForTap} onDetect={submit} />
 
+          {settings && (
+            <div className="flex flex-wrap items-center gap-2 text-xs text-ink-secondary">
+              <span>
+                Old MFCNY ID cards:{' '}
+                <span className="font-medium text-ink">{settings.accept_legacy_id_cards ? 'accepted' : 'not accepted'}</span>
+              </span>
+              {settings.can_manage && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  loading={setLegacy.isPending}
+                  onClick={() => setLegacy.mutate(!settings.accept_legacy_id_cards)}
+                >
+                  {settings.accept_legacy_id_cards ? 'Stop accepting old cards' : 'Accept old cards again'}
+                </Button>
+              )}
+            </div>
+          )}
+
           {errorText && (
             <Alert variant="danger" title="Could not check in">
               {errorText}
@@ -276,6 +304,9 @@ export default function EventCheckInPage() {
                         <p className="font-semibold text-ink">{result.member.display_name}</p>
                         {result.member.member_number && (
                           <p className="text-xs text-ink-secondary">{result.member.member_number}</p>
+                        )}
+                        {lastWasLegacy && (
+                          <Badge variant="neutral" className="mt-0.5">Old ID card</Badge>
                         )}
                       </div>
                     </div>

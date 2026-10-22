@@ -1,5 +1,5 @@
 // QR check-in at the event desk (Pass 9.12, written by Claude 2026-10-16).
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase/client';
 import type { EventGuest, GuestPaymentState, PaymentState } from './payments';
 
@@ -61,7 +61,48 @@ export const INVALID_REASONS: Record<string, string> = {
   tampered: 'This QR code could not be verified.',
   replaced_or_revoked: 'This card was replaced or cancelled. Ask the member to open My Card.',
   member_not_active: 'This member record is not active.',
+  // Pass 9.37: old MFCNY ID cards
+  legacy_card_off: 'Old MFCNY ID cards are no longer accepted. Ask the member to open My Card.',
+  legacy_unknown: 'This old ID card does not match any member in MissionOS.',
+  legacy_mismatch: 'The name or email on this old ID card does not match the member with that number.',
 };
+
+/** Pass 9.37: QR text of the old MFCNY ID cards ("NY10329,First,Last,email,Role"). */
+export function isLegacyIdCard(payload: string): boolean {
+  return /^NY[0-9]{5}\s*,/i.test(payload.trim());
+}
+
+export interface CheckInSettings {
+  accept_legacy_id_cards: boolean;
+  can_manage: boolean;
+}
+
+export function useCheckInSettings(orgId: string | null) {
+  return useQuery<CheckInSettings | null>({
+    queryKey: ['events', 'check-in-settings', orgId],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_check_in_settings', { p_organization_id: orgId! });
+      if (error) throw error;
+      return (data as unknown as CheckInSettings) ?? null;
+    },
+    enabled: !!orgId,
+  });
+}
+
+export function useSetAcceptLegacyIdCards(orgId: string | null) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (accept: boolean) => {
+      const { data, error } = await supabase.rpc('set_accept_legacy_id_cards', {
+        p_organization_id: orgId!,
+        p_accept: accept,
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['events', 'check-in-settings', orgId] }),
+  });
+}
 
 export const checkInKeys = {
   summary: (orgId: string | null, eventId: string | null) => ['events', 'check-in', orgId, eventId] as const,
