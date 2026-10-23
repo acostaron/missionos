@@ -90,12 +90,14 @@ export const NAV_ITEMS: NavItem[] = [
     to: '/app/library',
     icon: Library,
     tabs: [
-      { label: 'Household Topics', shortLabel: 'Topics', to: '/app/library' },
-      { label: 'Formation Curriculum', shortLabel: 'Formation', to: '/app/formation', permission: Permissions.FormationCatalogView },
+      { label: 'Topics', shortLabel: 'Topics', to: '/app/library' },
+      { label: 'Formation', shortLabel: 'Formation', to: '/app/formation', permission: Permissions.FormationCatalogView },
       // Pass 9.36 (Ron): official MFC documents from the shared Drive — Unit Servant Leaders and up
-      { label: 'Official Documents', shortLabel: 'Documents', to: '/app/official-documents', flag: 'official_documents' },
+      { label: 'Documents', shortLabel: 'Documents', to: '/app/official-documents', flag: 'official_documents' },
+      // Pass 9.44: FAQ and help files for all authenticated organization users
+      { label: 'Support', shortLabel: 'Support', to: '/app/support' },
     ],
-    matchPaths: ['/app/library', '/app/formation', '/app/official-documents'],
+    matchPaths: ['/app/library', '/app/formation', '/app/official-documents', '/app/support'],
   },
 ];
 

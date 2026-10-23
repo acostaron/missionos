@@ -44,3 +44,4 @@ export const MyEventsPage = lazy(() => import('../pages/MyEventsPage'));
 export const LibraryPage = lazy(() => import('../pages/LibraryPage'));
 export const LibraryTopicPage = lazy(() => import('../pages/LibraryTopicPage'));
 export const OfficialDocumentsPage = lazy(() => import('../pages/OfficialDocumentsPage'));
+export const SupportPage = lazy(() => import('../pages/SupportPage'));

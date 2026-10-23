@@ -37,7 +37,6 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const BUCKET = "official-documents";
 const DRIVE = "https://www.googleapis.com/drive/v3";
 const TIME_BUDGET_MS = 100_000;
 const MAX_BYTES = 45 * 1024 * 1024;
@@ -299,6 +298,9 @@ if (import.meta.main) {
     if (!/^[0-9a-f-]{36}$/i.test(orgId)) return json({ error: "organization_id is required." }, 400);
     const action = body?.action === "info" ? "info" : "sync";
 
+    const library = body?.library === "support" ? "support" : "official";
+    const bucket = library === "support" ? "support-documents" : "official-documents";
+
     // 1. Who is calling?
     let triggerSource: "scheduled" | "manual" = "manual";
     if (syncSecret) {
@@ -308,9 +310,16 @@ if (import.meta.main) {
       if (action === "info") return json({ error: "Not available." }, 400);
     } else {
       const caller = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: authHeader } } });
-      const { data: access, error } = await caller.rpc("get_official_documents_access", { p_organization_id: orgId });
+      const accessRpc = library === "support" ? "get_support_documents_access" : "get_official_documents_access";
+      const { data: access, error } = await caller.rpc(accessRpc, { p_organization_id: orgId });
       if (error) return json({ error: `Permission check failed: ${error.message}` }, 403);
-      if (access?.can_manage !== true) return json({ error: "Only administrators can sync the Official Documents." }, 403);
+      if (access?.can_manage !== true) {
+        return json({
+          error: library === "support"
+            ? "Only administrators can sync Support documents."
+            : "Only administrators can sync the Official Documents.",
+        }, 403);
+      }
     }
 
     const sa = readServiceAccount(Deno.env.get("GOOGLE_SERVICE_ACCOUNT_JSON_B64"));
@@ -323,12 +332,13 @@ if (import.meta.main) {
 
     const record = async (r: { listed?: number; new_?: number; updated?: number; removed?: number; skipped?: number;
                                 failed?: number; pending?: number; error?: string | null }) => {
-      const { error } = await admin.rpc("record_official_documents_sync_run", {
+      const recordRpc = library === "support" ? "record_support_documents_sync_run" : "record_official_documents_sync_run";
+      const { error } = await admin.rpc(recordRpc, {
         p_organization_id: orgId, p_trigger_source: triggerSource, p_listed: r.listed ?? 0, p_new: r.new_ ?? 0,
         p_updated: r.updated ?? 0, p_removed: r.removed ?? 0, p_skipped: r.skipped ?? 0, p_failed: r.failed ?? 0,
         p_pending: r.pending ?? 0, p_error: r.error ?? null,
       });
-      if (error) console.error("record_official_documents_sync_run failed:", error.message);
+      if (error) console.error(`${recordRpc} failed:`, error.message);
     };
 
     if (!sa) {
@@ -336,7 +346,8 @@ if (import.meta.main) {
       await record({ error: msg });
       return json({ error: msg }, 500);
     }
-    const { data: folderId, error: folderErr } = await admin.rpc("get_official_documents_folder", { p_organization_id: orgId });
+    const getFolderRpc = library === "support" ? "get_support_documents_folder" : "get_official_documents_folder";
+    const { data: folderId, error: folderErr } = await admin.rpc(getFolderRpc, { p_organization_id: orgId });
     if (folderErr) return json({ error: `Could not read the folder setting: ${folderErr.message}` }, 500);
     if (!folderId) return json({ error: "No Drive folder is set yet." }, 400);
 
@@ -361,7 +372,8 @@ if (import.meta.main) {
     }
 
     // 3. Save the listing; remove documents no longer in the folder
-    const { data: applied, error: applyErr } = await admin.rpc("apply_official_documents_listing", {
+    const applyRpc = library === "support" ? "apply_support_documents_listing" : "apply_official_documents_listing";
+    const { data: applied, error: applyErr } = await admin.rpc(applyRpc, {
       p_organization_id: orgId,
       p_items: listed.items.map(({ size: _s, ...rest }) => rest),
     });
@@ -371,12 +383,13 @@ if (import.meta.main) {
     }
     const removedPaths: string[] = (applied?.removed_paths ?? []).filter((p: unknown) => typeof p === "string");
     if (removedPaths.length > 0) {
-      const { error } = await admin.storage.from(BUCKET).remove(removedPaths);
+      const { error } = await admin.storage.from(bucket).remove(removedPaths);
       if (error) console.error("remove failed:", error.message);
     }
 
     // 4. Copy new / changed files
-    const { data: toCopy, error: copyErr } = await admin.rpc("official_documents_to_copy", { p_organization_id: orgId });
+    const toCopyRpc = library === "support" ? "support_documents_to_copy" : "official_documents_to_copy";
+    const { data: toCopy, error: copyErr } = await admin.rpc(toCopyRpc, { p_organization_id: orgId });
     if (copyErr) {
       await record({ listed: listed.items.length, error: copyErr.message });
       return json({ error: copyErr.message }, 500);
@@ -390,18 +403,19 @@ if (import.meta.main) {
       try {
         const bytes = await downloadFile(token, w.drive_file_id, w.source_mime_type);
         const path = `${orgId}/${w.drive_file_id}.${w.file_extension}`;
-        const { error: upErr } = await admin.storage.from(BUCKET).upload(path, bytes, {
+        const { error: upErr } = await admin.storage.from(bucket).upload(path, bytes, {
           contentType: w.stored_mime_type, upsert: true, cacheControl: "300",
         });
         if (upErr) throw new Error(`storage: ${upErr.message}`);
-        const { data: res, error: markErr } = await admin.rpc("mark_official_document_copied", {
+        const markRpc = library === "support" ? "mark_support_document_copied" : "mark_official_document_copied";
+        const { data: res, error: markErr } = await admin.rpc(markRpc, {
           p_organization_id: orgId, p_drive_file_id: w.drive_file_id, p_storage_path: path,
           p_file_size: bytes.length, p_copied_modified_at: w.drive_modified_at, p_copied_md5: w.drive_md5 ?? "",
         });
         if (markErr) throw new Error(markErr.message);
         if (res === "updated") updated++; else if (res === "copied") copied++;
         if (w.old_storage_path && w.old_storage_path !== path) {
-          await admin.storage.from(BUCKET).remove([w.old_storage_path]);
+          await admin.storage.from(bucket).remove([w.old_storage_path]);
         }
       } catch (e) {
         failed.push({ title: String(w.title ?? ""), error: (e as Error).message.slice(0, 200) });

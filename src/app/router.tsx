@@ -37,6 +37,7 @@ import {
   LibraryPage,
   LibraryTopicPage,
   OfficialDocumentsPage,
+  SupportPage,
 } from './lazy-pages';
 
 
@@ -341,6 +342,15 @@ export const router = createBrowserRouter([
             element: (
               <Suspense fallback={<PageLoadingFallback />}>
                 <OfficialDocumentsPage />
+              </Suspense>
+            ),
+          },
+          {
+            // Pass 9.44: Library > Support (FAQs and help files from Google Drive)
+            path: 'support',
+            element: (
+              <Suspense fallback={<PageLoadingFallback />}>
+                <SupportPage />
               </Suspense>
             ),
           },

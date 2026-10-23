@@ -8594,6 +8594,163 @@ export type Database = {
           },
         ]
       }
+      support_document_settings: {
+        Row: {
+          drive_folder_id: string | null
+          organization_id: string
+          updated_at: string
+          updated_by_profile_id: string | null
+        }
+        Insert: {
+          drive_folder_id?: string | null
+          organization_id: string
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Update: {
+          drive_folder_id?: string | null
+          organization_id?: string
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_document_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_document_settings_updated_by_profile_id_fkey"
+            columns: ["updated_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_document_sync_runs: {
+        Row: {
+          error_text: string | null
+          failed_count: number
+          id: string
+          listed_count: number
+          new_count: number
+          organization_id: string
+          pending_count: number
+          ran_at: string
+          removed_count: number
+          skipped_count: number
+          trigger_source: string
+          updated_count: number
+        }
+        Insert: {
+          error_text?: string | null
+          failed_count?: number
+          id?: string
+          listed_count?: number
+          new_count?: number
+          organization_id: string
+          pending_count?: number
+          ran_at?: string
+          removed_count?: number
+          skipped_count?: number
+          trigger_source: string
+          updated_count?: number
+        }
+        Update: {
+          error_text?: string | null
+          failed_count?: number
+          id?: string
+          listed_count?: number
+          new_count?: number
+          organization_id?: string
+          pending_count?: number
+          ran_at?: string
+          removed_count?: number
+          skipped_count?: number
+          trigger_source?: string
+          updated_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_document_sync_runs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_documents: {
+        Row: {
+          category: string
+          copied_at: string | null
+          copied_md5: string | null
+          copied_modified_at: string | null
+          drive_file_id: string
+          drive_md5: string | null
+          drive_modified_at: string
+          file_extension: string
+          file_size: number | null
+          first_seen_at: string
+          folder_path: string | null
+          id: string
+          organization_id: string
+          source_mime_type: string
+          storage_path: string | null
+          stored_mime_type: string
+          title: string
+        }
+        Insert: {
+          category?: string
+          copied_at?: string | null
+          copied_md5?: string | null
+          copied_modified_at?: string | null
+          drive_file_id: string
+          drive_md5?: string | null
+          drive_modified_at: string
+          file_extension: string
+          file_size?: number | null
+          first_seen_at?: string
+          folder_path?: string | null
+          id?: string
+          organization_id: string
+          source_mime_type: string
+          storage_path?: string | null
+          stored_mime_type: string
+          title: string
+        }
+        Update: {
+          category?: string
+          copied_at?: string | null
+          copied_md5?: string | null
+          copied_modified_at?: string | null
+          drive_file_id?: string
+          drive_md5?: string | null
+          drive_modified_at?: string
+          file_extension?: string
+          file_size?: number | null
+          first_seen_at?: string
+          folder_path?: string | null
+          id?: string
+          organization_id?: string
+          source_mime_type?: string
+          storage_path?: string | null
+          stored_mime_type?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_documents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tags: {
         Row: {
           code: string
@@ -8965,6 +9122,10 @@ export type Database = {
         Args: { p_items: Json; p_organization_id: string }
         Returns: Json
       }
+      apply_support_documents_listing: {
+        Args: { p_items: Json; p_organization_id: string }
+        Returns: Json
+      }
       appoint_area_coordinator: {
         Args: {
           p_effective_from?: string
@@ -9136,6 +9297,7 @@ export type Database = {
         Returns: boolean
       }
       can_read_official_document: { Args: { p_name: string }; Returns: boolean }
+      can_read_support_document: { Args: { p_name: string }; Returns: boolean }
       can_write_member_photo: {
         Args: { p_object_name: string }
         Returns: boolean
@@ -9834,6 +9996,14 @@ export type Database = {
         Args: { p_organization_id: string; p_sub_area_node_id: string }
         Returns: Json
       }
+      get_support_documents_access: {
+        Args: { p_organization_id: string }
+        Returns: Json
+      }
+      get_support_documents_folder: {
+        Args: { p_organization_id: string }
+        Returns: string
+      }
       get_topic_library_item: {
         Args: { p_organization_id: string; p_topic_id: string }
         Returns: Json
@@ -9952,6 +10122,10 @@ export type Database = {
         Args: { p_organization_id: string }
         Returns: Json
       }
+      list_support_documents: {
+        Args: { p_organization_id: string }
+        Returns: Json
+      }
       list_topic_library: {
         Args: { p_organization_id: string; p_series_code?: string }
         Returns: Json
@@ -9961,6 +10135,17 @@ export type Database = {
         Returns: Json
       }
       mark_official_document_copied: {
+        Args: {
+          p_copied_md5: string
+          p_copied_modified_at: string
+          p_drive_file_id: string
+          p_file_size: number
+          p_organization_id: string
+          p_storage_path: string
+        }
+        Returns: string
+      }
+      mark_support_document_copied: {
         Args: {
           p_copied_md5: string
           p_copied_modified_at: string
@@ -10227,6 +10412,21 @@ export type Database = {
         Returns: string
       }
       record_push_results: { Args: { p_results: Json }; Returns: number }
+      record_support_documents_sync_run: {
+        Args: {
+          p_error: string
+          p_failed: number
+          p_listed: number
+          p_new: number
+          p_organization_id: string
+          p_pending: number
+          p_removed: number
+          p_skipped: number
+          p_trigger_source: string
+          p_updated: number
+        }
+        Returns: string
+      }
       record_topic_library_sync_run: {
         Args: {
           p_changed_count: number
@@ -10694,6 +10894,10 @@ export type Database = {
         }
         Returns: Json
       }
+      set_support_documents_folder: {
+        Args: { p_drive_folder_id: string; p_organization_id: string }
+        Returns: Json
+      }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
       skip_household_topic: {
@@ -10702,6 +10906,10 @@ export type Database = {
           p_organization_id: string
           p_reason_code?: string
         }
+        Returns: Json
+      }
+      support_documents_to_copy: {
+        Args: { p_organization_id: string }
         Returns: Json
       }
       suspend_profile_role_assignment: {
