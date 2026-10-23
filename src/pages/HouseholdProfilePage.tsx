@@ -18,6 +18,7 @@ import { PastoralPlacementReviewModal } from '../features/households/components/
 import { HouseholdMeetingsCard } from '../features/households/components/HouseholdMeetingsCard';
 import { HouseholdFormationCard } from '../features/households/components/HouseholdFormationCard';
 import { ServantLeaderAccessModal } from '../features/households/components/ServantLeaderAccessModal';
+import { HouseholdSectionRow } from '../features/structure/HouseholdSectionRow';
 import type { HouseholdMember, HouseholdLeader, ServantLeaderRoleCode } from '../features/households/types';
 
 function formatFrequency(freq: string | null): string {
@@ -306,6 +307,11 @@ export default function HouseholdProfilePage() {
               </span>
             </div>
 
+
+            {/* Pass 9.38C: the Section this household belongs to */}
+            {orgId && householdId && (
+              <HouseholdSectionRow orgId={orgId} householdId={householdId} canEdit={canEditHouseholds && isEditable} />
+            )}
 
             <div className="flex justify-between items-center">
               <span className="text-ink-muted">Meeting Frequency</span>

@@ -8,6 +8,7 @@ import { usePlacementNodes } from '../../members/api/get-placement-nodes';
 import { createHousehold } from '../api/create-household';
 import { createHouseholdSchema, type CreateHouseholdFormValues } from '../schemas';
 import { normalizeError } from '../../../lib/supabase/errors';
+import { sectionLabel, setHouseholdSection, useNodeSection, useSectionOptions } from '../../structure/api';
 
 interface CreateHouseholdModalProps {
   isOpen: boolean;
@@ -26,6 +27,8 @@ export function CreateHouseholdModal({
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  // Pass 9.38C: the Section the household belongs to (from its chapter / unit, or chosen when under an Area)
+  const [sectionId, setSectionId] = useState('');
 
   const titleId = useId();
 
@@ -67,16 +70,25 @@ export function CreateHouseholdModal({
 
   const selectedParentId = watch('parent_governance_node_id');
   const selectedPastoralLevel = watch('pastoral_level');
+  const { data: parentSection, isLoading: isParentSectionLoading } = useNodeSection(organizationId, selectedParentId || null);
+  const { data: sectionOptions } = useSectionOptions(organizationId, isOpen);
+  const chooseSection = !!selectedParentId && !isParentSectionLoading && !parentSection;
+  const sectionRequired = chooseSection && ['member', 'unit', 'chapter'].includes(selectedPastoralLevel);
 
   if (!isOpen) return null;
 
   const handleClose = () => {
     reset();
+    setSectionId('');
     setErrorMessage(null);
     onClose();
   };
 
   const onSubmit = async (data: CreateHouseholdFormValues) => {
+    if (sectionRequired && !sectionId) {
+      setErrorMessage('Choose the Section this household belongs to.');
+      return;
+    }
     try {
       setIsSubmitting(true);
       setErrorMessage(null);
@@ -99,6 +111,16 @@ export function CreateHouseholdModal({
         language_code: data.language_code,
         is_couple_household: data.is_couple_household,
       });
+
+      // Pass 9.38C: households placed directly under an Area get the chosen Section
+      if (chooseSection && sectionId) {
+        try {
+          await setHouseholdSection(organizationId, result.household_id, sectionId);
+        } catch (e) {
+          onSuccessToast?.(`Household created, but the section was not saved: ${normalizeError(e).message}`);
+        }
+      }
+      await queryClient.invalidateQueries({ queryKey: ['structure'] });
 
       // Invalidate household directory lists
       await queryClient.invalidateQueries({
@@ -260,7 +282,10 @@ export function CreateHouseholdModal({
                       return (
                         <div
                           key={node.governance_node_id}
-                          onClick={() => setValue('parent_governance_node_id', node.governance_node_id, { shouldValidate: true })}
+                          onClick={() => {
+                            setValue('parent_governance_node_id', node.governance_node_id, { shouldValidate: true });
+                            setSectionId('');
+                          }}
                           className={`flex items-center justify-between p-2.5 rounded-lg border cursor-pointer transition-colors ${
                             isSelected
                               ? 'border-indigo-500 bg-indigo-950/40 text-indigo-200'
@@ -286,6 +311,42 @@ export function CreateHouseholdModal({
                 <p className="mt-1 text-xs text-rose-400">{errors.parent_governance_node_id.message}</p>
               )}
             </div>
+
+            {/* Pass 9.38C: Section */}
+            {selectedParentId && (
+              <div>
+                <label className="block text-xs font-medium text-slate-300">
+                  Section {sectionRequired && <span className="text-rose-400">*</span>}
+                </label>
+                {isParentSectionLoading ? (
+                  <div className="mt-1 h-9 animate-pulse rounded-lg bg-slate-800" />
+                ) : parentSection ? (
+                  <p className="mt-1 text-sm text-slate-200">
+                    {sectionLabel(parentSection)}{' '}
+                    <span className="text-xs text-slate-400">(from the chapter it is under)</span>
+                  </p>
+                ) : (
+                  <>
+                    <select
+                      value={sectionId}
+                      onChange={(e) => setSectionId(e.target.value)}
+                      aria-label="Section"
+                      className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-800/80 px-3 py-2 text-sm text-slate-100 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    >
+                      <option value="">{sectionRequired ? 'Choose a section…' : 'No section (serves several sections)'}</option>
+                      {(sectionOptions ?? []).map((s) => (
+                        <option key={s.section_id} value={s.section_id}>
+                          {sectionLabel(s)}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="mt-1 text-[11px] text-slate-400">
+                      This household is placed directly under an Area, so choose the section it serves.
+                    </p>
+                  </>
+                )}
+              </div>
+            )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>

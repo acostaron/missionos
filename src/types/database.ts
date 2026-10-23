@@ -8245,6 +8245,10 @@ export type Database = {
         }
         Returns: Json
       }
+      add_standard_sections: {
+        Args: { p_organization_id: string; p_sub_area_node_id: string }
+        Returns: Json
+      }
       apply_official_documents_listing: { Args: { p_items: Json; p_organization_id: string }; Returns: Json }
       appoint_area_coordinator: {
         Args: {
@@ -8679,6 +8683,15 @@ export type Database = {
         }
         Returns: Json
       }
+      create_structure_node: {
+        Args: {
+          p_name: string
+          p_node_type: string
+          p_organization_id: string
+          p_parent_node_id: string
+        }
+        Returns: Json
+      }
       create_sub_area_sections: {
         Args: { p_organization_id: string; p_sub_area_node_id: string }
         Returns: Json
@@ -8860,6 +8873,7 @@ export type Database = {
         Args: { p_household_id: string; p_organization_id: string }
         Returns: Json
       }
+      get_household_sections: { Args: { p_organization_id: string }; Returns: Json }
       get_household_topic_history: {
         Args: {
           p_household_node_id: string
@@ -8993,6 +9007,10 @@ export type Database = {
         Returns: Json
       }
       get_my_service: { Args: { p_organization_id: string }; Returns: Json }
+      get_node_section: {
+        Args: { p_node_id: string; p_organization_id: string }
+        Returns: Json
+      }
       get_official_documents_access: { Args: { p_organization_id: string }; Returns: Json }
       get_official_documents_folder: { Args: { p_organization_id: string }; Returns: string }
       get_pastoral_household_roster: {
@@ -9038,6 +9056,7 @@ export type Database = {
         Args: { p_event_id: string; p_organization_id: string }
         Returns: Json
       }
+      get_section_options: { Args: { p_organization_id: string }; Returns: Json }
       get_sections_overview: {
         Args: { p_organization_id: string }
         Returns: Json
@@ -9054,6 +9073,7 @@ export type Database = {
         }
         Returns: Json
       }
+      get_structure_tree: { Args: { p_organization_id: string }; Returns: Json }
       get_sub_area_placement_targets: {
         Args: { p_organization_id: string; p_sub_area_node_id: string }
         Returns: Json
@@ -9486,6 +9506,10 @@ export type Database = {
         }
         Returns: Json
       }
+      rename_structure_node: {
+        Args: { p_name: string; p_node_id: string; p_organization_id: string }
+        Returns: Json
+      }
       repair_family_relationship_reciprocal: {
         Args: {
           p_organization_id: string
@@ -9523,6 +9547,10 @@ export type Database = {
           p_organization_id: string
           p_reason: string
         }
+        Returns: Json
+      }
+      retire_structure_node: {
+        Args: { p_node_id: string; p_organization_id: string; p_reason?: string }
         Returns: Json
       }
       revert_member_deceased: {
@@ -9733,6 +9761,14 @@ export type Database = {
           p_member_id: string
           p_organization_id: string
           p_role_title: string
+        }
+        Returns: Json
+      }
+      set_household_section: {
+        Args: {
+          p_household_id: string
+          p_organization_id: string
+          p_section_node_id: string
         }
         Returns: Json
       }

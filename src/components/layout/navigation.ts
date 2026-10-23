@@ -78,8 +78,10 @@ export const NAV_ITEMS: NavItem[] = [
       { label: 'Dashboard', to: '/app/pastoral-operations', permission: Permissions.LeadershipPastoralDashboardView },
       // Pass 9.20 (Ron): Area / Chapter / Unit Servant Leaders
       { label: 'Leaders', to: '/app/leaders', permission: Permissions.LeadershipServantLeadersAppoint },
+      // Pass 9.38C (Ron): Structure — sections, chapters and units (the server allows administrators only)
+      { label: 'Structure', to: '/app/structure', role: 'organization_administrator' },
     ],
-    matchPaths: ['/app/households', '/app/pastoral-operations', '/app/leaders'],
+    matchPaths: ['/app/households', '/app/pastoral-operations', '/app/leaders', '/app/structure'],
   },
   {
     id: 'nav-library',

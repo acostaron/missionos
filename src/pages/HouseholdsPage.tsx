@@ -5,6 +5,7 @@ import { usePermissions } from '../hooks/use-permissions';
 import { Permissions } from '../types/permissions';
 import { useSearchHouseholds } from '../features/households/api/search-households';
 import { CreateHouseholdModal } from '../features/households/components/CreateHouseholdModal';
+import { sectionLabel, useHouseholdSections } from '../features/structure/api';
 
 function formatFrequency(freq: string | null): string {
   if (!freq) return 'Weekly';
@@ -26,6 +27,7 @@ export default function HouseholdsPage() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const orgId = activeOrganization?.id ?? null;
+  const { data: householdSections } = useHouseholdSections(orgId);
   const canViewHouseholds = !isPermLoading && hasPermission(Permissions.HouseholdsRecordsView);
   const canCreateHouseholds = !isPermLoading && hasPermission(Permissions.HouseholdsRecordsCreate);
 
@@ -241,6 +243,14 @@ export default function HouseholdsPage() {
                     </div>
 
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-muted">
+                      {/* Pass 9.38C: Section */}
+                      {householdSections?.[hh.household_id]?.name ? (
+                        <span>
+                          Section: <span className="text-ink">{sectionLabel(householdSections[hh.household_id])}</span>
+                        </span>
+                      ) : householdSections?.[hh.household_id]?.needs_section ? (
+                        <span className="text-warning-700">Section not set</span>
+                      ) : null}
                       {hh.parent_node_name && (
                         <span>
                           Parent: <span className="text-ink">{hh.parent_node_name}</span>

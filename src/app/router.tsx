@@ -16,6 +16,7 @@ import {
   MembersWithoutHouseholdPage,
   PastoralOperationsDashboardPage,
   LeadersPage,
+  StructurePage,
   MyProfilePage,
   FormationCatalogPage,
   FormationProgramDetailPage,
@@ -274,6 +275,15 @@ export const router = createBrowserRouter([
             element: (
               <Suspense fallback={<PageLoadingFallback />}>
                 <LeadersPage />
+              </Suspense>
+            ),
+          },
+          {
+            // Pass 9.38C: Structure (administrators)
+            path: 'structure',
+            element: (
+              <Suspense fallback={<PageLoadingFallback />}>
+                <StructurePage />
               </Suspense>
             ),
           },
