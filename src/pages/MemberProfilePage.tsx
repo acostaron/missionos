@@ -87,9 +87,9 @@ function RestrictedSection({ label }: { label: string }) {
 
 function DataRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="flex items-start justify-between gap-4 py-1.5">
-      <dt className="shrink-0 text-xs font-medium text-ink-muted w-32">{label}</dt>
-      <dd className="text-sm text-ink text-right flex-1">{value ?? <span className="text-ink-muted italic">—</span>}</dd>
+    <div className="flex items-start justify-between gap-3 py-1.5">
+      <dt className="shrink-0 text-xs font-medium text-ink-muted w-24 sm:w-32">{label}</dt>
+      <dd className="min-w-0 flex-1 text-sm text-ink text-right [overflow-wrap:anywhere]">{value ?? <span className="text-ink-muted italic">—</span>}</dd>
     </div>
   );
 }
@@ -622,6 +622,9 @@ interface PlacementsSectionProps {
   governance: GovernancePlacement | null;
   canManagePlacements: boolean;
   canChangeSection: boolean;
+  /** Pass 9.39: may this person see placements / households at all? (null from the server then means "none") */
+  canViewPlacements: boolean;
+  canViewHouseholds: boolean;
   onChangeGovernancePlacement: () => void;
   onChangeSection: () => void;
 }
@@ -633,12 +636,18 @@ function PlacementsSection({
   governance,
   canManagePlacements,
   canChangeSection,
+  canViewPlacements,
+  canViewHouseholds,
   onChangeGovernancePlacement,
   onChangeSection,
 }: PlacementsSectionProps) {
   const hasSectionAccess = memberSectionData !== undefined || section !== null;
   const currentSection = memberSectionData ?? section;
-  const allRestricted = !hasSectionAccess && household === null && governance === null;
+  // Pass 9.39 (Ron 2026-10-22): the server returns null both when there is nothing and when the viewer may not see
+  // it; with the permission, null means "Not placed" / "No household".
+  const govAccess = governance !== null || canViewPlacements || canManagePlacements;
+  const hhAccess = household !== null || canViewHouseholds;
+  const allRestricted = !hasSectionAccess && !hhAccess && !govAccess;
   const icon = (
     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round"
@@ -651,9 +660,9 @@ function PlacementsSection({
   }
 
   const sectionRowValue = hasSectionAccess ? (
-    <div className="flex items-center justify-end gap-3 flex-1">
+    <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-x-3 gap-y-1">
       {currentSection ? (
-        <span className="text-sm text-ink">
+        <span className="min-w-0 text-sm text-ink">
           {memberSectionData ? (
             <>
               {memberSectionData.section_name}
@@ -683,14 +692,17 @@ function PlacementsSection({
     <span className="text-ink-muted italic text-xs">restricted</span>
   );
 
-  const governanceRowValue = governance !== null ? (
-    <div className="flex items-center justify-end gap-3 flex-1">
+  const governanceRowValue = govAccess ? (
+    <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-x-3 gap-y-1">
       {governance ? (
-        <span className="text-sm text-ink">
-          {governance.node_name} ({governance.node_code}) · {governance.assignment_type ?? governance.assignment_status}
+        <span className="min-w-0 text-sm text-ink">
+          {governance.node_name}
+          <span className="block text-[11px] text-ink-muted">
+            {governance.node_code} · {governance.assignment_type ?? governance.assignment_status}
+          </span>
         </span>
       ) : (
-        <span className="text-ink-muted italic text-sm">Unplaced</span>
+        <span className="text-ink-muted italic text-sm">Not placed</span>
       )}
       {canManagePlacements && (
         <button
@@ -710,25 +722,25 @@ function PlacementsSection({
   return (
     <Section title="Placements" icon={icon}>
       <dl className="divide-y divide-line">
-        <div className="flex items-start justify-between gap-4 py-1.5">
-          <dt className="shrink-0 text-xs font-medium text-ink-muted w-32">Section</dt>
-          <dd className="text-sm text-ink text-right flex-1">{sectionRowValue}</dd>
+        <div className="flex items-start justify-between gap-3 py-1.5">
+          <dt className="shrink-0 text-xs font-medium text-ink-muted w-24 sm:w-32">Section</dt>
+          <dd className="min-w-0 flex-1 text-sm text-ink text-right [overflow-wrap:anywhere]">{sectionRowValue}</dd>
         </div>
-        {household !== null && (
+        {hhAccess && (
           household ? (
             <DataRow
               label="Household"
               value={`${household.household_name} (${household.household_code}) · ${household.membership_role ?? household.membership_status}`}
             />
           ) : (
-            <DataRow label="Household" value={<span className="text-ink-muted italic text-xs">No household assignment</span>} />
+            <DataRow label="Household" value={<span className="text-ink-muted italic text-xs">No household</span>} />
           )
         )}
-        <div className="flex items-start justify-between gap-4 py-1.5">
-          <dt className="shrink-0 text-xs font-medium text-ink-muted w-32">Governance</dt>
-          <dd className="text-sm text-ink text-right flex-1">{governanceRowValue}</dd>
+        <div className="flex items-start justify-between gap-3 py-1.5">
+          <dt className="shrink-0 text-xs font-medium text-ink-muted w-24 sm:w-32">Governance</dt>
+          <dd className="min-w-0 flex-1 text-sm text-ink text-right [overflow-wrap:anywhere]">{governanceRowValue}</dd>
         </div>
-        {household === null && <DataRow label="Household" value={<span className="text-ink-muted italic text-xs">restricted</span>} />}
+        {!hhAccess && <DataRow label="Household" value={<span className="text-ink-muted italic text-xs">restricted</span>} />}
       </dl>
     </Section>
   );
@@ -822,6 +834,7 @@ export default function MemberProfilePage() {
   const canRestoreRecord = !isPermLoading && hasPermission(Permissions.MembersRecordsRestore);
   const canViewFamilies = !isPermLoading && hasPermission(Permissions.FamiliesRecordsView);
   const canViewHouseholds = !isPermLoading && hasPermission(Permissions.MembersHouseholdsView);
+  const canViewPlacements = !isPermLoading && hasPermission(Permissions.MembersPlacementsView);
   const canAssignHousehold = !isPermLoading && hasPermission(Permissions.HouseholdsMembersAssign);
   const canTransferHousehold = !isPermLoading && hasPermission(Permissions.HouseholdsMembersTransfer);
   const canEndHousehold = !isPermLoading && hasPermission(Permissions.HouseholdsMembersEnd);
@@ -1175,6 +1188,8 @@ export default function MemberProfilePage() {
         governance={profile.governance_placement}
         canManagePlacements={canManagePlacements}
         canChangeSection={(canManagePlacements || canEditProfile) && profile.record_status === 'active'}
+        canViewPlacements={canViewPlacements}
+        canViewHouseholds={canViewHouseholds}
         onChangeGovernancePlacement={() => setIsChangePlacementModalOpen(true)}
         onChangeSection={() => setIsChangeSectionModalOpen(true)}
       />
