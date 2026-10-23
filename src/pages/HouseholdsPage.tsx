@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useOrganizationContext } from '../hooks/use-organization-context';
 import { usePermissions } from '../hooks/use-permissions';
@@ -6,6 +6,16 @@ import { Permissions } from '../types/permissions';
 import { useSearchHouseholds } from '../features/households/api/search-households';
 import { CreateHouseholdModal } from '../features/households/components/CreateHouseholdModal';
 import { sectionLabel, useHouseholdSections } from '../features/structure/api';
+import {
+  ALL_PATHS,
+  PathFilter,
+  SubAreaHeading,
+  groupByPath,
+  groupLabel,
+  matchesPathFilter,
+  useNodePaths,
+  type PathFilterValue,
+} from '../features/structure/paths';
 
 function formatFrequency(freq: string | null): string {
   if (!freq) return 'Weekly';
@@ -25,11 +35,14 @@ export default function HouseholdsPage() {
   const [statusFilter, setStatusFilter] = useState<string>('active');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [pathFilter, setPathFilter] = useState<PathFilterValue>(ALL_PATHS);
 
   const orgId = activeOrganization?.id ?? null;
   const { data: householdSections } = useHouseholdSections(orgId);
   const canViewHouseholds = !isPermLoading && hasPermission(Permissions.HouseholdsRecordsView);
   const canCreateHouseholds = !isPermLoading && hasPermission(Permissions.HouseholdsRecordsCreate);
+  // Pass 9.40 (Ron, 2026-10-22): grouped by MFC / FMC New York, Section and Chapter.
+  const { data: nodePaths } = useNodePaths(orgId, canViewHouseholds);
 
   const {
     data,
@@ -61,7 +74,9 @@ export default function HouseholdsPage() {
     );
   }
 
-  const households = data?.households ?? [];
+  const allHouseholds = data?.households ?? [];
+  const households = allHouseholds.filter((hh) => matchesPathFilter(nodePaths?.[hh.household_id], pathFilter));
+  const groups = groupByPath(households, (hh) => hh.household_id, nodePaths);
   const totalCount = data?.total_count ?? 0;
 
   return (
@@ -141,7 +156,13 @@ export default function HouseholdsPage() {
           />
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <PathFilter
+            paths={nodePaths}
+            nodeIds={allHouseholds.map((hh) => hh.household_id)}
+            value={pathFilter}
+            onChange={setPathFilter}
+          />
           <label htmlFor="status-filter" className="text-xs text-ink-muted">
             Status:
           </label>
@@ -184,7 +205,7 @@ export default function HouseholdsPage() {
             No households have been created yet
           </h2>
           <p className="mt-1.5 text-xs text-ink-muted max-w-sm mx-auto">
-            {searchTerm
+            {searchTerm || pathFilter.subArea !== 'all' || pathFilter.section !== 'all'
               ? 'No households matched your search query. Try clearing filters.'
               : 'Pastoral households are formed under Chapters and Units to shepherd and group members into prayer and pastoral communities.'}
           </p>
@@ -205,12 +226,20 @@ export default function HouseholdsPage() {
           )}
         </div>
       ) : (
-        <div className="rounded-xl border border-line bg-surface-muted overflow-hidden">
-          <div className="border-b border-line px-5 py-3 text-xs text-ink-muted">
+        <div className="space-y-3">
+          <div className="text-xs text-ink-muted">
             Showing {households.length} of {totalCount} {totalCount === 1 ? 'household' : 'households'}
           </div>
+          {groups.map((g, gi) => (
+            <Fragment key={g.key}>
+              {(gi === 0 || groups[gi - 1].subAreaKey !== g.subAreaKey) && <SubAreaHeading title={g.subAreaTitle} />}
+              <div className="rounded-xl border border-line bg-surface-muted overflow-hidden">
+                <div className="border-b border-line px-5 py-2 text-xs font-semibold text-ink-secondary">
+                  {groupLabel(g)}{' '}
+                  <span className="font-normal text-ink-muted">· {g.items.length}</span>
+                </div>
           <div className="divide-y divide-line">
-            {households.map((hh) => {
+            {g.items.map((hh) => {
               const day = formatDayOfWeek(hh.meeting_day_of_week);
               const freq = formatFrequency(hh.meeting_frequency);
               const schedule = [freq, day, hh.meeting_start_time ? hh.meeting_start_time.slice(0, 5) : null]
@@ -299,6 +328,9 @@ export default function HouseholdsPage() {
               );
             })}
           </div>
+              </div>
+            </Fragment>
+          ))}
         </div>
       )}
 

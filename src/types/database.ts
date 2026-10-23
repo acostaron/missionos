@@ -9007,6 +9007,7 @@ export type Database = {
         Returns: Json
       }
       get_my_service: { Args: { p_organization_id: string }; Returns: Json }
+      get_node_paths: { Args: { p_organization_id: string }; Returns: Json }
       get_node_section: {
         Args: { p_node_id: string; p_organization_id: string }
         Returns: Json

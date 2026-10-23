@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useOrganizationContext } from '../hooks/use-organization-context';
 import { usePermissions } from '../hooks/use-permissions';
@@ -6,6 +6,16 @@ import { Permissions } from '../types/permissions';
 import { usePastoralOperationsDashboard } from '../features/households/api/get-pastoral-operations-dashboard';
 import { PastoralPlacementReviewModal } from '../features/households/components/PastoralPlacementReviewModal';
 import { CreateHouseholdModal } from '../features/households/components/CreateHouseholdModal';
+import {
+  ALL_PATHS,
+  PathFilter,
+  groupByPath,
+  groupLabel,
+  matchesPathFilter,
+  unitOf,
+  useNodePaths,
+  type PathFilterValue,
+} from '../features/structure/paths';
 import type {
   PastoralHouseholdSummary,
   PastoralOperationalStatus,
@@ -91,6 +101,9 @@ export default function PastoralOperationsDashboardPage() {
     null,
     canViewDashboard
   );
+  // Pass 9.40 (Ron, 2026-10-22): vacancies and the household table grouped by MFC / FMC New York, Section, Chapter.
+  const { data: nodePaths } = useNodePaths(orgId, canViewDashboard);
+  const [pathFilter, setPathFilter] = useState<PathFilterValue>(ALL_PATHS);
 
   if (!canViewDashboard && !isPermLoading) {
     return (
@@ -165,8 +178,16 @@ export default function PastoralOperationsDashboardPage() {
     if (statusFilter !== 'all' && hh.operational_status !== statusFilter) return false;
     // Pass 9.24 (Ron, 2026-10-20): archived households are hidden unless "Archived" is chosen.
     if (statusFilter === 'all' && hh.operational_status === 'inactive') return false;
+    if (!matchesPathFilter(nodePaths?.[hh.household_id], pathFilter)) return false;
     return true;
   });
+  const householdGroups = groupByPath(filteredHouseholds, (hh) => hh.household_id, nodePaths);
+  const vacancyGroups = groupByPath(
+    leadership_vacancies.filter((v) => matchesPathFilter(nodePaths?.[v.governance_node_id], pathFilter)),
+    (v) => v.governance_node_id,
+    nodePaths,
+  );
+  const shownVacancies = vacancyGroups.reduce((n, g) => n + g.items.length, 0);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-8">
@@ -505,19 +526,39 @@ export default function PastoralOperationsDashboardPage() {
         </div>
       </div>
       {/* Leadership Vacancies List (if any) */}
-      {leadership_vacancies.length > 0 && (
+      {(leadership_vacancies.length > 0 || household_summary.length > 0) && (
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <span className="text-xs text-ink-muted">Show:</span>
+          <PathFilter
+            paths={nodePaths}
+            nodeIds={[
+              ...household_summary.map((hh) => hh.household_id),
+              ...leadership_vacancies.map((v) => v.governance_node_id),
+            ]}
+            value={pathFilter}
+            onChange={setPathFilter}
+          />
+        </div>
+      )}
+      {shownVacancies > 0 && (
         <div className="rounded-xl border border-warning-600/30 bg-warning-50 p-5 space-y-3">
           <div className="flex items-center justify-between border-b border-warning-600/30 pb-2">
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold uppercase tracking-wider text-warning-700">
-                Action Required · Leadership Vacancies ({leadership_vacancies.length})
+                Action Required · Leadership Vacancies ({shownVacancies})
               </span>
             </div>
             <span className="text-[10px] text-warning-700">Servant leader appointment needed</span>
           </div>
 
+          {vacancyGroups.map((g, gi) => (
+            <div key={g.key} className="space-y-2">
+              {(gi === 0 || vacancyGroups[gi - 1].subAreaKey !== g.subAreaKey) && (
+                <p className="pt-1 text-xs font-bold uppercase tracking-wide text-ink">{g.subAreaTitle}</p>
+              )}
+              <p className="text-[11px] font-semibold text-warning-700">{groupLabel(g)}</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-xs">
-            {leadership_vacancies.map((vac) => (
+            {g.items.map((vac) => (
               <div
                 key={vac.governance_node_id}
                 className="rounded-lg border border-warning-600/30 bg-surface p-3 space-y-1"
@@ -529,6 +570,9 @@ export default function PastoralOperationsDashboardPage() {
                   </span>
                 </div>
                 <p className="text-[11px] text-ink-muted">Office: {vac.role_name}</p>
+                {unitOf(nodePaths, vac.governance_node_id) && vac.governance_node_name !== unitOf(nodePaths, vac.governance_node_id) && (
+                  <p className="text-[11px] text-ink-muted">Unit: {unitOf(nodePaths, vac.governance_node_id)}</p>
+                )}
                 {vac.pastoral_level === 'member' && (
                   <Link
                     to={`/app/households/${vac.governance_node_id}`}
@@ -540,6 +584,8 @@ export default function PastoralOperationsDashboardPage() {
               </div>
             ))}
           </div>
+            </div>
+          ))}
         </div>
       )}
 
@@ -672,7 +718,21 @@ export default function PastoralOperationsDashboardPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-line text-ink-secondary">
-                {filteredHouseholds.map((hh) => {
+                {householdGroups.map((g, gi) => (
+                  <Fragment key={g.key}>
+                    {(gi === 0 || householdGroups[gi - 1].subAreaKey !== g.subAreaKey) && (
+                      <tr className="bg-surface-muted">
+                        <td colSpan={8} className="px-4 pt-3 pb-1 text-[11px] font-bold uppercase tracking-wide text-ink">
+                          {g.subAreaTitle}
+                        </td>
+                      </tr>
+                    )}
+                    <tr className="bg-surface-muted/50">
+                      <td colSpan={8} className="px-4 py-1.5 text-[11px] font-semibold text-ink-secondary">
+                        {groupLabel(g)} <span className="font-normal text-ink-muted">· {g.items.length}</span>
+                      </td>
+                    </tr>
+                {g.items.map((hh) => {
                   const opStatus = formatOperationalStatus(hh.operational_status);
                   const capStatus = formatCapacityStatus(hh.capacity_status);
 
@@ -695,6 +755,9 @@ export default function PastoralOperationsDashboardPage() {
 
                       <td className="px-4 py-3 text-ink-muted text-[11px]">
                         {hh.scope_node_name ?? '—'}
+                        {unitOf(nodePaths, hh.household_id) && unitOf(nodePaths, hh.household_id) !== hh.scope_node_name && (
+                          <span className="block text-[10px]">Unit: {unitOf(nodePaths, hh.household_id)}</span>
+                        )}
                       </td>
 
                       <td className="px-4 py-3 text-[11px]">
@@ -730,6 +793,8 @@ export default function PastoralOperationsDashboardPage() {
                     </tr>
                   );
                 })}
+                  </Fragment>
+                ))}
               </tbody>
             </table>
           </div>
