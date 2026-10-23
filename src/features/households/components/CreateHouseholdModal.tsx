@@ -15,6 +15,8 @@ interface CreateHouseholdModalProps {
   onClose: () => void;
   organizationId: string;
   onSuccessToast?: (msg: string) => void;
+  /** Pass 9.40A: open with this unit / chapter already chosen as the parent. */
+  initialParentId?: string;
 }
 
 export function CreateHouseholdModal({
@@ -22,6 +24,7 @@ export function CreateHouseholdModal({
   onClose,
   organizationId,
   onSuccessToast,
+  initialParentId,
 }: CreateHouseholdModalProps) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -51,7 +54,7 @@ export function CreateHouseholdModal({
     defaultValues: {
       name: '',
       code: '',
-      parent_governance_node_id: '',
+      parent_governance_node_id: initialParentId ?? '',
       pastoral_level: 'member',
       household_category: 'pastoral',
       meeting_frequency: 'weekly',

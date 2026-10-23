@@ -10,10 +10,12 @@ import {
   ALL_PATHS,
   PathFilter,
   SubAreaHeading,
+  emptyPlaces,
   groupByPath,
   groupLabel,
   matchesPathFilter,
   useNodePaths,
+  withEmptyPlaces,
   type PathFilterValue,
 } from '../features/structure/paths';
 
@@ -34,6 +36,7 @@ export default function HouseholdsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('active');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [createParentId, setCreateParentId] = useState<string | undefined>(undefined);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [pathFilter, setPathFilter] = useState<PathFilterValue>(ALL_PATHS);
 
@@ -76,7 +79,16 @@ export default function HouseholdsPage() {
 
   const allHouseholds = data?.households ?? [];
   const households = allHouseholds.filter((hh) => matchesPathFilter(nodePaths?.[hh.household_id], pathFilter));
-  const groups = groupByPath(households, (hh) => hh.household_id, nodePaths);
+  // Pass 9.40A (Ron, 2026-10-22): units (and chapters without units) with no household still show, with + Household.
+  const showEmpty = canCreateHouseholds && !searchTerm.trim() && (statusFilter === 'active' || statusFilter === 'all');
+  const allIds = allHouseholds.map((hh) => hh.household_id);
+  const empties = showEmpty ? emptyPlaces(nodePaths, allIds, pathFilter) : [];
+  const slots = withEmptyPlaces(households, (hh) => hh.household_id, (hh) => hh.name, empties, nodePaths);
+  const groups = groupByPath(slots, (sl) => sl.nodeId, nodePaths);
+  const openCreate = (parentId?: string) => {
+    setCreateParentId(parentId);
+    setIsCreateModalOpen(true);
+  };
   const totalCount = data?.total_count ?? 0;
 
   return (
@@ -126,7 +138,7 @@ export default function HouseholdsPage() {
             <button
               type="button"
               id="btn-create-household"
-              onClick={() => setIsCreateModalOpen(true)}
+              onClick={() => openCreate()}
               className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-primary-hover transition-colors"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -159,7 +171,7 @@ export default function HouseholdsPage() {
         <div className="flex flex-wrap items-center gap-2">
           <PathFilter
             paths={nodePaths}
-            nodeIds={allHouseholds.map((hh) => hh.household_id)}
+            nodeIds={[...allIds, ...(showEmpty ? emptyPlaces(nodePaths, allIds, ALL_PATHS).map((e) => e.node_id) : [])]}
             value={pathFilter}
             onChange={setPathFilter}
           />
@@ -194,7 +206,7 @@ export default function HouseholdsPage() {
         <div className="rounded-xl border border-danger-600/30 bg-danger-50 p-6 text-center text-sm text-danger-700">
           Failed to load households. Please try again.
         </div>
-      ) : households.length === 0 ? (
+      ) : slots.length === 0 ? (
         <div className="rounded-xl border border-line bg-surface p-12 text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-surface-muted text-ink-muted">
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -214,7 +226,7 @@ export default function HouseholdsPage() {
               <button
                 type="button"
                 id="btn-create-first-household"
-                onClick={() => setIsCreateModalOpen(true)}
+                onClick={() => openCreate()}
                 className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-primary-hover transition-colors"
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -236,10 +248,33 @@ export default function HouseholdsPage() {
               <div className="rounded-xl border border-line bg-surface-muted overflow-hidden">
                 <div className="border-b border-line px-5 py-2 text-xs font-semibold text-ink-secondary">
                   {groupLabel(g)}{' '}
-                  <span className="font-normal text-ink-muted">· {g.items.length}</span>
+                  <span className="font-normal text-ink-muted">
+                    · {g.items.filter((sl) => sl.kind === 'household').length}
+                  </span>
                 </div>
           <div className="divide-y divide-line">
-            {g.items.map((hh) => {
+            {g.items.map((sl) => {
+              if (sl.kind === 'empty') {
+                return (
+                  <div
+                    key={sl.nodeId}
+                    className="flex flex-wrap items-center justify-between gap-3 p-4 sm:px-6"
+                  >
+                    <div>
+                      <p className="text-sm font-semibold text-ink">{sl.place.name}</p>
+                      <p className="text-xs italic text-ink-muted">No households yet</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => openCreate(sl.nodeId)}
+                      className="rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-ink-secondary hover:bg-surface-muted transition-colors"
+                    >
+                      + Household
+                    </button>
+                  </div>
+                );
+              }
+              const hh = sl.item;
               const day = formatDayOfWeek(hh.meeting_day_of_week);
               const freq = formatFrequency(hh.meeting_frequency);
               const schedule = [freq, day, hh.meeting_start_time ? hh.meeting_start_time.slice(0, 5) : null]
@@ -340,6 +375,7 @@ export default function HouseholdsPage() {
           isOpen={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}
           organizationId={orgId}
+          initialParentId={createParentId}
           onSuccessToast={triggerToast}
         />
       )}

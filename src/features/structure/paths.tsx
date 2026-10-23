@@ -117,6 +117,74 @@ export function unitOf(paths: NodePaths | undefined, nodeId: string | null | und
   return paths?.[nodeId]?.unit_name ?? null;
 }
 
+/** A unit (or a chapter with no units) that has no household in the list being shown. Pass 9.40A. */
+export interface EmptyPlace {
+  node_id: string;
+  name: string;
+  type: 'chapter' | 'unit';
+}
+
+/** Units, and chapters without units, that none of the given households sits in — so they can still be shown. */
+export function emptyPlaces(
+  paths: NodePaths | undefined,
+  householdIds: (string | null | undefined)[],
+  f: PathFilterValue,
+): EmptyPlace[] {
+  if (!paths) return [];
+  const usedUnits = new Set<string>();
+  const usedChapters = new Set<string>();
+  for (const id of householdIds) {
+    const p = id ? paths[id] : undefined;
+    if (p?.unit_id) usedUnits.add(p.unit_id);
+    if (p?.chapter_id) usedChapters.add(p.chapter_id);
+  }
+  const chaptersWithUnits = new Set<string>();
+  for (const p of Object.values(paths)) if (p.type === 'unit' && p.chapter_id) chaptersWithUnits.add(p.chapter_id);
+  const out: EmptyPlace[] = [];
+  for (const [id, p] of Object.entries(paths)) {
+    if (!matchesPathFilter(p, f)) continue;
+    if (p.type === 'unit' && !usedUnits.has(id)) out.push({ node_id: id, name: p.unit_name ?? 'Unit', type: 'unit' });
+    if (p.type === 'chapter' && !chaptersWithUnits.has(id) && !usedChapters.has(id)) {
+      out.push({ node_id: id, name: p.chapter_name ?? 'Chapter', type: 'chapter' });
+    }
+  }
+  return out;
+}
+
+/** Households and empty places in one list, ordered by unit so each chapter reads unit by unit. */
+export type PlaceSlot<T> = { kind: 'household'; nodeId: string; item: T } | { kind: 'empty'; nodeId: string; place: EmptyPlace };
+
+export function withEmptyPlaces<T>(
+  items: T[],
+  nodeIdOf: (t: T) => string,
+  nameOf: (t: T) => string,
+  empties: EmptyPlace[],
+  paths: NodePaths | undefined,
+): PlaceSlot<T>[] {
+  const slots: (PlaceSlot<T> & { sortUnit: string; sortName: string; sortKind: number })[] = [
+    ...items.map((item) => ({
+      kind: 'household' as const,
+      nodeId: nodeIdOf(item),
+      item,
+      sortUnit: paths?.[nodeIdOf(item)]?.unit_name ?? '',
+      sortName: nameOf(item),
+      sortKind: 0,
+    })),
+    ...empties.map((place) => ({
+      kind: 'empty' as const,
+      nodeId: place.node_id,
+      place,
+      sortUnit: place.type === 'unit' ? place.name : '',
+      sortName: place.name,
+      sortKind: 1,
+    })),
+  ];
+  slots.sort(
+    (a, b) => a.sortUnit.localeCompare(b.sortUnit) || a.sortKind - b.sortKind || a.sortName.localeCompare(b.sortName),
+  );
+  return slots.map(({ sortUnit: _u, sortName: _n, sortKind: _k, ...s }) => s as PlaceSlot<T>);
+}
+
 export interface PathFilterValue {
   subArea: string; // 'all' | sub-area key
   section: string; // 'all' | section category

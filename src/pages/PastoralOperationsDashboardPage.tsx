@@ -9,11 +9,13 @@ import { CreateHouseholdModal } from '../features/households/components/CreateHo
 import {
   ALL_PATHS,
   PathFilter,
+  emptyPlaces,
   groupByPath,
   groupLabel,
   matchesPathFilter,
   unitOf,
   useNodePaths,
+  withEmptyPlaces,
   type PathFilterValue,
 } from '../features/structure/paths';
 import type {
@@ -88,6 +90,7 @@ export default function PastoralOperationsDashboardPage() {
 
   const [activePlacementAssignmentId, setActivePlacementAssignmentId] = useState<string | null>(null);
   const [isCreateHouseholdOpen, setIsCreateHouseholdOpen] = useState(false);
+  const [createParentId, setCreateParentId] = useState<string | undefined>(undefined);
   const [levelFilter, setLevelFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
@@ -181,7 +184,16 @@ export default function PastoralOperationsDashboardPage() {
     if (!matchesPathFilter(nodePaths?.[hh.household_id], pathFilter)) return false;
     return true;
   });
-  const householdGroups = groupByPath(filteredHouseholds, (hh) => hh.household_id, nodePaths);
+  // Pass 9.40A (Ron, 2026-10-22): units (and chapters without units) with no household still show, with + Household.
+  const showEmpty = canCreateHousehold && levelFilter === 'all' && statusFilter === 'all';
+  const householdIds = household_summary.map((hh) => hh.household_id);
+  const emptyRows = showEmpty ? emptyPlaces(nodePaths, householdIds, pathFilter) : [];
+  const tableSlots = withEmptyPlaces(filteredHouseholds, (hh) => hh.household_id, (hh) => hh.household_name, emptyRows, nodePaths);
+  const householdGroups = groupByPath(tableSlots, (sl) => sl.nodeId, nodePaths);
+  const openCreate = (parentId?: string) => {
+    setCreateParentId(parentId);
+    setIsCreateHouseholdOpen(true);
+  };
   const vacancyGroups = groupByPath(
     leadership_vacancies.filter((v) => matchesPathFilter(nodePaths?.[v.governance_node_id], pathFilter)),
     (v) => v.governance_node_id,
@@ -216,7 +228,7 @@ export default function PastoralOperationsDashboardPage() {
           {canCreateHousehold && (
             <button
               type="button"
-              onClick={() => setIsCreateHouseholdOpen(true)}
+              onClick={() => openCreate()}
               className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-xs font-semibold text-white hover:bg-primary-hover transition-colors shadow-sm"
             >
               + Create Household
@@ -691,14 +703,14 @@ export default function PastoralOperationsDashboardPage() {
             {canCreateHousehold && (
               <button
                 type="button"
-                onClick={() => setIsCreateHouseholdOpen(true)}
+                onClick={() => openCreate()}
                 className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white hover:bg-primary-hover transition-colors"
               >
                 + Create First Household
               </button>
             )}
           </div>
-        ) : filteredHouseholds.length === 0 ? (
+        ) : tableSlots.length === 0 ? (
           <div className="rounded-xl border border-line bg-surface p-8 text-center">
             <p className="text-xs text-ink-muted">No households match the selected filters.</p>
           </div>
@@ -729,10 +741,38 @@ export default function PastoralOperationsDashboardPage() {
                     )}
                     <tr className="bg-surface-muted/50">
                       <td colSpan={8} className="px-4 py-1.5 text-[11px] font-semibold text-ink-secondary">
-                        {groupLabel(g)} <span className="font-normal text-ink-muted">· {g.items.length}</span>
+                        {groupLabel(g)}{' '}
+                        <span className="font-normal text-ink-muted">
+                          · {g.items.filter((sl) => sl.kind === 'household').length}
+                        </span>
                       </td>
                     </tr>
-                {g.items.map((hh) => {
+                {g.items.map((sl) => {
+                  if (sl.kind === 'empty') {
+                    return (
+                      <tr key={sl.nodeId}>
+                        <td className="px-4 py-3 font-medium text-ink">{sl.place.name}</td>
+                        <td className="px-4 py-3">
+                          <span className="rounded bg-surface-muted px-2 py-0.5 text-[10px] font-medium uppercase text-ink-secondary">
+                            {sl.place.type}
+                          </span>
+                        </td>
+                        <td colSpan={5} className="px-4 py-3 text-[11px] italic text-ink-muted">
+                          No households yet
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <button
+                            type="button"
+                            onClick={() => openCreate(sl.nodeId)}
+                            className="rounded px-2.5 py-1 text-[11px] font-medium text-ink-secondary bg-surface-muted hover:bg-line transition-colors"
+                          >
+                            + Household
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  }
+                  const hh = sl.item;
                   const opStatus = formatOperationalStatus(hh.operational_status);
                   const capStatus = formatCapacityStatus(hh.capacity_status);
 
@@ -820,6 +860,7 @@ export default function PastoralOperationsDashboardPage() {
           isOpen={true}
           onClose={() => setIsCreateHouseholdOpen(false)}
           organizationId={orgId ?? ''}
+          initialParentId={createParentId}
           onSuccessToast={() => {
             setIsCreateHouseholdOpen(false);
           }}
