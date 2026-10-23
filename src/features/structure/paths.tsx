@@ -34,6 +34,26 @@ export function useNodePaths(orgId: string | null, enabled = true) {
   });
 }
 
+export interface HouseholdPlaceSlot {
+  unit_id: string;
+  household_count: number;
+  can_create_household: boolean;
+}
+
+export function useHouseholdPlaceSlots(orgId: string | null, enabled = true) {
+  return useQuery<HouseholdPlaceSlot[]>({
+    queryKey: ['structure', 'place-slots', orgId],
+    queryFn: async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error } = await (supabase.rpc as any)('get_household_place_slots', { p_organization_id: orgId });
+      if (error) throw error;
+      return (data ?? []) as HouseholdPlaceSlot[];
+    },
+    enabled: !!orgId && enabled,
+    staleTime: 60 * 1000,
+  });
+}
+
 const SECTION_ORDER = ['couples', 'handmaids', 'servants', 'singles', 'campus', 'youth', 'kids'];
 const SUB_AREA_ORDER = ['mfc_ny', 'fmc_ny'];
 const NOT_PLACED = '__none__';
@@ -117,36 +137,32 @@ export function unitOf(paths: NodePaths | undefined, nodeId: string | null | und
   return paths?.[nodeId]?.unit_name ?? null;
 }
 
-/** A unit (or a chapter with no units) that has no household in the list being shown. Pass 9.40A. */
+/** A unit (or a chapter with no units) that has no active household. Pass 9.40A, Pass 9.42. */
 export interface EmptyPlace {
   node_id: string;
   name: string;
   type: 'chapter' | 'unit';
+  can_create_household: boolean;
 }
 
-/** Units, and chapters without units, that none of the given households sits in — so they can still be shown. */
+/** Units, and chapters without units, that have 0 active households according to authoritative server occupancy. Pass 9.42. */
 export function emptyPlaces(
   paths: NodePaths | undefined,
-  householdIds: (string | null | undefined)[],
+  slots: HouseholdPlaceSlot[] | undefined,
   f: PathFilterValue,
 ): EmptyPlace[] {
-  if (!paths) return [];
-  const usedUnits = new Set<string>();
-  const usedChapters = new Set<string>();
-  for (const id of householdIds) {
-    const p = id ? paths[id] : undefined;
-    if (p?.unit_id) usedUnits.add(p.unit_id);
-    if (p?.chapter_id) usedChapters.add(p.chapter_id);
-  }
-  const chaptersWithUnits = new Set<string>();
-  for (const p of Object.values(paths)) if (p.type === 'unit' && p.chapter_id) chaptersWithUnits.add(p.chapter_id);
+  if (!paths || !slots) return [];
   const out: EmptyPlace[] = [];
-  for (const [id, p] of Object.entries(paths)) {
+  for (const slot of slots) {
+    if (slot.household_count > 0) continue;
+    const p = paths[slot.unit_id];
     if (!matchesPathFilter(p, f)) continue;
-    if (p.type === 'unit' && !usedUnits.has(id)) out.push({ node_id: id, name: p.unit_name ?? 'Unit', type: 'unit' });
-    if (p.type === 'chapter' && !chaptersWithUnits.has(id) && !usedChapters.has(id)) {
-      out.push({ node_id: id, name: p.chapter_name ?? 'Chapter', type: 'chapter' });
-    }
+    out.push({
+      node_id: slot.unit_id,
+      name: p?.unit_name ?? p?.chapter_name ?? 'Unit',
+      type: p?.type === 'chapter' ? 'chapter' : 'unit',
+      can_create_household: slot.can_create_household,
+    });
   }
   return out;
 }

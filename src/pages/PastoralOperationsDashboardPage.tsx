@@ -14,6 +14,7 @@ import {
   groupLabel,
   matchesPathFilter,
   unitOf,
+  useHouseholdPlaceSlots,
   useNodePaths,
   withEmptyPlaces,
   type PathFilterValue,
@@ -106,6 +107,7 @@ export default function PastoralOperationsDashboardPage() {
   );
   // Pass 9.40 (Ron, 2026-10-22): vacancies and the household table grouped by MFC / FMC New York, Section, Chapter.
   const { data: nodePaths } = useNodePaths(orgId, canViewDashboard);
+  const { data: placeSlots } = useHouseholdPlaceSlots(orgId, canViewDashboard);
   const [pathFilter, setPathFilter] = useState<PathFilterValue>(ALL_PATHS);
 
   if (!canViewDashboard && !isPermLoading) {
@@ -185,9 +187,9 @@ export default function PastoralOperationsDashboardPage() {
     return true;
   });
   // Pass 9.40A (Ron, 2026-10-22): units (and chapters without units) with no household still show, with + Household.
-  const showEmpty = canCreateHousehold && levelFilter === 'all' && statusFilter === 'all';
-  const householdIds = household_summary.map((hh) => hh.household_id);
-  const emptyRows = showEmpty ? emptyPlaces(nodePaths, householdIds, pathFilter) : [];
+  // Pass 9.42: empty units derived authoritatively from server-side household place slots.
+  const showEmpty = levelFilter === 'all' && statusFilter === 'all';
+  const emptyRows = showEmpty ? emptyPlaces(nodePaths, placeSlots, pathFilter) : [];
   const tableSlots = withEmptyPlaces(filteredHouseholds, (hh) => hh.household_id, (hh) => hh.household_name, emptyRows, nodePaths);
   const householdGroups = groupByPath(tableSlots, (sl) => sl.nodeId, nodePaths);
   const openCreate = (parentId?: string) => {
@@ -761,13 +763,15 @@ export default function PastoralOperationsDashboardPage() {
                           No households yet
                         </td>
                         <td className="px-4 py-3 text-right">
-                          <button
-                            type="button"
-                            onClick={() => openCreate(sl.nodeId)}
-                            className="rounded px-2.5 py-1 text-[11px] font-medium text-ink-secondary bg-surface-muted hover:bg-line transition-colors"
-                          >
-                            + Household
-                          </button>
+                          {sl.place.can_create_household && (
+                            <button
+                              type="button"
+                              onClick={() => openCreate(sl.nodeId)}
+                              className="rounded px-2.5 py-1 text-[11px] font-medium text-ink-secondary bg-surface-muted hover:bg-line transition-colors"
+                            >
+                              + Household
+                            </button>
+                          )}
                         </td>
                       </tr>
                     );

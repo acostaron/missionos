@@ -8979,6 +8979,14 @@ export type Database = {
         Args: { p_day?: string; p_organization_id: string }
         Returns: Json
       }
+      get_household_place_slots: {
+        Args: { p_organization_id: string }
+        Returns: {
+          unit_id: string
+          household_count: number
+          can_create_household: boolean
+        }[]
+      }
       get_my_event_access: {
         Args: { p_organization_id: string }
         Returns: Json

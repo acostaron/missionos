@@ -14,6 +14,7 @@ import {
   groupByPath,
   groupLabel,
   matchesPathFilter,
+  useHouseholdPlaceSlots,
   useNodePaths,
   withEmptyPlaces,
   type PathFilterValue,
@@ -46,6 +47,8 @@ export default function HouseholdsPage() {
   const canCreateHouseholds = !isPermLoading && hasPermission(Permissions.HouseholdsRecordsCreate);
   // Pass 9.40 (Ron, 2026-10-22): grouped by MFC / FMC New York, Section and Chapter.
   const { data: nodePaths } = useNodePaths(orgId, canViewHouseholds);
+  // Pass 9.42: Authoritative empty unit resolution and scope-aware create capability.
+  const { data: placeSlots } = useHouseholdPlaceSlots(orgId, canViewHouseholds);
 
   const {
     data,
@@ -78,11 +81,11 @@ export default function HouseholdsPage() {
   }
 
   const allHouseholds = data?.households ?? [];
+  const householdIds = allHouseholds.map((hh) => hh.household_id);
   const households = allHouseholds.filter((hh) => matchesPathFilter(nodePaths?.[hh.household_id], pathFilter));
-  // Pass 9.40A (Ron, 2026-10-22): units (and chapters without units) with no household still show, with + Household.
-  const showEmpty = canCreateHouseholds && !searchTerm.trim() && (statusFilter === 'active' || statusFilter === 'all');
-  const allIds = allHouseholds.map((hh) => hh.household_id);
-  const empties = showEmpty ? emptyPlaces(nodePaths, allIds, pathFilter) : [];
+  // Pass 9.40A / Pass 9.42: units (and chapters without units) with no active household still show; "+ Household" only when authorized.
+  const showEmpty = !searchTerm.trim() && (statusFilter === 'active' || statusFilter === 'all');
+  const empties = showEmpty ? emptyPlaces(nodePaths, placeSlots, pathFilter) : [];
   const slots = withEmptyPlaces(households, (hh) => hh.household_id, (hh) => hh.name, empties, nodePaths);
   const groups = groupByPath(slots, (sl) => sl.nodeId, nodePaths);
   const openCreate = (parentId?: string) => {
@@ -171,7 +174,7 @@ export default function HouseholdsPage() {
         <div className="flex flex-wrap items-center gap-2">
           <PathFilter
             paths={nodePaths}
-            nodeIds={[...allIds, ...(showEmpty ? emptyPlaces(nodePaths, allIds, ALL_PATHS).map((e) => e.node_id) : [])]}
+            nodeIds={[...householdIds, ...(showEmpty ? emptyPlaces(nodePaths, placeSlots, ALL_PATHS).map((e) => e.node_id) : [])]}
             value={pathFilter}
             onChange={setPathFilter}
           />
@@ -264,13 +267,15 @@ export default function HouseholdsPage() {
                       <p className="text-sm font-semibold text-ink">{sl.place.name}</p>
                       <p className="text-xs italic text-ink-muted">No households yet</p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => openCreate(sl.nodeId)}
-                      className="rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-ink-secondary hover:bg-surface-muted transition-colors"
-                    >
-                      + Household
-                    </button>
+                    {sl.place.can_create_household && (
+                      <button
+                        type="button"
+                        onClick={() => openCreate(sl.nodeId)}
+                        className="rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-ink-secondary hover:bg-surface-muted transition-colors"
+                      >
+                        + Household
+                      </button>
+                    )}
                   </div>
                 );
               }
