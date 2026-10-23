@@ -157,6 +157,48 @@ export type Database = {
           },
         ]
       }
+      app_activity_days: {
+        Row: {
+          activity_date: string
+          first_at: string
+          last_at: string
+          opens: number
+          organization_id: string
+          profile_id: string
+        }
+        Insert: {
+          activity_date: string
+          first_at?: string
+          last_at?: string
+          opens?: number
+          organization_id: string
+          profile_id: string
+        }
+        Update: {
+          activity_date?: string
+          first_at?: string
+          last_at?: string
+          opens?: number
+          organization_id?: string
+          profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "app_activity_days_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "app_activity_days_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       app_roles: {
         Row: {
           code: string
@@ -1359,6 +1401,7 @@ export type Database = {
           guest_code: string
           host_member_id: string | null
           id: string
+          is_child: boolean
           last_name: string
           organization_id: string
           phone: string | null
@@ -1380,6 +1423,7 @@ export type Database = {
           guest_code: string
           host_member_id?: string | null
           id?: string
+          is_child?: boolean
           last_name: string
           organization_id: string
           phone?: string | null
@@ -1401,6 +1445,7 @@ export type Database = {
           guest_code?: string
           host_member_id?: string | null
           id?: string
+          is_child?: boolean
           last_name?: string
           organization_id?: string
           phone?: string | null
@@ -1451,6 +1496,103 @@ export type Database = {
           {
             foreignKeyName: "event_guests_waived_by_profile_id_fkey"
             columns: ["waived_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_payment_reports: {
+        Row: {
+          amount: number
+          decline_reason: string | null
+          event_id: string
+          id: string
+          member_id: string
+          organization_id: string
+          payment_id: string | null
+          payment_method: string
+          reference: string | null
+          report_kind: string
+          report_status: string
+          reported_at: string
+          reported_by_profile_id: string
+          reviewed_at: string | null
+          reviewed_by_profile_id: string | null
+        }
+        Insert: {
+          amount: number
+          decline_reason?: string | null
+          event_id: string
+          id?: string
+          member_id: string
+          organization_id: string
+          payment_id?: string | null
+          payment_method: string
+          reference?: string | null
+          report_kind?: string
+          report_status?: string
+          reported_at?: string
+          reported_by_profile_id: string
+          reviewed_at?: string | null
+          reviewed_by_profile_id?: string | null
+        }
+        Update: {
+          amount?: number
+          decline_reason?: string | null
+          event_id?: string
+          id?: string
+          member_id?: string
+          organization_id?: string
+          payment_id?: string | null
+          payment_method?: string
+          reference?: string | null
+          report_kind?: string
+          report_status?: string
+          reported_at?: string
+          reported_by_profile_id?: string
+          reviewed_at?: string | null
+          reviewed_by_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_payment_reports_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_payment_reports_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_payment_reports_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_payment_reports_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "event_payments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_payment_reports_reported_by_profile_id_fkey"
+            columns: ["reported_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_payment_reports_reviewed_by_profile_id_fkey"
+            columns: ["reviewed_by_profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -1617,6 +1759,10 @@ export type Database = {
         Row: {
           audience_node_id: string | null
           cancel_reason: string | null
+          cash_check_note: string | null
+          check_mailing_address: string | null
+          check_payable_to: string | null
+          child_fee: number | null
           created_at: string
           created_by_profile_id: string
           description: string | null
@@ -1634,6 +1780,8 @@ export type Database = {
           id: string
           location_text: string | null
           organization_id: string
+          payment_note: string | null
+          paypal_link: string | null
           program_run_id: string | null
           registration_open: boolean
           session_number: number | null
@@ -1642,10 +1790,16 @@ export type Database = {
           updated_at: string
           updated_by_profile_id: string | null
           walk_in_fee: number | null
+          zelle_name: string | null
+          zelle_recipient: string | null
         }
         Insert: {
           audience_node_id?: string | null
           cancel_reason?: string | null
+          cash_check_note?: string | null
+          check_mailing_address?: string | null
+          check_payable_to?: string | null
+          child_fee?: number | null
           created_at?: string
           created_by_profile_id: string
           description?: string | null
@@ -1663,6 +1817,8 @@ export type Database = {
           id?: string
           location_text?: string | null
           organization_id: string
+          payment_note?: string | null
+          paypal_link?: string | null
           program_run_id?: string | null
           registration_open?: boolean
           session_number?: number | null
@@ -1671,10 +1827,16 @@ export type Database = {
           updated_at?: string
           updated_by_profile_id?: string | null
           walk_in_fee?: number | null
+          zelle_name?: string | null
+          zelle_recipient?: string | null
         }
         Update: {
           audience_node_id?: string | null
           cancel_reason?: string | null
+          cash_check_note?: string | null
+          check_mailing_address?: string | null
+          check_payable_to?: string | null
+          child_fee?: number | null
           created_at?: string
           created_by_profile_id?: string
           description?: string | null
@@ -1692,6 +1854,8 @@ export type Database = {
           id?: string
           location_text?: string | null
           organization_id?: string
+          payment_note?: string | null
+          paypal_link?: string | null
           program_run_id?: string | null
           registration_open?: boolean
           session_number?: number | null
@@ -1700,6 +1864,8 @@ export type Database = {
           updated_at?: string
           updated_by_profile_id?: string | null
           walk_in_fee?: number | null
+          zelle_name?: string | null
+          zelle_recipient?: string | null
         }
         Relationships: [
           {
@@ -3366,6 +3532,7 @@ export type Database = {
           meeting_timezone_name: string | null
           organization_id: string
           pastoral_level: string
+          section_node_id: string | null
           target_member_count: number | null
           updated_at: string
           updated_by: string | null
@@ -3388,6 +3555,7 @@ export type Database = {
           meeting_timezone_name?: string | null
           organization_id: string
           pastoral_level?: string
+          section_node_id?: string | null
           target_member_count?: number | null
           updated_at?: string
           updated_by?: string | null
@@ -3410,6 +3578,7 @@ export type Database = {
           meeting_timezone_name?: string | null
           organization_id?: string
           pastoral_level?: string
+          section_node_id?: string | null
           target_member_count?: number | null
           updated_at?: string
           updated_by?: string | null
@@ -3442,6 +3611,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "timezones"
             referencedColumns: ["name"]
+          },
+          {
+            foreignKeyName: "households_section_node_id_fkey"
+            columns: ["section_node_id"]
+            isOneToOne: false
+            referencedRelation: "governance_nodes"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -5489,6 +5665,114 @@ export type Database = {
           },
         ]
       }
+      member_reminder_preferences: {
+        Row: {
+          email_enabled: boolean
+          member_id: string
+          organization_id: string
+          unsubscribe_token: string
+          updated_at: string
+          updated_by_profile_id: string | null
+        }
+        Insert: {
+          email_enabled?: boolean
+          member_id: string
+          organization_id: string
+          unsubscribe_token?: string
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Update: {
+          email_enabled?: boolean
+          member_id?: string
+          organization_id?: string
+          unsubscribe_token?: string
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_reminder_preferences_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: true
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_reminder_preferences_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_reminder_preferences_updated_by_profile_id_fkey"
+            columns: ["updated_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      member_replies: {
+        Row: {
+          event_id: string | null
+          household_meeting_id: string | null
+          id: string
+          member_id: string
+          organization_id: string
+          responded_at: string
+          response: string
+        }
+        Insert: {
+          event_id?: string | null
+          household_meeting_id?: string | null
+          id?: string
+          member_id: string
+          organization_id: string
+          responded_at?: string
+          response: string
+        }
+        Update: {
+          event_id?: string | null
+          household_meeting_id?: string | null
+          id?: string
+          member_id?: string
+          organization_id?: string
+          responded_at?: string
+          response?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_replies_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_replies_household_meeting_id_fkey"
+            columns: ["household_meeting_id"]
+            isOneToOne: false
+            referencedRelation: "household_meetings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_replies_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_replies_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       member_status_history: {
         Row: {
           approved_at: string | null
@@ -5925,6 +6209,199 @@ export type Database = {
           },
         ]
       }
+      official_document_settings: {
+        Row: {
+          drive_folder_id: string | null
+          organization_id: string
+          updated_at: string
+          updated_by_profile_id: string | null
+        }
+        Insert: {
+          drive_folder_id?: string | null
+          organization_id: string
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Update: {
+          drive_folder_id?: string | null
+          organization_id?: string
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "official_document_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "official_document_settings_updated_by_profile_id_fkey"
+            columns: ["updated_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      official_document_sync_runs: {
+        Row: {
+          error_text: string | null
+          failed_count: number
+          id: string
+          listed_count: number
+          new_count: number
+          organization_id: string
+          pending_count: number
+          ran_at: string
+          removed_count: number
+          skipped_count: number
+          trigger_source: string
+          updated_count: number
+        }
+        Insert: {
+          error_text?: string | null
+          failed_count?: number
+          id?: string
+          listed_count?: number
+          new_count?: number
+          organization_id: string
+          pending_count?: number
+          ran_at?: string
+          removed_count?: number
+          skipped_count?: number
+          trigger_source: string
+          updated_count?: number
+        }
+        Update: {
+          error_text?: string | null
+          failed_count?: number
+          id?: string
+          listed_count?: number
+          new_count?: number
+          organization_id?: string
+          pending_count?: number
+          ran_at?: string
+          removed_count?: number
+          skipped_count?: number
+          trigger_source?: string
+          updated_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "official_document_sync_runs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      official_documents: {
+        Row: {
+          category: string
+          copied_at: string | null
+          copied_md5: string | null
+          copied_modified_at: string | null
+          drive_file_id: string
+          drive_md5: string | null
+          drive_modified_at: string
+          file_extension: string
+          file_size: number | null
+          first_seen_at: string
+          folder_path: string | null
+          id: string
+          organization_id: string
+          source_mime_type: string
+          storage_path: string | null
+          stored_mime_type: string
+          title: string
+        }
+        Insert: {
+          category?: string
+          copied_at?: string | null
+          copied_md5?: string | null
+          copied_modified_at?: string | null
+          drive_file_id: string
+          drive_md5?: string | null
+          drive_modified_at: string
+          file_extension: string
+          file_size?: number | null
+          first_seen_at?: string
+          folder_path?: string | null
+          id?: string
+          organization_id: string
+          source_mime_type: string
+          storage_path?: string | null
+          stored_mime_type: string
+          title: string
+        }
+        Update: {
+          category?: string
+          copied_at?: string | null
+          copied_md5?: string | null
+          copied_modified_at?: string | null
+          drive_file_id?: string
+          drive_md5?: string | null
+          drive_modified_at?: string
+          file_extension?: string
+          file_size?: number | null
+          first_seen_at?: string
+          folder_path?: string | null
+          id?: string
+          organization_id?: string
+          source_mime_type?: string
+          storage_path?: string | null
+          stored_mime_type?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "official_documents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_check_in_settings: {
+        Row: {
+          accept_legacy_id_cards: boolean
+          organization_id: string
+          updated_at: string
+          updated_by_profile_id: string | null
+        }
+        Insert: {
+          accept_legacy_id_cards?: boolean
+          organization_id: string
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Update: {
+          accept_legacy_id_cards?: boolean
+          organization_id?: string
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_check_in_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_check_in_settings_updated_by_profile_id_fkey"
+            columns: ["updated_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_features: {
         Row: {
           configuration: Json
@@ -6005,6 +6482,102 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_payment_details: {
+        Row: {
+          cash_check_note: string | null
+          check_mailing_address: string | null
+          check_payable_to: string | null
+          organization_id: string
+          payment_note: string | null
+          paypal_link: string | null
+          updated_at: string
+          updated_by_profile_id: string | null
+          zelle_name: string | null
+          zelle_recipient: string | null
+        }
+        Insert: {
+          cash_check_note?: string | null
+          check_mailing_address?: string | null
+          check_payable_to?: string | null
+          organization_id: string
+          payment_note?: string | null
+          paypal_link?: string | null
+          updated_at?: string
+          updated_by_profile_id?: string | null
+          zelle_name?: string | null
+          zelle_recipient?: string | null
+        }
+        Update: {
+          cash_check_note?: string | null
+          check_mailing_address?: string | null
+          check_payable_to?: string | null
+          organization_id?: string
+          payment_note?: string | null
+          paypal_link?: string | null
+          updated_at?: string
+          updated_by_profile_id?: string | null
+          zelle_name?: string | null
+          zelle_recipient?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_payment_details_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_payment_details_updated_by_profile_id_fkey"
+            columns: ["updated_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_reminder_settings: {
+        Row: {
+          daily_email_limit: number
+          email_mode: string
+          organization_id: string
+          push_mode: string
+          test_member_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          daily_email_limit?: number
+          email_mode?: string
+          organization_id: string
+          push_mode?: string
+          test_member_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          daily_email_limit?: number
+          email_mode?: string
+          organization_id?: string
+          push_mode?: string
+          test_member_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_reminder_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_reminder_settings_test_member_id_fkey"
+            columns: ["test_member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
             referencedColumns: ["id"]
           },
         ]
@@ -7304,6 +7877,145 @@ export type Database = {
           },
         ]
       }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          device_label: string | null
+          disabled_at: string | null
+          endpoint: string
+          failure_count: number
+          id: string
+          last_success_at: string | null
+          member_id: string
+          organization_id: string
+          p256dh: string
+          profile_id: string | null
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          device_label?: string | null
+          disabled_at?: string | null
+          endpoint: string
+          failure_count?: number
+          id?: string
+          last_success_at?: string | null
+          member_id: string
+          organization_id: string
+          p256dh: string
+          profile_id?: string | null
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          device_label?: string | null
+          disabled_at?: string | null
+          endpoint?: string
+          failure_count?: number
+          id?: string
+          last_success_at?: string | null
+          member_id?: string
+          organization_id?: string
+          p256dh?: string
+          profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_subscriptions_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "push_subscriptions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "push_subscriptions_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reminder_deliveries: {
+        Row: {
+          attempts: number
+          channel: string
+          claimed_at: string
+          clicked_at: string | null
+          days_before: number
+          error_text: string | null
+          id: string
+          item_id: string
+          item_kind: string
+          member_id: string
+          opened_at: string | null
+          organization_id: string
+          provider_message_id: string | null
+          reminder_type: string
+          sent_at: string | null
+          status: string
+        }
+        Insert: {
+          attempts?: number
+          channel?: string
+          claimed_at?: string
+          clicked_at?: string | null
+          days_before: number
+          error_text?: string | null
+          id?: string
+          item_id: string
+          item_kind: string
+          member_id: string
+          opened_at?: string | null
+          organization_id: string
+          provider_message_id?: string | null
+          reminder_type: string
+          sent_at?: string | null
+          status?: string
+        }
+        Update: {
+          attempts?: number
+          channel?: string
+          claimed_at?: string
+          clicked_at?: string | null
+          days_before?: number
+          error_text?: string | null
+          id?: string
+          item_id?: string
+          item_kind?: string
+          member_id?: string
+          opened_at?: string | null
+          organization_id?: string
+          provider_message_id?: string | null
+          reminder_type?: string
+          sent_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reminder_deliveries_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reminder_deliveries_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       role_permissions: {
         Row: {
           app_role_id: string
@@ -8188,9 +8900,9 @@ export type Database = {
           p_event_id: string
           p_first_name: string
           p_host_member_id?: string
+          p_is_child?: boolean
           p_last_name: string
           p_organization_id: string
-          p_is_child?: boolean
           p_phone?: string
           p_walk_in?: boolean
         }
@@ -8249,7 +8961,10 @@ export type Database = {
         Args: { p_organization_id: string; p_sub_area_node_id: string }
         Returns: Json
       }
-      apply_official_documents_listing: { Args: { p_items: Json; p_organization_id: string }; Returns: Json }
+      apply_official_documents_listing: {
+        Args: { p_items: Json; p_organization_id: string }
+        Returns: Json
+      }
       appoint_area_coordinator: {
         Args: {
           p_effective_from?: string
@@ -8512,6 +9227,14 @@ export type Database = {
         Args: { p_client_key: string; p_code: string }
         Returns: Json
       }
+      claim_due_push_reminders: {
+        Args: { p_limit?: number; p_today?: string }
+        Returns: Json
+      }
+      claim_due_reminders: {
+        Args: { p_limit?: number; p_today?: string }
+        Returns: Json
+      }
       claim_email_has_login: { Args: { p_email: string }; Returns: boolean }
       close_governance_node: {
         Args: {
@@ -8541,6 +9264,7 @@ export type Database = {
         }
         Returns: Json
       }
+      complete_reminders: { Args: { p_results: Json }; Returns: number }
       conclude_servant_leader: {
         Args: {
           p_effective_to?: string
@@ -8783,7 +9507,14 @@ export type Database = {
         }
         Returns: Json
       }
-      get_check_in_settings: { Args: { p_organization_id: string }; Returns: Json }
+      get_activity_report: {
+        Args: { p_day?: string; p_organization_id: string }
+        Returns: Json
+      }
+      get_check_in_settings: {
+        Args: { p_organization_id: string }
+        Returns: Json
+      }
       get_current_authorization_context: {
         Args: { p_organization_id: string }
         Returns: Json
@@ -8810,6 +9541,10 @@ export type Database = {
         Returns: Json
       }
       get_event_payments: {
+        Args: { p_event_id: string; p_organization_id: string }
+        Returns: Json
+      }
+      get_event_replies: {
         Args: { p_event_id: string; p_organization_id: string }
         Returns: Json
       }
@@ -8869,11 +9604,18 @@ export type Database = {
         Args: { p_household_node_id: string; p_organization_id: string }
         Returns: Json
       }
+      get_household_place_slots: {
+        Args: { p_organization_id: string }
+        Returns: Json
+      }
       get_household_profile: {
         Args: { p_household_id: string; p_organization_id: string }
         Returns: Json
       }
-      get_household_sections: { Args: { p_organization_id: string }; Returns: Json }
+      get_household_sections: {
+        Args: { p_organization_id: string }
+        Returns: Json
+      }
       get_household_topic_history: {
         Args: {
           p_household_node_id: string
@@ -8881,6 +9623,10 @@ export type Database = {
           p_offset?: number
           p_organization_id: string
         }
+        Returns: Json
+      }
+      get_meeting_replies: {
+        Args: { p_household_meeting_id: string; p_organization_id: string }
         Returns: Json
       }
       get_member_account_invitation_details: {
@@ -8975,18 +9721,6 @@ export type Database = {
           status_id: string
         }[]
       }
-      get_activity_report: {
-        Args: { p_day?: string; p_organization_id: string }
-        Returns: Json
-      }
-      get_household_place_slots: {
-        Args: { p_organization_id: string }
-        Returns: {
-          unit_id: string
-          household_count: number
-          can_create_household: boolean
-        }[]
-      }
       get_my_event_access: {
         Args: { p_organization_id: string }
         Returns: Json
@@ -8996,11 +9730,6 @@ export type Database = {
         Returns: Json
       }
       get_my_member_card: { Args: { p_organization_id: string }; Returns: Json }
-      get_my_push_status: { Args: { p_organization_id: string }; Returns: Json }
-      get_my_reminder_preferences: {
-        Args: { p_organization_id: string }
-        Returns: Json
-      }
       get_my_member_context: {
         Args: { p_organization_id: string }
         Returns: Json
@@ -9014,14 +9743,25 @@ export type Database = {
         Args: { p_organization_id: string }
         Returns: Json
       }
+      get_my_push_status: { Args: { p_organization_id: string }; Returns: Json }
+      get_my_reminder_preferences: {
+        Args: { p_organization_id: string }
+        Returns: Json
+      }
       get_my_service: { Args: { p_organization_id: string }; Returns: Json }
       get_node_paths: { Args: { p_organization_id: string }; Returns: Json }
       get_node_section: {
         Args: { p_node_id: string; p_organization_id: string }
         Returns: Json
       }
-      get_official_documents_access: { Args: { p_organization_id: string }; Returns: Json }
-      get_official_documents_folder: { Args: { p_organization_id: string }; Returns: string }
+      get_official_documents_access: {
+        Args: { p_organization_id: string }
+        Returns: Json
+      }
+      get_official_documents_folder: {
+        Args: { p_organization_id: string }
+        Returns: string
+      }
       get_pastoral_household_roster: {
         Args: { p_household_id: string; p_organization_id: string }
         Returns: Json
@@ -9032,6 +9772,10 @@ export type Database = {
       }
       get_pastoral_placement_review: {
         Args: { p_leadership_assignment_id: string; p_organization_id: string }
+        Returns: Json
+      }
+      get_payment_details: {
+        Args: { p_event_id?: string; p_organization_id: string }
         Returns: Json
       }
       get_placement_nodes: {
@@ -9065,7 +9809,10 @@ export type Database = {
         Args: { p_event_id: string; p_organization_id: string }
         Returns: Json
       }
-      get_section_options: { Args: { p_organization_id: string }; Returns: Json }
+      get_section_options: {
+        Args: { p_organization_id: string }
+        Returns: Json
+      }
       get_sections_overview: {
         Args: { p_organization_id: string }
         Returns: Json
@@ -9148,6 +9895,10 @@ export type Database = {
         Args: { p_organization_id: string }
         Returns: Json
       }
+      list_event_payment_reports: {
+        Args: { p_event_id: string; p_organization_id: string }
+        Returns: Json
+      }
       list_events: {
         Args: { p_from: string; p_organization_id: string; p_to: string }
         Returns: Json
@@ -9184,7 +9935,15 @@ export type Database = {
         Args: { p_organization_id: string }
         Returns: Json
       }
-      list_official_documents: { Args: { p_organization_id: string }; Returns: Json }
+      list_my_payment_reports: {
+        Args: { p_organization_id: string }
+        Returns: Json
+      }
+      list_my_replies: { Args: { p_organization_id: string }; Returns: Json }
+      list_official_documents: {
+        Args: { p_organization_id: string }
+        Returns: Json
+      }
       list_program_runs: {
         Args: { p_include_closed?: boolean; p_organization_id: string }
         Returns: Json
@@ -9321,7 +10080,10 @@ export type Database = {
         }
         Returns: Json
       }
-      official_documents_to_copy: { Args: { p_organization_id: string }; Returns: Json }
+      official_documents_to_copy: {
+        Args: { p_organization_id: string }
+        Returns: Json
+      }
       place_members_bulk: {
         Args: {
           p_effective_from: string
@@ -9356,7 +10118,6 @@ export type Database = {
         }
         Returns: string
       }
-      record_my_app_open: { Args: { p_organization_id: string }; Returns: undefined }
       record_consent: {
         Args: {
           p_actor_profile_id?: string
@@ -9446,6 +10207,10 @@ export type Database = {
         }
         Returns: Json
       }
+      record_my_app_open: {
+        Args: { p_organization_id: string }
+        Returns: undefined
+      }
       record_official_documents_sync_run: {
         Args: {
           p_error: string
@@ -9461,6 +10226,7 @@ export type Database = {
         }
         Returns: string
       }
+      record_push_results: { Args: { p_results: Json }; Returns: number }
       record_topic_library_sync_run: {
         Args: {
           p_changed_count: number
@@ -9503,16 +10269,17 @@ export type Database = {
         }
         Returns: string
       }
-      remove_my_push_subscription: {
-        Args: { p_endpoint: string; p_organization_id: string }
-        Returns: Json
-      }
       reissue_member_card: {
         Args: {
           p_member_id?: string
           p_organization_id: string
           p_reason?: string
         }
+        Returns: Json
+      }
+      reminder_unsubscribe: { Args: { p_token: string }; Returns: Json }
+      remove_my_push_subscription: {
+        Args: { p_endpoint: string; p_organization_id: string }
         Returns: Json
       }
       rename_structure_node: {
@@ -9538,6 +10305,17 @@ export type Database = {
         }
         Returns: Json
       }
+      report_my_event_payment: {
+        Args: {
+          p_amount: number
+          p_event_id: string
+          p_organization_id: string
+          p_payment_method: string
+          p_reference?: string
+          p_report_kind?: string
+        }
+        Returns: Json
+      }
       reschedule_household_topic: {
         Args: {
           p_household_topic_assignment_id: string
@@ -9559,7 +10337,11 @@ export type Database = {
         Returns: Json
       }
       retire_structure_node: {
-        Args: { p_node_id: string; p_organization_id: string; p_reason?: string }
+        Args: {
+          p_node_id: string
+          p_organization_id: string
+          p_reason?: string
+        }
         Returns: Json
       }
       revert_member_deceased: {
@@ -9568,6 +10350,15 @@ export type Database = {
           p_member_id: string
           p_organization_id: string
           p_reason?: string
+        }
+        Returns: Json
+      }
+      review_event_payment_report: {
+        Args: {
+          p_confirm: boolean
+          p_decline_reason?: string
+          p_organization_id: string
+          p_report_id: string
         }
         Returns: Json
       }
@@ -9616,6 +10407,16 @@ export type Database = {
           p_leadership_assignment_id?: string
           p_organization_id: string
           p_reason?: string
+        }
+        Returns: Json
+      }
+      save_my_push_subscription: {
+        Args: {
+          p_auth: string
+          p_device_label?: string
+          p_endpoint: string
+          p_organization_id: string
+          p_p256dh: string
         }
         Returns: Json
       }
@@ -9824,12 +10625,39 @@ export type Database = {
         }
         Returns: Json
       }
+      set_my_reminder_preferences: {
+        Args: { p_email_enabled: boolean; p_organization_id: string }
+        Returns: Json
+      }
+      set_my_reply: {
+        Args: {
+          p_event_id?: string
+          p_household_meeting_id?: string
+          p_organization_id: string
+          p_response?: string
+        }
+        Returns: Json
+      }
       set_my_wedding_date: {
         Args: { p_organization_id: string; p_wedding_date: string }
         Returns: Json
       }
       set_official_documents_folder: {
         Args: { p_drive_folder_id: string; p_organization_id: string }
+        Returns: Json
+      }
+      set_payment_details: {
+        Args: {
+          p_cash_check_note?: string
+          p_check_mailing_address?: string
+          p_check_payable_to?: string
+          p_event_id?: string
+          p_organization_id: string
+          p_payment_note?: string
+          p_paypal_link?: string
+          p_zelle_name?: string
+          p_zelle_recipient?: string
+        }
         Returns: Json
       }
       set_program_participant_attendance: {
@@ -9858,8 +10686,6 @@ export type Database = {
         }
         Returns: Json
       }
-      show_limit: { Args: never; Returns: number }
-      show_trgm: { Args: { "": string }; Returns: string[] }
       set_servant_leader_interim: {
         Args: {
           p_is_interim: boolean
@@ -9868,92 +10694,8 @@ export type Database = {
         }
         Returns: Json
       }
-      get_event_replies: {
-        Args: { p_event_id: string; p_organization_id: string }
-        Returns: Json
-      }
-      get_meeting_replies: {
-        Args: { p_household_meeting_id: string; p_organization_id: string }
-        Returns: Json
-      }
-      list_my_replies: {
-        Args: { p_organization_id: string }
-        Returns: Json
-      }
-      set_my_reply: {
-        Args: {
-          p_event_id?: string
-          p_household_meeting_id?: string
-          p_organization_id: string
-          p_response?: string
-        }
-        Returns: Json
-      }
-      get_payment_details: {
-        Args: { p_event_id?: string; p_organization_id: string }
-        Returns: Json
-      }
-      list_event_payment_reports: {
-        Args: { p_event_id: string; p_organization_id: string }
-        Returns: Json
-      }
-      list_my_payment_reports: {
-        Args: { p_organization_id: string }
-        Returns: Json
-      }
-      report_my_event_payment: {
-        Args: {
-          p_amount: number
-          p_event_id: string
-          p_organization_id: string
-          p_payment_method: string
-          p_reference?: string
-          p_report_kind?: string
-        }
-        Returns: Json
-      }
-      review_event_payment_report: {
-        Args: {
-          p_confirm: boolean
-          p_decline_reason?: string
-          p_organization_id: string
-          p_report_id: string
-        }
-        Returns: Json
-      }
-      save_my_push_subscription: {
-        Args: {
-          p_auth: string
-          p_device_label?: string
-          p_endpoint: string
-          p_organization_id: string
-          p_p256dh: string
-        }
-        Returns: Json
-      }
-      set_my_reminder_preferences: {
-        Args: { p_email_enabled: boolean; p_organization_id: string }
-        Returns: Json
-      }
-      set_payment_details: {
-        Args: {
-          p_cash_check_note?: string
-          p_check_mailing_address?: string
-          p_check_payable_to?: string
-          p_event_id?: string
-          p_organization_id: string
-          p_payment_note?: string
-          p_paypal_link?: string
-          p_zelle_name?: string
-          p_zelle_recipient?: string
-        }
-        Returns: Json
-      }
-      verify_docs_sync_secret: { Args: { p_secret: string }; Returns: boolean }
-      withdraw_my_payment_report: {
-        Args: { p_organization_id: string; p_report_id: string }
-        Returns: Json
-      }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
       skip_household_topic: {
         Args: {
           p_household_topic_assignment_id: string
@@ -9969,6 +10711,10 @@ export type Database = {
           p_reason: string
         }
         Returns: undefined
+      }
+      track_reminder_event: {
+        Args: { p_delivery_id: string; p_event: string }
+        Returns: boolean
       }
       transfer_household_member: {
         Args: {
@@ -10126,6 +10872,7 @@ export type Database = {
         }
         Returns: string
       }
+      verify_docs_sync_secret: { Args: { p_secret: string }; Returns: boolean }
       verify_profile_member_link: {
         Args: {
           p_actor_profile_id: string
@@ -10137,6 +10884,7 @@ export type Database = {
         }
         Returns: string
       }
+      verify_reminders_secret: { Args: { p_secret: string }; Returns: boolean }
       verify_topic_sync_secret: { Args: { p_secret: string }; Returns: boolean }
       void_event_guest_payment: {
         Args: { p_organization_id: string; p_payment_id: string }
@@ -10160,6 +10908,10 @@ export type Database = {
           p_talk_record_id: string
           p_void_reason: string
         }
+        Returns: Json
+      }
+      withdraw_my_payment_report: {
+        Args: { p_organization_id: string; p_report_id: string }
         Returns: Json
       }
     }
