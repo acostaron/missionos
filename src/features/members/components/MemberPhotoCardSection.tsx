@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Camera, QrCode } from 'lucide-react';
+import { Camera, Download, QrCode } from 'lucide-react';
+import QRCode from 'qrcode';
 import { MemberPhotoUploader } from '../../self-service/components/MemberPhotoUploader';
-import { useReissueMemberCard } from '../../self-service/portal-api';
+import { useMyMemberCard, useReissueMemberCard } from '../../self-service/portal-api';
 import { useMemberPhotoPath } from '../queries';
+import { usePermissions } from '../../../hooks/use-permissions';
+import { Permissions } from '../../../types/permissions';
 import { getEventErrorMessage } from '../../events/error-message';
 import { Alert, Button, FormField, Modal, Textarea } from '../../../components/ui';
 
@@ -11,14 +14,23 @@ export interface MemberPhotoCardSectionProps {
   organizationId: string;
   memberId: string;
   memberName: string;
+  memberNumber?: string | null;
+  canEditPhoto?: boolean;
+  canManageQr?: boolean;
 }
 
 export function MemberPhotoCardSection({
   organizationId,
   memberId,
   memberName,
+  memberNumber,
+  canEditPhoto = true,
+  canManageQr: canManageQrProp,
 }: MemberPhotoCardSectionProps) {
   const queryClient = useQueryClient();
+  const { hasPermission, isLoading: isPermLoading } = usePermissions();
+  const canManageQr = canManageQrProp !== undefined ? canManageQrProp : (!isPermLoading && hasPermission(Permissions.MembersQrManage));
+
   const { data: photoData } = useMemberPhotoPath(organizationId, memberId);
   const [localPhotoPath, setLocalPhotoPath] = useState<string | null | undefined>(undefined);
 
@@ -37,8 +49,33 @@ export function MemberPhotoCardSection({
   const [reissueReason, setReissueReason] = useState('');
   const [qrSuccessMsg, setQrSuccessMsg] = useState<string | null>(null);
   const [qrErrorMsg, setQrErrorMsg] = useState<string | null>(null);
+  const [issuedQrPayload, setIssuedQrPayload] = useState<string | null>(null);
+
+  const { data: myCard } = useMyMemberCard(organizationId);
+  const isOwnProfile = myCard?.member_id === memberId;
+  const activeQrPayload = issuedQrPayload || (isOwnProfile ? myCard?.qr_payload : null);
 
   const reissueMutation = useReissueMemberCard();
+
+  const handleSaveQrImage = async () => {
+    if (!activeQrPayload) return;
+    try {
+      const dataUrl = await QRCode.toDataURL(activeQrPayload, {
+        errorCorrectionLevel: 'M',
+        margin: 2,
+        width: 320,
+      });
+      const link = document.createElement('a');
+      const num = memberNumber || 'member';
+      link.download = `MFCNY-${num}-QR.png`;
+      link.href = dataUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch {
+      setQrErrorMsg('Failed to generate QR image for download.');
+    }
+  };
 
   const handleReissueQr = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,11 +85,12 @@ export function MemberPhotoCardSection({
     setQrSuccessMsg(null);
 
     try {
-      await reissueMutation.mutateAsync({
+      const newCard = await reissueMutation.mutateAsync({
         organizationId,
         memberId,
         reason: reissueReason.trim(),
       });
+      setIssuedQrPayload(newCard.qr_payload);
       setQrSuccessMsg("A new QR was issued. The member's old QR no longer works.");
       setIsQrModalOpen(false);
       setReissueReason('');
@@ -89,85 +127,105 @@ export function MemberPhotoCardSection({
         )}
 
         {/* Photo Uploader */}
-        <MemberPhotoUploader
-          organizationId={organizationId}
-          memberId={memberId}
-          effectiveMemberId={memberId}
-          currentPath={photoPath}
-          memberName={memberName}
-          onPhotoChanged={handlePhotoChanged}
-        />
+        {canEditPhoto && (
+          <MemberPhotoUploader
+            organizationId={organizationId}
+            memberId={memberId}
+            effectiveMemberId={memberId}
+            currentPath={photoPath}
+            memberName={memberName}
+            onPhotoChanged={handlePhotoChanged}
+          />
+        )}
 
-        {/* QR Reissue */}
-        <div className="border-t border-line pt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <p className="text-small font-medium text-ink">Member QR Code</p>
-            <p className="text-caption text-ink-muted">
-              If the member lost their printed card or needs a new QR code, leaders may issue a replacement.
-            </p>
+        {/* QR Management */}
+        {canManageQr && (
+          <div className={`${canEditPhoto ? 'border-t border-line pt-4 ' : ''}flex flex-col sm:flex-row sm:items-center justify-between gap-3`}>
+            <div>
+              <p className="text-small font-medium text-ink">Member QR Code</p>
+              <p className="text-caption text-ink-muted">
+                If this member lost their card or needs a new QR code, authorized administrators may replace it.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleSaveQrImage}
+                disabled={!activeQrPayload}
+                className="gap-1.5"
+                title={!activeQrPayload ? 'Reissue or replace QR to export the active image' : 'Save QR Image'}
+              >
+                <Download className="h-4 w-4" />
+                Save QR Image
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setQrErrorMsg(null);
+                  setIsQrModalOpen(true);
+                }}
+                className="gap-1.5"
+              >
+                <QrCode className="h-4 w-4" />
+                Replace QR
+              </Button>
+            </div>
           </div>
-
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setQrErrorMsg(null);
-              setIsQrModalOpen(true);
-            }}
-            className="gap-1.5 shrink-0"
-          >
-            <QrCode className="h-4 w-4" />
-            Replace member&apos;s QR
-          </Button>
-        </div>
+        )}
       </div>
 
       {/* Reissue QR Modal */}
-      <Modal
-        open={isQrModalOpen}
-        onClose={() => setIsQrModalOpen(false)}
-        title="Replace Member's QR Code"
-        size="md"
-        footer={
-          <>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsQrModalOpen(false)}
-              disabled={reissueMutation.isPending}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              variant="danger"
-              disabled={reissueReason.trim().length < 5 || reissueMutation.isPending}
-              loading={reissueMutation.isPending}
-              onClick={handleReissueQr}
-            >
-              Issue New QR
-            </Button>
-          </>
-        }
-      >
-        <form onSubmit={handleReissueQr} className="space-y-4">
-          <p className="text-small text-ink-secondary">
-            The member&apos;s previous QR code will immediately be invalidated. Please provide a reason for the audit log (at least 5 characters).
-          </p>
+      {canManageQr && (
+        <Modal
+          open={isQrModalOpen}
+          onClose={() => setIsQrModalOpen(false)}
+          title="Replace this member's QR code?"
+          size="md"
+          footer={
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsQrModalOpen(false)}
+                disabled={reissueMutation.isPending}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="danger"
+                disabled={reissueReason.trim().length < 5 || reissueMutation.isPending}
+                loading={reissueMutation.isPending}
+                onClick={handleReissueQr}
+              >
+                Replace QR
+              </Button>
+            </>
+          }
+        >
+          <form onSubmit={handleReissueQr} className="space-y-4">
+            <p className="text-small text-ink-secondary">
+              The current QR code will stop working immediately. If this member has a printed ID card, a new ID card or QR label will need to be issued.
+            </p>
 
-          <FormField label="Reason for replacement" required>
-            <Textarea
-              value={reissueReason}
-              onChange={(e) => setReissueReason(e.target.value)}
-              placeholder="e.g. Member lost physical ID card / requested reset"
-              required
-              rows={3}
-              minLength={5}
-            />
-          </FormField>
-        </form>
-      </Modal>
+            <FormField label="Reason for replacement" required>
+              <Textarea
+                value={reissueReason}
+                onChange={(e) => setReissueReason(e.target.value)}
+                placeholder="e.g. Member lost physical ID card / requested reset"
+                required
+                rows={3}
+                minLength={5}
+              />
+            </FormField>
+          </form>
+        </Modal>
+      )}
     </div>
   );
 }

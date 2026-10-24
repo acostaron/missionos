@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import QRCode from 'qrcode';
-import { Download, RefreshCw, Sun, User, ShieldAlert } from 'lucide-react';
+import { Download, Sun, User, ShieldAlert } from 'lucide-react';
 import { useOrganizationContext } from '../hooks/use-organization-context';
-import { useMyMemberCard, useReissueMemberCard, type MemberCard } from '../features/self-service/portal-api';
+import { useMyMemberCard, type MemberCard } from '../features/self-service/portal-api';
 import { MemberAvatar } from '../features/self-service/components/MemberAvatar';
 import { getEventErrorMessage } from '../features/events/error-message';
-import { Alert, Button, Card, EmptyState, Modal } from '../components/ui';
+import { Alert, Button, Card, EmptyState } from '../components/ui';
+import { usePermissions } from '../hooks/use-permissions';
+import { Permissions } from '../types/permissions';
 
 interface OfflineCardData {
   payload: string;
@@ -27,15 +29,13 @@ interface OfflineCardData {
 export default function MyCardPage() {
   const { activeOrganization, isLoading: isOrgLoading } = useOrganizationContext();
   const orgId = activeOrganization?.id ?? null;
+  const { hasPermission, isLoading: isPermLoading } = usePermissions();
+  const canManageQr = !isPermLoading && hasPermission(Permissions.MembersQrManage);
 
   const { data: card, isLoading, error } = useMyMemberCard(orgId);
-  const reissueMutation = useReissueMemberCard();
 
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [offlineData, setOfflineData] = useState<OfflineCardData | null>(null);
-  const [isReplaceModalOpen, setIsReplaceModalOpen] = useState(false);
-  const [replaceError, setReplaceError] = useState<string | null>(null);
-  const [replaceSuccess, setReplaceSuccess] = useState<string | null>(null);
   const [isEnlarged, setIsEnlarged] = useState(false);
 
   const qrButtonRef = useRef<HTMLButtonElement>(null);
@@ -159,24 +159,6 @@ export default function MyCardPage() {
     document.body.removeChild(link);
   };
 
-  const handleReplaceQrConfirm = async () => {
-    if (!orgId) return;
-    setReplaceError(null);
-    setReplaceSuccess(null);
-
-    try {
-      await reissueMutation.mutateAsync({
-        organizationId: orgId,
-        memberId: null,
-        reason: 'Replaced by the member',
-      });
-      setReplaceSuccess('New QR issued successfully.');
-      setIsReplaceModalOpen(false);
-    } catch (err) {
-      setReplaceError(getEventErrorMessage(err));
-    }
-  };
-
   if (isOrgLoading || (isLoading && !offlineData)) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
@@ -265,11 +247,7 @@ export default function MyCardPage() {
         </Alert>
       )}
 
-      {replaceSuccess && (
-        <Alert variant="success">
-          {replaceSuccess}
-        </Alert>
-      )}
+
 
       {/* ID Card Display */}
       <div className="space-y-2 rounded-2xl border-2 border-line bg-white p-3 text-center text-slate-900 shadow-md sm:space-y-4 sm:p-6">
@@ -333,69 +311,22 @@ export default function MyCardPage() {
         </p>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex gap-2 sm:gap-3">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="flex-1 gap-2"
-          onClick={handleDownloadQr}
-          disabled={!qrDataUrl}
-        >
-          <Download className="h-4 w-4" />
-          Save QR image
-        </Button>
-
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="flex-1 gap-2 text-ink-secondary hover:text-ink"
-          onClick={() => setIsReplaceModalOpen(true)}
-        >
-          <RefreshCw className="h-4 w-4" />
-          Replace my QR
-        </Button>
-      </div>
-
-      {/* Replace Confirmation Modal */}
-      <Modal
-        open={isReplaceModalOpen}
-        onClose={() => setIsReplaceModalOpen(false)}
-        title="Replace Your QR Code?"
-        size="md"
-        footer={
-          <>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsReplaceModalOpen(false)}
-              disabled={reissueMutation.isPending}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              variant="danger"
-              onClick={handleReplaceQrConfirm}
-              loading={reissueMutation.isPending}
-            >
-              Replace QR Code
-            </Button>
-          </>
-        }
-      >
-        <div className="space-y-3">
-          {replaceError && <Alert variant="danger">{replaceError}</Alert>}
-          <p className="text-small text-ink-secondary">
-            Your old QR code (including any screenshots or printed copies) will stop working immediately.
-          </p>
-          <p className="text-small text-ink-secondary">
-            A new QR code will be generated and linked to your member number.
-          </p>
+      {/* Action Buttons - only shown when authorized to manage QR credentials */}
+      {canManageQr && (
+        <div className="flex">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="w-full gap-2"
+            onClick={handleDownloadQr}
+            disabled={!qrDataUrl}
+          >
+            <Download className="h-4 w-4" />
+            Save QR image
+          </Button>
         </div>
-      </Modal>
+      )}
 
       {/* Full-screen Enlarged QR Overlay */}
       {isEnlarged && qrDataUrl && activeCard && (

@@ -822,6 +822,7 @@ export default function MemberProfilePage() {
   });
 
   const canEditProfile = !isPermLoading && hasPermission(Permissions.MembersRecordsUpdate);
+  const canManageQr = !isPermLoading && hasPermission(Permissions.MembersQrManage);
   const canManageIdentifiers = !isPermLoading && hasPermission(Permissions.MembersIdentifiersManage);
   const canManageContacts = !isPermLoading && hasPermission(Permissions.MembersContactsManage);
   const canManageAddresses = !isPermLoading && hasPermission(Permissions.MembersAddressesManage);
@@ -1100,11 +1101,14 @@ export default function MemberProfilePage() {
         canProvision={canProvisionAccount}
         onSuccessToast={triggerToast}
       />
-      {canEditProfile && orgId && (
+      {(canEditProfile || canManageQr) && orgId && (
         <MemberPhotoCardSection
           organizationId={orgId}
           memberId={profile.id}
           memberName={profile.display_name}
+          memberNumber={profile.member_number}
+          canEditPhoto={canEditProfile}
+          canManageQr={canManageQr}
         />
       )}
       <IdentifiersSection identifiers={profile.identifiers} />
