@@ -1,14 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import QRCode from 'qrcode';
-import { Download, Sun, User, ShieldAlert } from 'lucide-react';
+import { Sun, User, ShieldAlert } from 'lucide-react';
 import { useOrganizationContext } from '../hooks/use-organization-context';
 import { useMyMemberCard, type MemberCard } from '../features/self-service/portal-api';
 import { MemberAvatar } from '../features/self-service/components/MemberAvatar';
 import { getEventErrorMessage } from '../features/events/error-message';
-import { Alert, Button, Card, EmptyState } from '../components/ui';
-import { usePermissions } from '../hooks/use-permissions';
-import { Permissions } from '../types/permissions';
+import { Alert, Card, EmptyState } from '../components/ui';
 
 interface OfflineCardData {
   payload: string;
@@ -29,8 +27,6 @@ interface OfflineCardData {
 export default function MyCardPage() {
   const { activeOrganization, isLoading: isOrgLoading } = useOrganizationContext();
   const orgId = activeOrganization?.id ?? null;
-  const { hasPermission, isLoading: isPermLoading } = usePermissions();
-  const canManageQr = !isPermLoading && hasPermission(Permissions.MembersQrManage);
 
   const { data: card, isLoading, error } = useMyMemberCard(orgId);
 
@@ -148,17 +144,6 @@ export default function MyCardPage() {
 
   const activeCard: MemberCard | OfflineCardData | null = card || offlineData;
 
-  const handleDownloadQr = () => {
-    if (!qrDataUrl) return;
-    const link = document.createElement('a');
-    const memberNum = activeCard?.member_number || 'member';
-    link.download = `MFC-ID-${memberNum}.png`;
-    link.href = qrDataUrl;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   if (isOrgLoading || (isLoading && !offlineData)) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
@@ -247,8 +232,6 @@ export default function MyCardPage() {
         </Alert>
       )}
 
-
-
       {/* ID Card Display */}
       <div className="space-y-2 rounded-2xl border-2 border-line bg-white p-3 text-center text-slate-900 shadow-md sm:space-y-4 sm:p-6">
         {/* Header */}
@@ -310,23 +293,6 @@ export default function MyCardPage() {
           <span>Turn brightness up to scan · tap the QR to enlarge</span>
         </p>
       </div>
-
-      {/* Action Buttons - only shown when authorized to manage QR credentials */}
-      {canManageQr && (
-        <div className="flex">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="w-full gap-2"
-            onClick={handleDownloadQr}
-            disabled={!qrDataUrl}
-          >
-            <Download className="h-4 w-4" />
-            Save QR image
-          </Button>
-        </div>
-      )}
 
       {/* Full-screen Enlarged QR Overlay */}
       {isEnlarged && qrDataUrl && activeCard && (
