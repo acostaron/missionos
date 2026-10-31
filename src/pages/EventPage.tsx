@@ -44,6 +44,7 @@ import {
 import { EventFormModal } from '../features/events/components/EventFormModal';
 import { CancelEventModal } from '../features/events/components/CancelEventModal';
 import { AddGreeterModal } from '../features/events/components/AddGreeterModal';
+import { ActivityTeamCards } from '../features/activity-team/components/ActivityTeamCards';
 import { money, useEventPaymentAccess } from '../features/events/payments';
 import { getEventErrorMessage } from '../features/events/error-message';
 import { mapsUrl } from '../lib/maps';
@@ -602,6 +603,13 @@ export default function EventPage() {
           </Card>
         )}
       </div>
+
+      {/* Pass 9.49: structured Speakers + Service Team */}
+      <ActivityTeamCards
+        organizationId={orgId}
+        target={{ eventId: event.id }}
+        locked={isCancelled}
+      />
 
       {/* Formation Posting Section for Course Talk */}
       {canPostFormation && (

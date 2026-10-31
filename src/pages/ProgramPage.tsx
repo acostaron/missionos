@@ -37,6 +37,7 @@ import { CancelProgramModal } from '../features/programs/components/CancelProgra
 import { ScheduleSessionModal } from '../features/programs/components/ScheduleSessionModal';
 import { AddParticipantModal } from '../features/programs/components/AddParticipantModal';
 import { EditParticipantModal } from '../features/programs/components/EditParticipantModal';
+import { ActivityTeamCards } from '../features/activity-team/components/ActivityTeamCards';
 import { formatNyDateLong, formatNyTimeRange } from '../lib/ny-time';
 import { getEventErrorMessage } from '../features/events/error-message';
 import type { EventSummary } from '../features/events/types';
@@ -410,6 +411,18 @@ export default function ProgramPage() {
           })}
         </div>
       </Card>
+
+      {/* Pass 9.49: SPEAKERS + SERVICE TEAM (program-level and per session) */}
+      {orgId && (
+        <ActivityTeamCards
+          organizationId={orgId}
+          target={{ programRunId: run.id }}
+          sessionOptions={sessions
+            .filter((s) => s.session_number != null)
+            .map((s) => ({ eventId: s.id, label: `Session ${s.session_number}` }))}
+          locked={run.run_status === 'cancelled'}
+        />
+      )}
 
       {/* PARTICIPANTS CARD */}
       <Card padding="comfortable" className="space-y-4">

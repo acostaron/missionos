@@ -39,6 +39,237 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_service_assignments: {
+        Row: {
+          created_at: string
+          created_by_profile_id: string
+          event_id: string | null
+          external_name: string | null
+          id: string
+          member_id: string | null
+          notes: string | null
+          organization_id: string
+          program_run_id: string | null
+          role_code: string
+          role_label: string | null
+          sort_order: number
+          team_group: string | null
+          updated_at: string
+          updated_by_profile_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by_profile_id: string
+          event_id?: string | null
+          external_name?: string | null
+          id?: string
+          member_id?: string | null
+          notes?: string | null
+          organization_id: string
+          program_run_id?: string | null
+          role_code: string
+          role_label?: string | null
+          sort_order?: number
+          team_group?: string | null
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by_profile_id?: string
+          event_id?: string | null
+          external_name?: string | null
+          id?: string
+          member_id?: string | null
+          notes?: string | null
+          organization_id?: string
+          program_run_id?: string | null
+          role_code?: string
+          role_label?: string | null
+          sort_order?: number
+          team_group?: string | null
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_service_assignments_created_by_profile_id_fkey"
+            columns: ["created_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_service_assignments_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_service_assignments_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_service_assignments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_service_assignments_program_run_id_fkey"
+            columns: ["program_run_id"]
+            isOneToOne: false
+            referencedRelation: "program_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_service_assignments_role_code_fkey"
+            columns: ["role_code"]
+            isOneToOne: false
+            referencedRelation: "activity_service_roles"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "activity_service_assignments_updated_by_profile_id_fkey"
+            columns: ["updated_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      activity_service_roles: {
+        Row: {
+          code: string
+          created_at: string
+          is_active: boolean
+          label: string
+          sort_order: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          is_active?: boolean
+          label: string
+          sort_order?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          is_active?: boolean
+          label?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      activity_speakers: {
+        Row: {
+          created_at: string
+          created_by_profile_id: string
+          event_id: string | null
+          external_name: string | null
+          external_organization: string | null
+          external_title: string | null
+          id: string
+          member_id: string | null
+          notes: string | null
+          organization_id: string
+          program_run_id: string | null
+          session_label: string | null
+          sort_order: number
+          speaker_role: string
+          topic_title: string | null
+          updated_at: string
+          updated_by_profile_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by_profile_id: string
+          event_id?: string | null
+          external_name?: string | null
+          external_organization?: string | null
+          external_title?: string | null
+          id?: string
+          member_id?: string | null
+          notes?: string | null
+          organization_id: string
+          program_run_id?: string | null
+          session_label?: string | null
+          sort_order?: number
+          speaker_role?: string
+          topic_title?: string | null
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by_profile_id?: string
+          event_id?: string | null
+          external_name?: string | null
+          external_organization?: string | null
+          external_title?: string | null
+          id?: string
+          member_id?: string | null
+          notes?: string | null
+          organization_id?: string
+          program_run_id?: string | null
+          session_label?: string | null
+          sort_order?: number
+          speaker_role?: string
+          topic_title?: string | null
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_speakers_created_by_profile_id_fkey"
+            columns: ["created_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_speakers_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_speakers_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_speakers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_speakers_program_run_id_fkey"
+            columns: ["program_run_id"]
+            isOneToOne: false
+            referencedRelation: "program_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_speakers_updated_by_profile_id_fkey"
+            columns: ["updated_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       addresses: {
         Row: {
           address_line_1: string
@@ -9929,6 +10160,14 @@ export type Database = {
         Args: { p_day?: string; p_organization_id: string }
         Returns: Json
       }
+      get_activity_team: {
+        Args: {
+          p_event_id?: string
+          p_organization_id: string
+          p_program_run_id?: string
+        }
+        Returns: Json
+      }
       get_check_in_settings: {
         Args: { p_organization_id: string }
         Returns: Json
@@ -10319,6 +10558,10 @@ export type Database = {
           p_verification_method: string
           p_verification_summary?: string
         }
+        Returns: Json
+      }
+      list_activity_service_roles: {
+        Args: { p_organization_id: string }
         Returns: Json
       }
       list_event_audience_options: {
@@ -10752,6 +10995,14 @@ export type Database = {
         Returns: Json
       }
       reminder_unsubscribe: { Args: { p_token: string }; Returns: Json }
+      remove_activity_service_assignment: {
+        Args: { p_assignment_id: string; p_organization_id: string }
+        Returns: Json
+      }
+      remove_activity_speaker: {
+        Args: { p_organization_id: string; p_speaker_id: string }
+        Returns: Json
+      }
       remove_my_push_subscription: {
         Args: { p_endpoint: string; p_organization_id: string }
         Returns: Json
@@ -10884,6 +11135,40 @@ export type Database = {
         }
         Returns: Json
       }
+      save_activity_service_assignment: {
+        Args: {
+          p_assignment_id?: string
+          p_event_id?: string
+          p_external_name?: string
+          p_member_id?: string
+          p_notes?: string
+          p_organization_id: string
+          p_program_run_id?: string
+          p_role_code?: string
+          p_role_label?: string
+          p_sort_order?: number
+          p_team_group?: string
+        }
+        Returns: Json
+      }
+      save_activity_speaker: {
+        Args: {
+          p_event_id?: string
+          p_external_name?: string
+          p_external_organization?: string
+          p_external_title?: string
+          p_member_id?: string
+          p_notes?: string
+          p_organization_id: string
+          p_program_run_id?: string
+          p_session_label?: string
+          p_sort_order?: number
+          p_speaker_id?: string
+          p_speaker_role?: string
+          p_topic_title?: string
+        }
+        Returns: Json
+      }
       save_my_push_subscription: {
         Args: {
           p_auth: string
@@ -10932,6 +11217,15 @@ export type Database = {
           p_record_status?: string
           p_search?: string
           p_status_ids?: string[]
+        }
+        Returns: Json
+      }
+      search_members_for_activity_team: {
+        Args: {
+          p_event_id?: string
+          p_organization_id: string
+          p_program_run_id?: string
+          p_query?: string
         }
         Returns: Json
       }
