@@ -6133,6 +6133,217 @@ export type Database = {
           },
         ]
       }
+      ministry_census_snapshot_rows: {
+        Row: {
+          active_member_count: number
+          branch_name: string | null
+          created_at: string
+          display_order: number
+          id: string
+          organization_id: string
+          section_category: string | null
+          section_code: string
+          section_name: string
+          section_node_id: string
+          snapshot_id: string
+        }
+        Insert: {
+          active_member_count: number
+          branch_name?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          organization_id: string
+          section_category?: string | null
+          section_code: string
+          section_name: string
+          section_node_id: string
+          snapshot_id: string
+        }
+        Update: {
+          active_member_count?: number
+          branch_name?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          organization_id?: string
+          section_category?: string | null
+          section_code?: string
+          section_name?: string
+          section_node_id?: string
+          snapshot_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ministry_census_snapshot_rows_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ministry_census_snapshot_rows_section_node_id_fkey"
+            columns: ["section_node_id"]
+            isOneToOne: false
+            referencedRelation: "governance_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ministry_census_snapshot_rows_snapshot_id_fkey"
+            columns: ["snapshot_id"]
+            isOneToOne: false
+            referencedRelation: "ministry_census_snapshots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ministry_census_snapshots: {
+        Row: {
+          captured_at: string
+          captured_by_profile_id: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          organization_id: string
+          reporting_period_id: string
+          snapshot_date: string
+          total_active_members: number
+          uncategorized_active_members: number
+          updated_at: string
+        }
+        Insert: {
+          captured_at?: string
+          captured_by_profile_id?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+          reporting_period_id: string
+          snapshot_date?: string
+          total_active_members: number
+          uncategorized_active_members?: number
+          updated_at?: string
+        }
+        Update: {
+          captured_at?: string
+          captured_by_profile_id?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          reporting_period_id?: string
+          snapshot_date?: string
+          total_active_members?: number
+          uncategorized_active_members?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ministry_census_snapshots_captured_by_profile_id_fkey"
+            columns: ["captured_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ministry_census_snapshots_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ministry_census_snapshots_reporting_period_id_fkey"
+            columns: ["reporting_period_id"]
+            isOneToOne: true
+            referencedRelation: "ministry_reporting_periods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ministry_reporting_periods: {
+        Row: {
+          approved_at: string | null
+          approved_by_profile_id: string | null
+          created_at: string
+          created_by_profile_id: string | null
+          id: string
+          notes: string | null
+          organization_id: string
+          period_end: string
+          period_quarter: number
+          period_start: string
+          period_year: number
+          report_type: string
+          status: string
+          updated_at: string
+          updated_by_profile_id: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by_profile_id?: string | null
+          created_at?: string
+          created_by_profile_id?: string | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          period_end: string
+          period_quarter: number
+          period_start: string
+          period_year: number
+          report_type?: string
+          status?: string
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by_profile_id?: string | null
+          created_at?: string
+          created_by_profile_id?: string | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          period_end?: string
+          period_quarter?: number
+          period_start?: string
+          period_year?: number
+          report_type?: string
+          status?: string
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ministry_reporting_periods_approved_by_profile_id_fkey"
+            columns: ["approved_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ministry_reporting_periods_created_by_profile_id_fkey"
+            columns: ["created_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ministry_reporting_periods_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ministry_reporting_periods_updated_by_profile_id_fkey"
+            columns: ["updated_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       number_sequences: {
         Row: {
           created_at: string
@@ -9330,6 +9541,10 @@ export type Database = {
         }
         Returns: Json
       }
+      capture_quarterly_census_snapshot: {
+        Args: { p_reporting_period_id: string }
+        Returns: Json
+      }
       change_meeting_topic: {
         Args: {
           p_meeting_id: string
@@ -9433,6 +9648,15 @@ export type Database = {
           p_leadership_assignment_id: string
           p_organization_id: string
           p_reason?: string
+        }
+        Returns: Json
+      }
+      create_draft_reporting_period: {
+        Args: {
+          p_notes?: string
+          p_organization_id: string
+          p_quarter: number
+          p_year: number
         }
         Returns: Json
       }
@@ -9971,6 +10195,14 @@ export type Database = {
         Args: { p_event_id: string; p_organization_id: string }
         Returns: Json
       }
+      get_quarterly_census_preview: {
+        Args: { p_organization_id: string; p_quarter: number; p_year: number }
+        Returns: Json
+      }
+      get_reporting_period: {
+        Args: { p_reporting_period_id: string }
+        Returns: Json
+      }
       get_section_options: {
         Args: { p_organization_id: string }
         Returns: Json
@@ -10116,6 +10348,10 @@ export type Database = {
       }
       list_program_runs: {
         Args: { p_include_closed?: boolean; p_organization_id: string }
+        Returns: Json
+      }
+      list_reporting_periods: {
+        Args: { p_organization_id: string }
         Returns: Json
       }
       list_servant_leader_offices: {
@@ -10884,6 +11120,10 @@ export type Database = {
           p_run_id: string
           p_status: string
         }
+        Returns: Json
+      }
+      set_reporting_period_status: {
+        Args: { p_reporting_period_id: string; p_status: string }
         Returns: Json
       }
       set_servant_leader_interim: {

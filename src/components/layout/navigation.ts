@@ -1,4 +1,4 @@
-import { Home, Users, CalendarDays, HeartHandshake, Library } from 'lucide-react';
+import { Home, Users, CalendarDays, HeartHandshake, Library, FileText } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { Permissions } from '../../types/permissions';
 import type { PermissionCode } from '../../types/permissions';
@@ -98,6 +98,18 @@ export const NAV_ITEMS: NavItem[] = [
       { label: 'Support', shortLabel: 'Support', to: '/app/support' },
     ],
     matchPaths: ['/app/library', '/app/formation', '/app/official-documents', '/app/support'],
+  },
+  {
+    id: 'nav-reports',
+    label: 'Reports',
+    shortLabel: 'Reports',
+    to: '/app/reports/census',
+    icon: FileText,
+    permission: Permissions.ReportsCensusView,
+    tabs: [
+      { label: 'Quarterly Census', shortLabel: 'Census', to: '/app/reports/census', permission: Permissions.ReportsCensusView },
+    ],
+    matchPaths: ['/app/reports'],
   },
 ];
 

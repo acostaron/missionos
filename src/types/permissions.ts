@@ -100,6 +100,11 @@ export const Permissions = {
   EventsView: 'events.view',
   EventsManage: 'events.manage',
   EventsAttendanceRecord: 'events.attendance.record',
+
+  // Pass 9.46: Quarterly Reporting & Census Snapshot
+  ReportsCensusView: 'reports.census.view',
+  ReportsCensusManage: 'reports.census.manage',
+  ReportsCensusApprove: 'reports.census.approve',
 } as const;
 
 export type PermissionCode = typeof Permissions[keyof typeof Permissions];
