@@ -12,7 +12,7 @@ import { PROGRAM_CODE_LABELS } from '../labels';
 import { useCreateProgramRun } from '../queries';
 import { useEventAudienceOptions } from '../../events/queries';
 import { getEventErrorMessage } from '../../events/error-message';
-import type { ProgramCode, ProgramRunSummary } from '../types';
+import type { ProgramCode, ProgramReportPriority, ProgramRunSummary } from '../types';
 
 interface NewProgramModalProps {
   open: boolean;
@@ -39,6 +39,9 @@ export function NewProgramModal({
   const [chapterCode, setChapterCode] = useState('');
   const [selectedSectionCodes, setSelectedSectionCodes] = useState<string[]>([]);
   const [sessionCount, setSessionCount] = useState<number>(1);
+  const [includeInQuarterlyReport, setIncludeInQuarterlyReport] = useState(false);
+  const [reportPriority, setReportPriority] = useState<ProgramReportPriority>('routine');
+  const [reportHighlight, setReportHighlight] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const programId = useId();
@@ -125,6 +128,9 @@ export function NewProgramModal({
     setProgramCode('youth_camp');
     setSessionCount(1);
     setDescription('');
+    setIncludeInQuarterlyReport(false);
+    setReportPriority('routine');
+    setReportHighlight('');
     setErrorMessage(null);
 
     const firstYouth = youthSections[0]?.code;
@@ -245,6 +251,9 @@ export function NewProgramModal({
         chapterCode: chapterCode || undefined,
         sectionCodes: selectedSectionCodes,
         sessionCount,
+        includeInQuarterlyReport,
+        reportPriority,
+        reportHighlight: reportHighlight.trim() || undefined,
       });
 
       onSuccess?.(res.run);
@@ -475,6 +484,61 @@ export function NewProgramModal({
             rows={3}
           />
         </FormField>
+
+        {/* Quarterly Ministry Reporting */}
+        <div className="border-t border-mist pt-4 space-y-4">
+          <div className="flex items-start gap-2">
+            <input
+              type="checkbox"
+              id="new-program-quarterly-report"
+              checked={includeInQuarterlyReport}
+              onChange={(e) => setIncludeInQuarterlyReport(e.target.checked)}
+              disabled={isSubmitting}
+              className="mt-1 h-4 w-4 rounded border-mist text-primary focus:ring-primary"
+            />
+            <div>
+              <label
+                htmlFor="new-program-quarterly-report"
+                className="text-small font-medium text-ink cursor-pointer"
+              >
+                Include in Quarterly Report
+              </label>
+              <p className="text-caption text-ink-muted">
+                Mark this program to be included in national and area quarterly ministry reporting.
+              </p>
+            </div>
+          </div>
+
+          {includeInQuarterlyReport && (
+            <div className="space-y-4 pl-6 border-l-2 border-primary/20">
+              <FormField label="Report Priority">
+                <Select
+                  value={reportPriority}
+                  onChange={(e) => setReportPriority(e.target.value as ProgramReportPriority)}
+                  disabled={isSubmitting}
+                >
+                  <option value="routine">Routine</option>
+                  <option value="ministry_activity">Ministry Activity</option>
+                  <option value="major_highlight">Major Highlight</option>
+                </Select>
+              </FormField>
+
+              <FormField
+                label="Program Highlight / Accomplishment"
+                hint="Briefly describe the main outcome, accomplishment, or ministry highlight from this program."
+              >
+                <Textarea
+                  value={reportHighlight}
+                  onChange={(e) => setReportHighlight(e.target.value)}
+                  placeholder="Key milestones, attendance highlights, spiritual fruits, or breakthrough stories..."
+                  disabled={isSubmitting}
+                  maxLength={2000}
+                  rows={3}
+                />
+              </FormField>
+            </div>
+          )}
+        </div>
       </form>
     </Modal>
   );

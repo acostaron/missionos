@@ -27,8 +27,10 @@ import {
 import {
   PROGRAM_CODE_LABELS,
   PROGRAM_STATUS_LABELS,
+  PROGRAM_REPORT_PRIORITY_LABELS,
   getProgramCodeBadgeVariant,
   getProgramStatusBadgeVariant,
+  getProgramReportPriorityBadgeVariant,
 } from '../features/programs/labels';
 import { EditProgramModal } from '../features/programs/components/EditProgramModal';
 import { CancelProgramModal } from '../features/programs/components/CancelProgramModal';
@@ -91,7 +93,6 @@ export default function ProgramPage() {
 
   const { run, sessions, participants } = detail;
   const canManage = run.can_manage;
-  const allSessionsScheduled = run.sessions_scheduled === run.session_count;
 
   const handleStatusChange = async (newStatus: 'running' | 'completed' | 'planned') => {
     setActionError(null);
@@ -152,6 +153,11 @@ export default function ProgramPage() {
               <Badge variant={getProgramStatusBadgeVariant(run.run_status)}>
                 {PROGRAM_STATUS_LABELS[run.run_status]}
               </Badge>
+              {canManage && run.include_in_quarterly_report && (
+                <Badge variant={getProgramReportPriorityBadgeVariant(run.report_priority)}>
+                  {`Quarterly Report · ${PROGRAM_REPORT_PRIORITY_LABELS[run.report_priority ?? 'routine']}`}
+                </Badge>
+              )}
             </div>
 
             <h1 className="text-h1 font-bold text-ink">{run.title}</h1>
@@ -175,12 +181,31 @@ export default function ProgramPage() {
                   <span className="font-semibold text-ink">Audience:</span> {run.audience_name}
                 </p>
               )}
+              {canManage && (
+                <p>
+                  <span className="font-semibold text-ink">Quarterly Report:</span>{' '}
+                  {run.include_in_quarterly_report
+                    ? PROGRAM_REPORT_PRIORITY_LABELS[run.report_priority ?? 'routine']
+                    : 'Not Included'}
+                </p>
+              )}
             </div>
 
             {run.description && (
               <p className="mt-2 whitespace-pre-line text-small text-ink">
                 {run.description}
               </p>
+            )}
+
+            {canManage && run.include_in_quarterly_report && run.report_highlight && (
+              <div className="mt-3 rounded-md bg-surface-subtle p-3 border border-mist">
+                <p className="text-caption font-semibold uppercase tracking-wider text-ink-muted">
+                  Program Highlight / Accomplishment
+                </p>
+                <p className="mt-1 whitespace-pre-line text-small text-ink">
+                  {run.report_highlight}
+                </p>
+              </div>
             )}
           </div>
 
@@ -258,15 +283,15 @@ export default function ProgramPage() {
           </Alert>
         )}
 
-        {/* Graduation Summary Line */}
+        {/* Completion Summary Line */}
         <div className="border-t border-line/60 pt-3">
-          {allSessionsScheduled ? (
+          {run.graduate_count != null ? (
             <p className="text-small font-semibold text-ink">
-              🎓 {run.graduate_count} graduate{run.graduate_count === 1 ? '' : 's'} (attended all {run.session_count} sessions)
+              🎓 {run.graduate_count} graduate{run.graduate_count === 1 ? '' : 's'}
             </p>
           ) : (
             <p className="text-small text-ink-muted">
-              Graduation is counted once all {run.session_count} sessions are scheduled.
+              Completion data not recorded
             </p>
           )}
         </div>

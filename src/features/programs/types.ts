@@ -3,6 +3,7 @@ import type { EventSummary } from '../events/types';
 export type ProgramCode = 'youth_camp' | 'discovery_camp' | 'cls' | 'other_program';
 export type ProgramRunStatus = 'planned' | 'running' | 'completed' | 'cancelled';
 export type ParticipantStatus = 'registered' | 'withdrawn';
+export type ProgramReportPriority = 'routine' | 'ministry_activity' | 'major_highlight';
 
 export interface ProgramSectionRef {
   code: string;
@@ -19,14 +20,19 @@ export interface ProgramRunSummary {
   chapter_name: string | null;
   sections: ProgramSectionRef[];
   audience_name: string;
+  audience_node_id?: string | null;
   session_count: number;
   sessions_scheduled: number;
   run_status: ProgramRunStatus;
   cancel_reason: string | null;
+  include_in_quarterly_report?: boolean | null;
+  report_priority?: ProgramReportPriority | null;
+  report_highlight?: string | null;
   participant_count: number;
-  graduate_count: number;
+  graduate_count: number | null;
   first_session_at: string | null;
   last_session_at: string | null;
+  venue_location?: string | null;
   can_manage: boolean;
 }
 
@@ -46,7 +52,7 @@ export interface ProgramParticipant {
   last_name: string | null;
   attended_sessions: number[];
   attended_count: number;
-  graduated: boolean;
+  graduated: boolean | null;
 }
 
 export interface ProgramRunDetail {

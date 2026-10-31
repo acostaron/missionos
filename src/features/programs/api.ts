@@ -2,6 +2,7 @@ import { supabase } from '../../lib/supabase/client';
 import type {
   ListProgramRunsResponse,
   ProgramCode,
+  ProgramReportPriority,
   ProgramRunDetail,
   ProgramRunStatus,
   ProgramSessionRosterResponse,
@@ -10,11 +11,17 @@ import type { EventSummary } from '../events/types';
 
 export async function listProgramRuns(
   organizationId: string,
-  includeClosed = false
+  includeClosed = false,
+  from?: string,
+  to?: string,
+  quarterlyOnly = false
 ): Promise<ListProgramRunsResponse> {
   const { data, error } = await supabase.rpc('list_program_runs', {
     p_organization_id: organizationId,
     p_include_closed: includeClosed,
+    p_from: from ?? undefined,
+    p_to: to ?? undefined,
+    p_quarterly_only: quarterlyOnly,
   });
   if (error) throw error;
   return data as unknown as ListProgramRunsResponse;
@@ -40,6 +47,9 @@ export interface CreateProgramRunParams {
   chapterCode?: string;
   sectionCodes?: string[];
   description?: string;
+  includeInQuarterlyReport?: boolean;
+  reportPriority?: ProgramReportPriority;
+  reportHighlight?: string;
 }
 
 export async function createProgramRun(params: CreateProgramRunParams) {
@@ -51,6 +61,9 @@ export async function createProgramRun(params: CreateProgramRunParams) {
     p_chapter_code: params.chapterCode ?? undefined,
     p_section_codes: params.sectionCodes ?? [],
     p_description: params.description ?? undefined,
+    p_include_in_quarterly_report: params.includeInQuarterlyReport ?? false,
+    p_report_priority: params.reportPriority ?? 'routine',
+    p_report_highlight: params.reportHighlight ?? undefined,
   });
   if (error) throw error;
   return data as unknown as { status: string; run: ProgramRunDetail['run'] };
@@ -61,6 +74,9 @@ export interface UpdateProgramRunParams {
   runId: string;
   title: string;
   description?: string;
+  includeInQuarterlyReport?: boolean;
+  reportPriority?: ProgramReportPriority;
+  reportHighlight?: string;
 }
 
 export async function updateProgramRun(params: UpdateProgramRunParams) {
@@ -69,6 +85,9 @@ export async function updateProgramRun(params: UpdateProgramRunParams) {
     p_run_id: params.runId,
     p_title: params.title,
     p_description: params.description ?? undefined,
+    p_include_in_quarterly_report: params.includeInQuarterlyReport ?? undefined,
+    p_report_priority: params.reportPriority ?? undefined,
+    p_report_highlight: params.reportHighlight !== undefined ? params.reportHighlight : undefined,
   });
   if (error) throw error;
   return data as unknown as { status: string; run: ProgramRunDetail['run'] };

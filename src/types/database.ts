@@ -8022,8 +8022,11 @@ export type Database = {
           created_by_profile_id: string
           description: string | null
           id: string
+          include_in_quarterly_report: boolean
           organization_id: string
           program_code: string
+          report_highlight: string | null
+          report_priority: string
           run_status: string
           section_node_ids: string[]
           session_count: number
@@ -8039,8 +8042,11 @@ export type Database = {
           created_by_profile_id: string
           description?: string | null
           id?: string
+          include_in_quarterly_report?: boolean
           organization_id: string
           program_code: string
+          report_highlight?: string | null
+          report_priority?: string
           run_status?: string
           section_node_ids?: string[]
           session_count: number
@@ -8056,8 +8062,11 @@ export type Database = {
           created_by_profile_id?: string
           description?: string | null
           id?: string
+          include_in_quarterly_report?: boolean
           organization_id?: string
           program_code?: string
+          report_highlight?: string | null
+          report_priority?: string
           run_status?: string
           section_node_ids?: string[]
           session_count?: number
@@ -9805,8 +9814,11 @@ export type Database = {
         Args: {
           p_chapter_code?: string
           p_description?: string
+          p_include_in_quarterly_report?: boolean
           p_organization_id: string
           p_program_code: string
+          p_report_highlight?: string
+          p_report_priority?: string
           p_section_codes?: string[]
           p_session_count?: number
           p_title: string
@@ -10367,7 +10379,13 @@ export type Database = {
         Returns: Json
       }
       list_program_runs: {
-        Args: { p_include_closed?: boolean; p_organization_id: string }
+        Args: {
+          p_from?: string
+          p_include_closed?: boolean
+          p_organization_id: string
+          p_quarterly_only?: boolean
+          p_to?: string
+        }
         Returns: Json
       }
       list_reporting_periods: {
@@ -11313,7 +11331,10 @@ export type Database = {
       update_program_run: {
         Args: {
           p_description?: string
+          p_include_in_quarterly_report?: boolean
           p_organization_id: string
+          p_report_highlight?: string
+          p_report_priority?: string
           p_run_id: string
           p_title: string
         }

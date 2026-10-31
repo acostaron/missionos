@@ -1,5 +1,5 @@
 import type { BadgeVariant } from '../../components/ui';
-import type { ProgramCode, ProgramRunStatus } from './types';
+import type { ProgramCode, ProgramReportPriority, ProgramRunStatus } from './types';
 
 export const PROGRAM_CODE_LABELS: Record<ProgramCode, string> = {
   youth_camp: 'Youth Camp',
@@ -14,6 +14,26 @@ export const PROGRAM_STATUS_LABELS: Record<ProgramRunStatus, string> = {
   completed: 'Completed',
   cancelled: 'Cancelled',
 };
+
+export const PROGRAM_REPORT_PRIORITY_LABELS: Record<ProgramReportPriority, string> = {
+  routine: 'Routine',
+  ministry_activity: 'Ministry Activity',
+  major_highlight: 'Major Highlight',
+};
+
+export function getProgramReportPriorityBadgeVariant(
+  priority: ProgramReportPriority | string | null | undefined
+): BadgeVariant {
+  switch (priority) {
+    case 'major_highlight':
+      return 'warning';
+    case 'ministry_activity':
+      return 'info';
+    case 'routine':
+    default:
+      return 'neutral';
+  }
+}
 
 export function getProgramCodeBadgeVariant(code: ProgramCode): BadgeVariant {
   switch (code) {

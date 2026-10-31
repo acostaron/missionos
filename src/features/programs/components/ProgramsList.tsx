@@ -9,8 +9,10 @@ import { useProgramRunsList } from '../queries';
 import {
   PROGRAM_CODE_LABELS,
   PROGRAM_STATUS_LABELS,
+  PROGRAM_REPORT_PRIORITY_LABELS,
   getProgramCodeBadgeVariant,
   getProgramStatusBadgeVariant,
+  getProgramReportPriorityBadgeVariant,
 } from '../labels';
 
 export interface ProgramsListProps {
@@ -65,6 +67,11 @@ export function ProgramsList({ organizationId, includeClosed }: ProgramsListProp
                   <Badge variant={getProgramStatusBadgeVariant(run.run_status)}>
                     {PROGRAM_STATUS_LABELS[run.run_status]}
                   </Badge>
+                  {run.can_manage && run.include_in_quarterly_report && (
+                    <Badge variant={getProgramReportPriorityBadgeVariant(run.report_priority)}>
+                      {`Quarterly Report · ${PROGRAM_REPORT_PRIORITY_LABELS[run.report_priority ?? 'routine']}`}
+                    </Badge>
+                  )}
                 </div>
 
                 <h3 className="text-h3 font-bold text-ink group-hover:text-primary transition-colors">
@@ -109,12 +116,14 @@ export function ProgramsList({ organizationId, includeClosed }: ProgramsListProp
                       {run.participant_count} participant{run.participant_count === 1 ? '' : 's'}
                     </span>
                   </span>
-                  <span className="flex items-center gap-1.5 font-semibold text-ink">
-                    <Award className="h-3.5 w-3.5 text-warning-600" />
-                    <span>
-                      {run.graduate_count} graduate{run.graduate_count === 1 ? '' : 's'}
+                  {run.graduate_count != null && (
+                    <span className="flex items-center gap-1.5 font-semibold text-ink">
+                      <Award className="h-3.5 w-3.5 text-warning-600" />
+                      <span>
+                        {run.graduate_count} graduate{run.graduate_count === 1 ? '' : 's'}
+                      </span>
                     </span>
-                  </span>
+                  )}
                 </div>
               </div>
             </div>
