@@ -8,6 +8,9 @@ export type EventType =
 
 export type EventStatus = 'scheduled' | 'held' | 'cancelled';
 
+export type EventMeetingType = 'in_person' | 'virtual';
+export type EventReportPriority = 'routine' | 'ministry_activity' | 'major_highlight';
+
 export interface EventSummary {
   id: string;
   event_type: EventType;
@@ -16,6 +19,11 @@ export interface EventSummary {
   starts_at: string;
   ends_at: string | null;
   location_text: string | null;
+  meeting_type: EventMeetingType;
+  virtual_meeting_url: string | null;
+  include_in_quarterly_report: boolean;
+  report_priority: EventReportPriority;
+  report_highlight: string | null;
   event_status: EventStatus;
   cancel_reason: string | null;
   audience_node_id: string | null;
@@ -124,6 +132,11 @@ export interface CreateEventParams {
   description?: string | null;
   audienceCode?: string;
   formationTalkId?: string | null;
+  meetingType?: EventMeetingType;
+  virtualMeetingUrl?: string | null;
+  includeInQuarterlyReport?: boolean;
+  reportPriority?: EventReportPriority;
+  reportHighlight?: string | null;
 }
 
 export interface UpdateEventParams {
@@ -137,6 +150,11 @@ export interface UpdateEventParams {
   description?: string | null;
   audienceCode?: string;
   formationTalkId?: string | null;
+  meetingType?: EventMeetingType;
+  virtualMeetingUrl?: string | null;
+  includeInQuarterlyReport?: boolean;
+  reportPriority?: EventReportPriority;
+  reportHighlight?: string | null;
 }
 
 export interface SetEventStatusParams {

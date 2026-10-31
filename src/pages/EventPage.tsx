@@ -14,6 +14,8 @@ import {
   RotateCcw,
   BookOpen,
   GraduationCap,
+  Video,
+  ExternalLink,
 } from 'lucide-react';
 import {
   Alert,
@@ -34,6 +36,8 @@ import {
 import {
   EVENT_STATUS_LABELS,
   EVENT_TYPE_LABELS,
+  EVENT_MEETING_TYPE_LABELS,
+  REPORT_PRIORITY_LABELS,
   getEventStatusBadgeVariant,
   getEventTypeBadgeVariant,
 } from '../features/events/labels';
@@ -184,6 +188,9 @@ export default function EventPage() {
               <Badge variant={getEventTypeBadgeVariant(event.event_type)}>
                 {EVENT_TYPE_LABELS[event.event_type]}
               </Badge>
+              <Badge variant={event.meeting_type === 'virtual' ? 'warning' : 'neutral'}>
+                {EVENT_MEETING_TYPE_LABELS[event.meeting_type] || (event.meeting_type === 'virtual' ? 'Virtual' : 'In-Person')}
+              </Badge>
               <Badge variant={getEventStatusBadgeVariant(event.event_status)}>
                 {EVENT_STATUS_LABELS[event.event_status]}
               </Badge>
@@ -195,6 +202,21 @@ export default function EventPage() {
             </div>
 
             <h1 className="text-h1 font-bold text-ink">{event.title}</h1>
+
+            {event.event_status !== 'cancelled' && event.meeting_type === 'virtual' && event.virtual_meeting_url && (
+              <div className="pt-1">
+                <a
+                  href={event.virtual_meeting_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-control bg-primary px-3 py-1.5 text-small font-semibold text-white shadow-xs transition-colors hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                >
+                  <Video className="h-4 w-4" />
+                  <span>Join Virtual Meeting</span>
+                  <ExternalLink className="h-3.5 w-3.5 opacity-80" />
+                </a>
+              </div>
+            )}
 
             {event.is_program_session && event.program_run_id && (
               <div className="flex items-center gap-2 text-small font-medium text-primary">
@@ -322,11 +344,31 @@ export default function EventPage() {
           </div>
 
           <div className="flex items-start gap-2.5">
-            <MapPin className="mt-0.5 h-4 w-4 text-ink-muted" />
+            {event.meeting_type === 'virtual' ? (
+              <Video className="mt-0.5 h-4 w-4 text-ink-muted" />
+            ) : (
+              <MapPin className="mt-0.5 h-4 w-4 text-ink-muted" />
+            )}
             <div>
-              <p className="text-caption font-medium text-ink-muted">Location</p>
+              <p className="text-caption font-medium text-ink-muted">
+                {event.meeting_type === 'virtual' ? 'Format & Link' : 'Location'}
+              </p>
               <p className="text-body font-medium text-ink">
-                {event.location_text ? (
+                {event.meeting_type === 'virtual' ? (
+                  event.virtual_meeting_url ? (
+                    <a
+                      href={event.virtual_meeting_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-primary hover:underline"
+                    >
+                      <span>Join Meeting</span>
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  ) : (
+                    'Virtual (No link specified)'
+                  )
+                ) : event.location_text ? (
                   mapsUrl(event.location_text) ? (
                     <a
                       href={mapsUrl(event.location_text)!}
@@ -372,6 +414,46 @@ export default function EventPage() {
             <p className="mt-1 whitespace-pre-line text-body text-ink">
               {event.description}
             </p>
+          </div>
+        )}
+
+        {/* Quarterly Report Section (Visible to Authorized Event Managers) */}
+        {event.can_manage && (
+          <div className="border-t border-line pt-4 space-y-2">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-caption font-semibold uppercase tracking-wider text-ink-muted">
+                  Quarterly Report:
+                </span>
+                <Badge
+                  variant={
+                    !event.include_in_quarterly_report
+                      ? 'neutral'
+                      : event.report_priority === 'major_highlight'
+                        ? 'warning'
+                        : 'info'
+                  }
+                >
+                  {event.include_in_quarterly_report
+                    ? REPORT_PRIORITY_LABELS[event.report_priority] || event.report_priority
+                    : 'Not Included'}
+                </Badge>
+              </div>
+              <span className="text-caption text-ink-muted">
+                {event.include_in_quarterly_report
+                  ? 'Eligible for Quarterly National Ministry Report'
+                  : 'Excluded from quarterly narrative'}
+              </span>
+            </div>
+
+            {event.include_in_quarterly_report && event.report_highlight && (
+              <div className="rounded-control bg-surface-muted/50 p-3 text-small text-ink border border-line">
+                <p className="text-caption font-medium text-ink-muted mb-1">
+                  Event Highlight / Accomplishment
+                </p>
+                <p className="italic">{event.report_highlight}</p>
+              </div>
+            )}
           </div>
         )}
       </Card>

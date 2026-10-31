@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Calendar, CalendarCheck2, Clock, QrCode } from 'lucide-react';
+import { Calendar, CalendarCheck2, Clock, QrCode, Video, ExternalLink } from 'lucide-react';
 import { useOrganizationContext } from '../hooks/use-organization-context';
 import {
   useListMyEvents,
@@ -82,6 +82,8 @@ export default function MyEventsPage() {
         starts_at: r.starts_at,
         ends_at: r.ends_at,
         location_text: r.location_text,
+        meeting_type: 'in_person' as const,
+        virtual_meeting_url: null,
         event_status: 'scheduled',
         audience_name: null,
         program_title: null,
@@ -200,6 +202,9 @@ export default function MyEventsPage() {
                           <div className="w-full space-y-1">
                             <div className="flex flex-wrap items-center gap-2">
                               <Badge variant={typeBadgeVariant}>{typeLabel}</Badge>
+                              <Badge variant={e.meeting_type === 'virtual' ? 'warning' : 'neutral'}>
+                                {e.meeting_type === 'virtual' ? 'Virtual' : 'In-Person'}
+                              </Badge>
                               {isCancelled && <Badge variant="danger">Cancelled</Badge>}
                               {e.attended && <Badge variant="success">Attended</Badge>}
                             </div>
@@ -218,7 +223,24 @@ export default function MyEventsPage() {
                                 {formatNyDateShort(e.starts_at)} · {formatNyTime(e.starts_at)}
                               </span>
 
-                              <MapLink location={e.location_text} />
+                              {e.meeting_type === 'virtual' ? (
+                                e.virtual_meeting_url && !isCancelled ? (
+                                  <a
+                                    href={e.virtual_meeting_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 font-semibold text-primary hover:underline"
+                                  >
+                                    <Video className="h-3.5 w-3.5" />
+                                    <span>Join Virtual Meeting</span>
+                                    <ExternalLink className="h-3 w-3" />
+                                  </a>
+                                ) : (
+                                  <span className="text-ink-muted">Virtual Meeting</span>
+                                )
+                              ) : (
+                                <MapLink location={e.location_text} />
+                              )}
 
                               {e.audience_name && (
                                 <span className="rounded bg-surface-muted px-1.5 py-0.5 text-[11px] text-ink-muted">

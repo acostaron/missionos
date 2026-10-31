@@ -84,6 +84,8 @@ export const myEventSchema = z.object({
   starts_at: z.string(),
   ends_at: z.string().nullable(),
   location_text: z.string().nullable(),
+  meeting_type: z.enum(['in_person', 'virtual']).default('in_person'),
+  virtual_meeting_url: z.string().nullable().optional(),
   event_status: z.string(),
   audience_name: z.string().nullable(),
   program_title: z.string().nullable(),

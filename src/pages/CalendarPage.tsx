@@ -7,6 +7,7 @@ import {
   GraduationCap,
   List as ListIcon,
   Plus,
+  Video,
 } from 'lucide-react';
 import {
   Badge,
@@ -455,6 +456,9 @@ export default function CalendarPage() {
                       >
                         {item.isFirstDay ? (
                           <>
+                            {item.event.meeting_type === 'virtual' && (
+                              <Video className="inline-block h-3 w-3 mr-1 align-text-top text-ink-muted" />
+                            )}
                             <span className="font-semibold">{formatNyTime(item.event.starts_at)}</span>{' '}
                             {item.event.is_program_session && (
                               <span className="inline-flex items-center rounded bg-primary/10 px-1 py-0.2 text-[9px] font-bold text-primary mr-1">
@@ -465,6 +469,9 @@ export default function CalendarPage() {
                           </>
                         ) : (
                           <>
+                            {item.event.meeting_type === 'virtual' && (
+                              <Video className="inline-block h-3 w-3 mr-1 align-text-top text-ink-muted" />
+                            )}
                             {item.event.is_program_session && (
                               <span className="inline-flex items-center rounded bg-primary/10 px-1 py-0.2 text-[9px] font-bold text-primary mr-1">
                                 {getProgramSessionBadgeLabel(item.event)}
@@ -522,6 +529,9 @@ export default function CalendarPage() {
                             </span>
                             <Badge variant={getEventTypeBadgeVariant(evt.event_type)}>
                               {EVENT_TYPE_LABELS[evt.event_type]}
+                            </Badge>
+                            <Badge variant={evt.meeting_type === 'virtual' ? 'warning' : 'neutral'}>
+                              {evt.meeting_type === 'virtual' ? 'Virtual' : 'In-Person'}
                             </Badge>
                             <Badge variant={getEventStatusBadgeVariant(evt.event_status)}>
                               {EVENT_STATUS_LABELS[evt.event_status]}

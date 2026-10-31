@@ -8,7 +8,11 @@ import {
   Textarea,
   Alert,
 } from '../../../components/ui';
-import { EVENT_TYPE_LABELS } from '../labels';
+import {
+  EVENT_TYPE_LABELS,
+  EVENT_MEETING_TYPE_LABELS,
+  REPORT_PRIORITY_LABELS,
+} from '../labels';
 import {
   useCreateEvent,
   useEventAudienceOptions,
@@ -17,7 +21,13 @@ import {
 } from '../queries';
 import { getEventErrorMessage } from '../error-message';
 import { getTodayNyDate, isoToNyLocal, nyLocalToIso } from '../../../lib/ny-time';
-import type { EventDetail, EventSummary, EventType } from '../types';
+import type {
+  EventDetail,
+  EventSummary,
+  EventType,
+  EventMeetingType,
+  EventReportPriority,
+} from '../types';
 
 interface EventFormModalProps {
   open: boolean;
@@ -45,6 +55,11 @@ export function EventFormModal({
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
   const [locationText, setLocationText] = useState('');
+  const [meetingType, setMeetingType] = useState<EventMeetingType>('in_person');
+  const [virtualMeetingUrl, setVirtualMeetingUrl] = useState('');
+  const [includeInQuarterlyReport, setIncludeInQuarterlyReport] = useState(false);
+  const [reportPriority, setReportPriority] = useState<EventReportPriority>('routine');
+  const [reportHighlight, setReportHighlight] = useState('');
   const [audienceCode, setAudienceCode] = useState('mfc_ny');
   const [formationTalkId, setFormationTalkId] = useState('');
   const [description, setDescription] = useState('');
@@ -60,6 +75,10 @@ export function EventFormModal({
   const startTimeId = useId();
   const endTimeId = useId();
   const locationId = useId();
+  const virtualUrlId = useId();
+  const includeReportId = useId();
+  const reportPriorityId = useId();
+  const reportHighlightId = useId();
   const audienceId = useId();
   const talkId = useId();
   const descriptionId = useId();
@@ -96,6 +115,11 @@ export function EventFormModal({
       setStartTime(startNy.time);
       setEndTime(endNy ? endNy.time : '');
       setLocationText(event.location_text || '');
+      setMeetingType(event.meeting_type ?? 'in_person');
+      setVirtualMeetingUrl(event.virtual_meeting_url || '');
+      setIncludeInQuarterlyReport(event.include_in_quarterly_report ?? false);
+      setReportPriority(event.report_priority ?? 'routine');
+      setReportHighlight(event.report_highlight || '');
       setAudienceCode(event.audience_code ?? '');
       setFormationTalkId(event.formation_talk_id || '');
       setDescription(event.description || '');
@@ -107,6 +131,11 @@ export function EventFormModal({
       setStartTime('19:00');
       setEndTime('');
       setLocationText('');
+      setMeetingType('in_person');
+      setVirtualMeetingUrl('');
+      setIncludeInQuarterlyReport(false);
+      setReportPriority('routine');
+      setReportHighlight('');
       setAudienceCode('mfc_ny');
       setFormationTalkId('');
       setDescription('');
@@ -226,6 +255,22 @@ export function EventFormModal({
       return;
     }
 
+    const trimmedVirtualUrl = meetingType === 'virtual' ? virtualMeetingUrl.trim() : null;
+    if (meetingType === 'virtual' && trimmedVirtualUrl) {
+      if (!/^https:\/\/[^\s/$.?#].[^\s]*$/i.test(trimmedVirtualUrl) || /^(javascript|data):/i.test(trimmedVirtualUrl)) {
+        setErrorMessage('Virtual meeting URL must be a valid secure HTTPS web address.');
+        return;
+      }
+    }
+
+    const reportingPayload = {
+      meetingType,
+      virtualMeetingUrl: trimmedVirtualUrl || null,
+      includeInQuarterlyReport,
+      reportPriority: includeInQuarterlyReport ? reportPriority : ('routine' as EventReportPriority),
+      reportHighlight: includeInQuarterlyReport && reportHighlight.trim() ? reportHighlight.trim() : null,
+    };
+
     try {
       const startsAt = nyLocalToIso(date, startTime);
       const endsAt = endTime ? nyLocalToIso(date, endTime) : null;
@@ -238,10 +283,11 @@ export function EventFormModal({
           title: resolvedTitle,
           startsAt,
           endsAt,
-          locationText: locationText.trim() || null,
+          locationText: meetingType === 'in_person' ? (locationText.trim() || null) : null,
           description: description.trim() || null,
           audienceCode: audienceCode || undefined,
           formationTalkId: eventType === 'formation_talk' ? formationTalkId : null,
+          ...reportingPayload,
         });
         onSuccess?.(result.event);
         onClose();
@@ -252,10 +298,11 @@ export function EventFormModal({
           title: resolvedTitle,
           startsAt,
           endsAt,
-          locationText: locationText.trim() || null,
+          locationText: meetingType === 'in_person' ? (locationText.trim() || null) : null,
           description: description.trim() || null,
           audienceCode: audienceCode || undefined,
           formationTalkId: eventType === 'formation_talk' ? formationTalkId : null,
+          ...reportingPayload,
         });
         onSuccess?.(result.event);
         onClose();
@@ -502,16 +549,68 @@ export function EventFormModal({
           </FormField>
         </div>
 
-        <FormField label="Location">
-          <Input
-            id={locationId}
-            value={locationText}
-            onChange={(e) => setLocationText(e.target.value)}
-            placeholder="e.g. St. Patrick Church Hall, Queens, NY"
-            disabled={isSubmitting}
-            maxLength={300}
-          />
-        </FormField>
+        {/* Meeting Format & Location / Virtual URL */}
+        <div className="space-y-4 rounded-card border border-line bg-surface-muted/30 p-3 sm:p-4">
+          <FormField label="Meeting format" required>
+            <div className="flex items-center gap-6 pt-1">
+              <label className="flex cursor-pointer items-center gap-2 text-body font-medium text-ink">
+                <input
+                  type="radio"
+                  name="meetingType"
+                  value="in_person"
+                  checked={meetingType === 'in_person'}
+                  onChange={() => {
+                    setMeetingType('in_person');
+                    setVirtualMeetingUrl('');
+                  }}
+                  disabled={isSubmitting}
+                  className="h-4 w-4 text-primary focus:ring-primary"
+                />
+                {EVENT_MEETING_TYPE_LABELS.in_person}
+              </label>
+              <label className="flex cursor-pointer items-center gap-2 text-body font-medium text-ink">
+                <input
+                  type="radio"
+                  name="meetingType"
+                  value="virtual"
+                  checked={meetingType === 'virtual'}
+                  onChange={() => setMeetingType('virtual')}
+                  disabled={isSubmitting}
+                  className="h-4 w-4 text-primary focus:ring-primary"
+                />
+                {EVENT_MEETING_TYPE_LABELS.virtual}
+              </label>
+            </div>
+          </FormField>
+
+          {meetingType === 'in_person' ? (
+            <FormField label="Location">
+              <Input
+                id={locationId}
+                value={locationText}
+                onChange={(e) => setLocationText(e.target.value)}
+                placeholder="e.g. St. Patrick Church Hall, Queens, NY"
+                disabled={isSubmitting}
+                maxLength={300}
+              />
+            </FormField>
+          ) : (
+            <FormField
+              label="Virtual Meeting URL"
+              hint="Support links from Zoom, Google Meet, Microsoft Teams, Webex, etc."
+            >
+              <Input
+                id={virtualUrlId}
+                type="url"
+                value={virtualMeetingUrl}
+                onChange={(e) => setVirtualMeetingUrl(e.target.value)}
+                placeholder="https://zoom.us/j/... or https://meet.google.com/..."
+                disabled={isSubmitting}
+                maxLength={1000}
+              />
+            </FormField>
+          )}
+        </div>
 
         <FormField
           label="Audience"
@@ -531,6 +630,58 @@ export function EventFormModal({
             rows={3}
           />
         </FormField>
+
+        {/* Reporting Details */}
+        <div className="space-y-3 rounded-card border border-line bg-surface-muted/30 p-3 sm:p-4">
+          <div className="flex items-center justify-between">
+            <h4 className="text-body font-semibold text-ink">Reporting Details</h4>
+            <span className="text-caption text-ink-muted">Quarterly National Report</span>
+          </div>
+
+          <label className="flex cursor-pointer items-center gap-2.5 text-body text-ink">
+            <input
+              id={includeReportId}
+              type="checkbox"
+              checked={includeInQuarterlyReport}
+              onChange={(e) => setIncludeInQuarterlyReport(e.target.checked)}
+              disabled={isSubmitting}
+              className="h-4 w-4 rounded border-line text-primary focus:ring-primary"
+            />
+            <span className="font-medium">Include in Quarterly Report</span>
+          </label>
+
+          {includeInQuarterlyReport && (
+            <div className="space-y-4 pt-2 border-t border-line">
+              <FormField label="Report Priority">
+                <Select
+                  id={reportPriorityId}
+                  value={reportPriority}
+                  onChange={(e) => setReportPriority(e.target.value as EventReportPriority)}
+                  disabled={isSubmitting}
+                >
+                  <option value="routine">{REPORT_PRIORITY_LABELS.routine}</option>
+                  <option value="ministry_activity">{REPORT_PRIORITY_LABELS.ministry_activity}</option>
+                  <option value="major_highlight">{REPORT_PRIORITY_LABELS.major_highlight}</option>
+                </Select>
+              </FormField>
+
+              <FormField
+                label="Event Highlight / Accomplishment"
+                hint="Briefly describe the main outcome, accomplishment, or ministry highlight from this event."
+              >
+                <Textarea
+                  id={reportHighlightId}
+                  value={reportHighlight}
+                  onChange={(e) => setReportHighlight(e.target.value)}
+                  placeholder="e.g. Gathered 120 leaders across the area with strong spiritual engagement..."
+                  disabled={isSubmitting}
+                  maxLength={2000}
+                  rows={2}
+                />
+              </FormField>
+            </div>
+          )}
+        </div>
       </form>
     </Modal>
   );

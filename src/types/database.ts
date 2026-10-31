@@ -1778,17 +1778,22 @@ export type Database = {
           formation_talk_id: string | null
           guest_fee: number | null
           id: string
+          include_in_quarterly_report: boolean
           location_text: string | null
+          meeting_type: string
           organization_id: string
           payment_note: string | null
           paypal_link: string | null
           program_run_id: string | null
           registration_open: boolean
+          report_highlight: string | null
+          report_priority: string
           session_number: number | null
           starts_at: string
           title: string
           updated_at: string
           updated_by_profile_id: string | null
+          virtual_meeting_url: string | null
           walk_in_fee: number | null
           zelle_name: string | null
           zelle_recipient: string | null
@@ -1815,17 +1820,22 @@ export type Database = {
           formation_talk_id?: string | null
           guest_fee?: number | null
           id?: string
+          include_in_quarterly_report?: boolean
           location_text?: string | null
+          meeting_type?: string
           organization_id: string
           payment_note?: string | null
           paypal_link?: string | null
           program_run_id?: string | null
           registration_open?: boolean
+          report_highlight?: string | null
+          report_priority?: string
           session_number?: number | null
           starts_at: string
           title: string
           updated_at?: string
           updated_by_profile_id?: string | null
+          virtual_meeting_url?: string | null
           walk_in_fee?: number | null
           zelle_name?: string | null
           zelle_recipient?: string | null
@@ -1852,17 +1862,22 @@ export type Database = {
           formation_talk_id?: string | null
           guest_fee?: number | null
           id?: string
+          include_in_quarterly_report?: boolean
           location_text?: string | null
+          meeting_type?: string
           organization_id?: string
           payment_note?: string | null
           paypal_link?: string | null
           program_run_id?: string | null
           registration_open?: boolean
+          report_highlight?: string | null
+          report_priority?: string
           session_number?: number | null
           starts_at?: string
           title?: string
           updated_at?: string
           updated_by_profile_id?: string | null
+          virtual_meeting_url?: string | null
           walk_in_fee?: number | null
           zelle_name?: string | null
           zelle_recipient?: string | null
@@ -9667,10 +9682,15 @@ export type Database = {
           p_ends_at?: string
           p_event_type: string
           p_formation_talk_id?: string
+          p_include_in_quarterly_report?: boolean
           p_location_text?: string
+          p_meeting_type?: string
           p_organization_id: string
+          p_report_highlight?: string
+          p_report_priority?: string
           p_starts_at: string
           p_title: string
+          p_virtual_meeting_url?: string
         }
         Returns: Json
       }
@@ -11191,10 +11211,15 @@ export type Database = {
           p_event_id: string
           p_event_type: string
           p_formation_talk_id?: string
+          p_include_in_quarterly_report?: boolean
           p_location_text?: string
+          p_meeting_type?: string
           p_organization_id: string
+          p_report_highlight?: string
+          p_report_priority?: string
           p_starts_at: string
           p_title: string
+          p_virtual_meeting_url?: string
         }
         Returns: Json
       }

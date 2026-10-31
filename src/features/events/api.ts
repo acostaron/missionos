@@ -56,6 +56,11 @@ export async function createEvent(params: CreateEventParams): Promise<{ status: 
     p_description: params.description ?? undefined,
     p_audience_code: params.audienceCode ?? 'mfc_ny',
     p_formation_talk_id: params.formationTalkId ?? undefined,
+    p_meeting_type: params.meetingType ?? 'in_person',
+    p_virtual_meeting_url: params.virtualMeetingUrl ?? undefined,
+    p_include_in_quarterly_report: params.includeInQuarterlyReport ?? false,
+    p_report_priority: params.reportPriority ?? 'routine',
+    p_report_highlight: params.reportHighlight ?? undefined,
   });
 
   if (error) throw error;
@@ -74,6 +79,11 @@ export async function updateEvent(params: UpdateEventParams): Promise<{ status: 
     p_description: params.description ?? undefined,
     p_audience_code: params.audienceCode ?? 'mfc_ny',
     p_formation_talk_id: params.formationTalkId ?? undefined,
+    p_meeting_type: params.meetingType ?? 'in_person',
+    p_virtual_meeting_url: params.virtualMeetingUrl ?? undefined,
+    p_include_in_quarterly_report: params.includeInQuarterlyReport ?? false,
+    p_report_priority: params.reportPriority ?? 'routine',
+    p_report_highlight: params.reportHighlight ?? undefined,
   });
 
   if (error) throw error;
