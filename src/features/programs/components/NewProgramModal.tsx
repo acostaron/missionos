@@ -248,7 +248,7 @@ export function NewProgramModal({
         programCode,
         title: trimmedTitle,
         description: description.trim() || undefined,
-        chapterCode: chapterCode || undefined,
+        chapterCode: programCode === 'cls' ? (chapterCode || undefined) : undefined,
         sectionCodes: selectedSectionCodes,
         sessionCount,
         includeInQuarterlyReport,

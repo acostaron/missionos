@@ -93,6 +93,7 @@ export default function ProgramPage() {
 
   const { run, sessions, participants } = detail;
   const canManage = run.can_manage;
+  const branchName = run.sections.find((s) => s.sub_area_name)?.sub_area_name;
 
   const handleStatusChange = async (newStatus: 'running' | 'completed' | 'planned') => {
     setActionError(null);
@@ -163,6 +164,11 @@ export default function ProgramPage() {
             <h1 className="text-h1 font-bold text-ink">{run.title}</h1>
 
             <div className="text-small text-ink-secondary space-y-1">
+              {branchName && (
+                <p>
+                  <span className="font-semibold text-ink">Branch:</span> {branchName}
+                </p>
+              )}
               {run.chapter_name && (
                 <p>
                   <span className="font-semibold text-ink">Chapter:</span> {run.chapter_name}

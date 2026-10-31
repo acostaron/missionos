@@ -53,34 +53,42 @@ export function ProgramsList({ organizationId, includeClosed }: ProgramsListProp
       {/* Program Cards Grid */}
       {!isLoading && runs.length > 0 && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {runs.map((run) => (
-            <div
-              key={run.id}
-              onClick={() => navigate(`/app/programs/${run.id}`)}
-              className="group flex flex-col justify-between rounded-card border border-line bg-surface p-5 shadow-xs transition-all hover:border-primary/40 hover:shadow-sm cursor-pointer"
-            >
-              <div className="space-y-3">
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant={getProgramCodeBadgeVariant(run.program_code)}>
-                    {PROGRAM_CODE_LABELS[run.program_code]}
-                  </Badge>
-                  <Badge variant={getProgramStatusBadgeVariant(run.run_status)}>
-                    {PROGRAM_STATUS_LABELS[run.run_status]}
-                  </Badge>
-                  {run.can_manage && run.include_in_quarterly_report && (
-                    <Badge variant={getProgramReportPriorityBadgeVariant(run.report_priority)}>
-                      {`Quarterly Report · ${PROGRAM_REPORT_PRIORITY_LABELS[run.report_priority ?? 'routine']}`}
+          {runs.map((run) => {
+            const branchName = run.sections.find((s) => s.sub_area_name)?.sub_area_name;
+
+            return (
+              <div
+                key={run.id}
+                onClick={() => navigate(`/app/programs/${run.id}`)}
+                className="group flex flex-col justify-between rounded-card border border-line bg-surface p-5 shadow-xs transition-all hover:border-primary/40 hover:shadow-sm cursor-pointer"
+              >
+                <div className="space-y-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge variant={getProgramCodeBadgeVariant(run.program_code)}>
+                      {PROGRAM_CODE_LABELS[run.program_code]}
                     </Badge>
-                  )}
-                </div>
+                    <Badge variant={getProgramStatusBadgeVariant(run.run_status)}>
+                      {PROGRAM_STATUS_LABELS[run.run_status]}
+                    </Badge>
+                    {run.can_manage && run.include_in_quarterly_report && (
+                      <Badge variant={getProgramReportPriorityBadgeVariant(run.report_priority)}>
+                        {`Quarterly Report · ${PROGRAM_REPORT_PRIORITY_LABELS[run.report_priority ?? 'routine']}`}
+                      </Badge>
+                    )}
+                  </div>
 
-                <h3 className="text-h3 font-bold text-ink group-hover:text-primary transition-colors">
-                  {run.title}
-                </h3>
+                  <h3 className="text-h3 font-bold text-ink group-hover:text-primary transition-colors">
+                    {run.title}
+                  </h3>
 
-                {/* Chapter / Section info */}
-                <div className="text-small text-ink-secondary space-y-0.5">
-                  {run.chapter_name && (
+                  {/* Chapter / Section info */}
+                  <div className="text-small text-ink-secondary space-y-0.5">
+                    {branchName && (
+                      <p className="truncate">
+                        <span className="font-medium text-ink">Branch:</span> {branchName}
+                      </p>
+                    )}
+                    {run.chapter_name && (
                     <p className="truncate">
                       <span className="font-medium text-ink">Chapter:</span> {run.chapter_name}
                     </p>
@@ -127,7 +135,8 @@ export function ProgramsList({ organizationId, includeClosed }: ProgramsListProp
                 </div>
               </div>
             </div>
-          ))}
+          );
+        })}
         </div>
       )}
     </div>
