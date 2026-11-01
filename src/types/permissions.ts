@@ -105,6 +105,11 @@ export const Permissions = {
   ReportsCensusView: 'reports.census.view',
   ReportsCensusManage: 'reports.census.manage',
   ReportsCensusApprove: 'reports.census.approve',
+
+  // Pass 9.52: Quarterly National Report
+  ReportsQuarterlyView: 'reports.quarterly.view',
+  ReportsQuarterlyManage: 'reports.quarterly.manage',
+  ReportsQuarterlyApprove: 'reports.quarterly.approve',
 } as const;
 
 export type PermissionCode = typeof Permissions[keyof typeof Permissions];

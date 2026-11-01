@@ -39,6 +39,7 @@ import {
   OfficialDocumentsPage,
   SupportPage,
   QuarterlyCensusPage,
+  QuarterlyReportPage,
 } from './lazy-pages';
 
 
@@ -380,6 +381,14 @@ export const router = createBrowserRouter([
             element: (
               <Suspense fallback={<PageLoadingFallback />}>
                 <QuarterlyCensusPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'reports/quarterly',
+            element: (
+              <Suspense fallback={<PageLoadingFallback />}>
+                <QuarterlyReportPage />
               </Suspense>
             ),
           },

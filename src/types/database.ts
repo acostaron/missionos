@@ -6606,6 +6606,96 @@ export type Database = {
           },
         ]
       }
+      ministry_quarterly_reports: {
+        Row: {
+          approved_at: string | null
+          approved_by_profile_id: string | null
+          approved_document: Json | null
+          created_at: string
+          draft_built_at: string | null
+          draft_built_by_profile_id: string | null
+          draft_document: Json | null
+          id: string
+          organization_id: string
+          reporting_period_id: string
+          schema_version: number
+          status: string
+          submitted_at: string | null
+          submitted_by_profile_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by_profile_id?: string | null
+          approved_document?: Json | null
+          created_at?: string
+          draft_built_at?: string | null
+          draft_built_by_profile_id?: string | null
+          draft_document?: Json | null
+          id?: string
+          organization_id: string
+          reporting_period_id: string
+          schema_version?: number
+          status?: string
+          submitted_at?: string | null
+          submitted_by_profile_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by_profile_id?: string | null
+          approved_document?: Json | null
+          created_at?: string
+          draft_built_at?: string | null
+          draft_built_by_profile_id?: string | null
+          draft_document?: Json | null
+          id?: string
+          organization_id?: string
+          reporting_period_id?: string
+          schema_version?: number
+          status?: string
+          submitted_at?: string | null
+          submitted_by_profile_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ministry_quarterly_reports_approved_by_profile_id_fkey"
+            columns: ["approved_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ministry_quarterly_reports_draft_built_by_profile_id_fkey"
+            columns: ["draft_built_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ministry_quarterly_reports_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ministry_quarterly_reports_reporting_period_id_fkey"
+            columns: ["reporting_period_id"]
+            isOneToOne: true
+            referencedRelation: "ministry_reporting_periods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ministry_quarterly_reports_submitted_by_profile_id_fkey"
+            columns: ["submitted_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ministry_reporting_periods: {
         Row: {
           approved_at: string | null
@@ -9750,6 +9840,10 @@ export type Database = {
         Args: { p_actor_profile_id: string; p_assignment_id: string }
         Returns: undefined
       }
+      approve_quarterly_report: {
+        Args: { p_reporting_period_id: string }
+        Returns: Json
+      }
       archive_family_record: {
         Args: {
           p_confirm_with_active_members?: boolean
@@ -10610,6 +10704,14 @@ export type Database = {
         Args: { p_organization_id: string; p_quarter: number; p_year: number }
         Returns: Json
       }
+      get_quarterly_report_preview: {
+        Args: { p_reporting_period_id: string }
+        Returns: Json
+      }
+      get_quarterly_report_snapshot: {
+        Args: { p_reporting_period_id: string }
+        Returns: Json
+      }
       get_reporting_period: {
         Args: { p_reporting_period_id: string }
         Returns: Json
@@ -10778,6 +10880,10 @@ export type Database = {
           p_period_end: string
           p_period_start: string
         }
+        Returns: Json
+      }
+      list_quarterly_reports: {
+        Args: { p_organization_id: string }
         Returns: Json
       }
       list_report_activity_photos: {
@@ -11082,6 +11188,10 @@ export type Database = {
         Returns: string
       }
       record_push_results: { Args: { p_results: Json }; Returns: number }
+      record_quarterly_report_export: {
+        Args: { p_format: string; p_reporting_period_id: string }
+        Returns: undefined
+      }
       record_support_documents_sync_run: {
         Args: {
           p_error: string
@@ -11117,6 +11227,10 @@ export type Database = {
           p_code: string
           p_email: string
         }
+        Returns: Json
+      }
+      refresh_quarterly_report_draft: {
+        Args: { p_reporting_period_id: string }
         Returns: Json
       }
       register_for_event: {
@@ -11220,6 +11334,10 @@ export type Database = {
           p_organization_id: string
           p_reason?: string
         }
+        Returns: Json
+      }
+      return_quarterly_report_to_draft: {
+        Args: { p_reporting_period_id: string }
         Returns: Json
       }
       revert_member_deceased: {
@@ -11631,6 +11749,10 @@ export type Database = {
           p_organization_id: string
           p_reason_code?: string
         }
+        Returns: Json
+      }
+      submit_quarterly_report_for_review: {
+        Args: { p_reporting_period_id: string }
         Returns: Json
       }
       support_documents_to_copy: {

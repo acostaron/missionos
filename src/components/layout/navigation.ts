@@ -108,6 +108,7 @@ export const NAV_ITEMS: NavItem[] = [
     permission: Permissions.ReportsCensusView,
     tabs: [
       { label: 'Quarterly Census', shortLabel: 'Census', to: '/app/reports/census', permission: Permissions.ReportsCensusView },
+      { label: 'Quarterly Report', shortLabel: 'Quarterly', to: '/app/reports/quarterly', permission: Permissions.ReportsQuarterlyView },
     ],
     matchPaths: ['/app/reports'],
   },
