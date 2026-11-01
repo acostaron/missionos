@@ -292,7 +292,18 @@ export default function ProgramPage() {
         )}
 
         {/* Completion Summary Line */}
-        <div className="border-t border-line/60 pt-3">
+        <div className="border-t border-line/60 pt-3 space-y-1">
+          {canManage && (
+            <p className="text-small text-ink-muted">
+              <span className="font-semibold text-ink">Reporting attendance:</span>{' '}
+              {(() => {
+                const registered = participants.filter((p) => p.participant_status === 'registered');
+                const withAttendance = registered.filter((p) => p.attended_sessions.length > 0).length;
+                const instances = registered.reduce((sum, p) => sum + p.attended_sessions.length, 0);
+                return `${registered.length} registered · ${withAttendance} with attendance · ${instances} session check-ins across ${sessions.length} scheduled session${sessions.length === 1 ? '' : 's'}`;
+              })()}
+            </p>
+          )}
           {run.graduate_count != null ? (
             <p className="text-small font-semibold text-ink">
               🎓 {run.graduate_count} graduate{run.graduate_count === 1 ? '' : 's'}

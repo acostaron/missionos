@@ -5,6 +5,7 @@ export const PROGRAM_CODE_LABELS: Record<ProgramCode, string> = {
   youth_camp: 'Youth Camp',
   discovery_camp: 'Discovery Camp',
   cls: 'Christian Life Seminar',
+  lcs: 'Life in Christ Seminar (LCS)',
   other_program: 'Other program / retreat',
 };
 
@@ -43,6 +44,8 @@ export function getProgramCodeBadgeVariant(code: ProgramCode): BadgeVariant {
       return 'success';
     case 'cls':
       return 'warning';
+    case 'lcs':
+      return 'success';
     case 'other_program':
       return 'neutral';
   }
@@ -69,6 +72,8 @@ export function getProgramSessionBadgeLabel(evt: {
   let base = 'Program';
   if (evt.program_code === 'cls') {
     base = 'CLS';
+  } else if (evt.program_code === 'lcs') {
+    base = 'LCS';
   } else if (evt.program_code === 'youth_camp') {
     base = 'Youth Camp';
   } else if (evt.program_code === 'discovery_camp') {

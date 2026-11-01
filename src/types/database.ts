@@ -10771,6 +10771,15 @@ export type Database = {
         }
         Returns: Json
       }
+      list_quarterly_formation_reporting_items: {
+        Args: {
+          p_included_only?: boolean
+          p_organization_id: string
+          p_period_end: string
+          p_period_start: string
+        }
+        Returns: Json
+      }
       list_report_activity_photos: {
         Args: { p_from: string; p_organization_id: string; p_to: string }
         Returns: Json

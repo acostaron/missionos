@@ -1,6 +1,6 @@
 import type { EventSummary } from '../events/types';
 
-export type ProgramCode = 'youth_camp' | 'discovery_camp' | 'cls' | 'other_program';
+export type ProgramCode = 'youth_camp' | 'discovery_camp' | 'cls' | 'lcs' | 'other_program';
 export type ProgramRunStatus = 'planned' | 'running' | 'completed' | 'cancelled';
 export type ParticipantStatus = 'registered' | 'withdrawn';
 export type ProgramReportPriority = 'routine' | 'ministry_activity' | 'major_highlight';

@@ -115,6 +115,9 @@ export function NewProgramModal({
       const secStr = names.length > 0 ? names.join(' / ') : 'Couples';
       return `CLS ${secStr} ${currentMonthYear}`;
     }
+    if (code === 'lcs') {
+      return `Life in Christ Seminar ${currentMonthYear}`;
+    }
     return `Program / Retreat ${currentYear}`;
   };
 
@@ -177,6 +180,11 @@ export function NewProgramModal({
       const secs = firstCouples ? [firstCouples] : [];
       setSelectedSectionCodes(secs);
       setTitle(generateDefaultTitle(newCode, secs, sectionOptions));
+    } else if (newCode === 'lcs') {
+      setSelectedSectionCodes([]);
+      setChapterCode('');
+      setSessionCount(1);
+      setTitle(generateDefaultTitle(newCode, [], sectionOptions));
     } else {
       setSelectedSectionCodes([]);
       setSessionCount(1);
@@ -248,7 +256,8 @@ export function NewProgramModal({
         programCode,
         title: trimmedTitle,
         description: description.trim() || undefined,
-        chapterCode: programCode === 'cls' ? (chapterCode || undefined) : undefined,
+        chapterCode:
+          programCode === 'cls' || programCode === 'lcs' ? chapterCode || undefined : undefined,
         sectionCodes: selectedSectionCodes,
         sessionCount,
         includeInQuarterlyReport,
@@ -440,7 +449,7 @@ export function NewProgramModal({
           </>
         )}
 
-        {programCode === 'other_program' && (
+        {(programCode === 'other_program' || programCode === 'lcs') && (
           <>
             <FormField label="Chapter (optional)">
               <Select
@@ -449,7 +458,9 @@ export function NewProgramModal({
                 onChange={(e) => setChapterCode(e.target.value)}
                 disabled={isSubmitting}
               >
-                <option value="">None (all or section-based)</option>
+                <option value="">
+                  {programCode === 'lcs' ? 'None (parish mission)' : 'None (all or section-based)'}
+                </option>
                 {chapterOptions.map((c) => (
                   <option key={c.code} value={c.code}>
                     {c.sub_area_name ? `${c.sub_area_name} · ` : ''}{c.name}
