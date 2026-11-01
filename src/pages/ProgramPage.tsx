@@ -38,6 +38,7 @@ import { ScheduleSessionModal } from '../features/programs/components/ScheduleSe
 import { AddParticipantModal } from '../features/programs/components/AddParticipantModal';
 import { EditParticipantModal } from '../features/programs/components/EditParticipantModal';
 import { ActivityTeamCards } from '../features/activity-team/components/ActivityTeamCards';
+import { PhotoGallery } from '../features/activity-photos/components/PhotoGallery';
 import { formatNyDateLong, formatNyTimeRange } from '../lib/ny-time';
 import { getEventErrorMessage } from '../features/events/error-message';
 import type { EventSummary } from '../features/events/types';
@@ -419,6 +420,18 @@ export default function ProgramPage() {
           target={{ programRunId: run.id }}
           sessionOptions={sessions
             .filter((s) => s.session_number != null)
+            .map((s) => ({ eventId: s.id, label: `Session ${s.session_number}` }))}
+          locked={run.run_status === 'cancelled'}
+        />
+      )}
+
+      {/* Pass 9.50: PHOTOS (program-level + session photos) */}
+      {orgId && (
+        <PhotoGallery
+          organizationId={orgId}
+          target={{ programRunId: run.id }}
+          sessionOptions={sessions
+            .filter((s) => s.session_number != null && s.event_status !== 'cancelled')
             .map((s) => ({ eventId: s.id, label: `Session ${s.session_number}` }))}
           locked={run.run_status === 'cancelled'}
         />

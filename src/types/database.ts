@@ -39,6 +39,105 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_photos: {
+        Row: {
+          alt_text: string | null
+          caption: string | null
+          event_id: string | null
+          file_size_bytes: number
+          id: string
+          include_in_quarterly_report: boolean
+          mime_type: string
+          organization_id: string
+          original_filename: string | null
+          program_run_id: string | null
+          report_sort_order: number
+          sort_order: number
+          storage_bucket: string
+          storage_path: string
+          updated_at: string
+          updated_by_profile_id: string | null
+          uploaded_at: string
+          uploaded_by_profile_id: string
+        }
+        Insert: {
+          alt_text?: string | null
+          caption?: string | null
+          event_id?: string | null
+          file_size_bytes: number
+          id: string
+          include_in_quarterly_report?: boolean
+          mime_type: string
+          organization_id: string
+          original_filename?: string | null
+          program_run_id?: string | null
+          report_sort_order?: number
+          sort_order?: number
+          storage_bucket?: string
+          storage_path: string
+          updated_at?: string
+          updated_by_profile_id?: string | null
+          uploaded_at?: string
+          uploaded_by_profile_id: string
+        }
+        Update: {
+          alt_text?: string | null
+          caption?: string | null
+          event_id?: string | null
+          file_size_bytes?: number
+          id?: string
+          include_in_quarterly_report?: boolean
+          mime_type?: string
+          organization_id?: string
+          original_filename?: string | null
+          program_run_id?: string | null
+          report_sort_order?: number
+          sort_order?: number
+          storage_bucket?: string
+          storage_path?: string
+          updated_at?: string
+          updated_by_profile_id?: string | null
+          uploaded_at?: string
+          uploaded_by_profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_photos_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_photos_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_photos_program_run_id_fkey"
+            columns: ["program_run_id"]
+            isOneToOne: false
+            referencedRelation: "program_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_photos_updated_by_profile_id_fkey"
+            columns: ["updated_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_photos_uploaded_by_profile_id_fkey"
+            columns: ["uploaded_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       activity_service_assignments: {
         Row: {
           created_at: string
@@ -9758,12 +9857,20 @@ export type Database = {
         Args: { p_organization_id: string }
         Returns: boolean
       }
+      can_read_activity_photo: {
+        Args: { p_object_name: string }
+        Returns: boolean
+      }
       can_read_member_photo: {
         Args: { p_object_name: string }
         Returns: boolean
       }
       can_read_official_document: { Args: { p_name: string }; Returns: boolean }
       can_read_support_document: { Args: { p_name: string }; Returns: boolean }
+      can_write_activity_photo: {
+        Args: { p_object_name: string }
+        Returns: boolean
+      }
       can_write_member_photo: {
         Args: { p_object_name: string }
         Returns: boolean
@@ -9903,6 +10010,16 @@ export type Database = {
           p_leadership_assignment_id: string
           p_organization_id: string
           p_reason?: string
+        }
+        Returns: Json
+      }
+      create_activity_photo_upload: {
+        Args: {
+          p_event_id?: string
+          p_file_size_bytes?: number
+          p_mime_type?: string
+          p_organization_id: string
+          p_program_run_id?: string
         }
         Returns: Json
       }
@@ -10069,6 +10186,10 @@ export type Database = {
         Args: { p_organization_id: string; p_sub_area_node_id: string }
         Returns: Json
       }
+      delete_activity_photo: {
+        Args: { p_organization_id: string; p_photo_id: string }
+        Returns: Json
+      }
       end_area_coordinator: {
         Args: {
           p_assignment_id: string
@@ -10145,6 +10266,17 @@ export type Database = {
         }
         Returns: Json
       }
+      finalize_activity_photo: {
+        Args: {
+          p_alt_text?: string
+          p_caption?: string
+          p_include_in_quarterly_report?: boolean
+          p_organization_id: string
+          p_original_filename?: string
+          p_storage_path: string
+        }
+        Returns: Json
+      }
       finalize_member_account_invitation: {
         Args: {
           p_actor_profile_id: string
@@ -10153,6 +10285,14 @@ export type Database = {
           p_invitation_status?: string
           p_member_id: string
           p_organization_id: string
+        }
+        Returns: Json
+      }
+      get_activity_photos: {
+        Args: {
+          p_event_id?: string
+          p_organization_id: string
+          p_program_run_id?: string
         }
         Returns: Json
       }
@@ -10629,6 +10769,10 @@ export type Database = {
           p_quarterly_only?: boolean
           p_to?: string
         }
+        Returns: Json
+      }
+      list_report_activity_photos: {
+        Args: { p_from: string; p_organization_id: string; p_to: string }
         Returns: Json
       }
       list_reporting_periods: {
@@ -11512,6 +11656,18 @@ export type Database = {
           p_organization_id: string
           p_profile_id: string
           p_reason: string
+        }
+        Returns: Json
+      }
+      update_activity_photo: {
+        Args: {
+          p_alt_text?: string
+          p_caption?: string
+          p_include_in_quarterly_report?: boolean
+          p_organization_id: string
+          p_photo_id: string
+          p_report_sort_order?: number
+          p_sort_order?: number
         }
         Returns: Json
       }
